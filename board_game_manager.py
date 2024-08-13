@@ -35,6 +35,9 @@ conn.commit()
 DEFAULT_IMAGE_URL = ("https://cf.geekdo-images.com/zxVVmggfpHJpmnJY9j-k1w__imagepage/img/6AJ0hDAeJlICZkzaeIhZA_fSiAI="
                      "/fit-in/900x600/filters:no_upscale():strip_icc()/pic1657689.jpg")
 
+BGG_GAME_ID_HELP = ("It's the id in the BGG URL. EX: for Wingspan the URL is "
+                    "https://boardgamegeek.com/boardgame/266192/wingspan, hence the BGG game id is 266192")
+
 
 st.set_page_config(page_title="Board Game Proposals", layout="wide")
 
@@ -102,7 +105,7 @@ def create_table_proposition():
     st.header("➕Create a New Table Proposition")
 
     game_name = st.text_input("Game Name")
-    bgg_game_id = st.number_input("BGG Game ID", format="%.0f")
+    bgg_game_id = st.number_input("BGG Game ID", format="%.0f", help=BGG_GAME_ID_HELP)
     col1, col2 = st.columns([1, 1])
     with col1:
         max_players = st.number_input("Max Number of Players", min_value=1, step=1)
