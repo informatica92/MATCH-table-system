@@ -234,6 +234,12 @@ else:
     st.session_state['username'] = None
     st.sidebar.warning("Please set a username to join a table.")
 
+st.sidebar.text("""
+TODO: 
+ - add filters
+ - add logo
+""")
+
 
 tab1,  tab2 = st.tabs(["📜View and Join Table Propositions", "➕Create Table Proposition"])
 with tab1:
