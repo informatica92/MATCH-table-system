@@ -39,7 +39,7 @@ DEFAULT_IMAGE_URL = ("https://cf.geekdo-images.com/zxVVmggfpHJpmnJY9j-k1w__image
 st.set_page_config(page_title="Board Game Proposals", layout="wide")
 
 
-def get_bgg_game_image(game_id):
+def get_bgg_game_info(game_id):
     # BGG API URL for game details
     url = f"https://boardgamegeek.com/xmlapi2/thing?id={game_id}"
 
@@ -56,10 +56,27 @@ def get_bgg_game_image(game_id):
         # Find the image tag and extract the URL
         image_url = root.find('item/image').text
 
-        return image_url
+        game_description = root.find('item/description').text
+        # print(game_description)
+
+        categories = []
+        for category in root.findall('item/link[@type="boardgamecategory"]'):
+            categories.append(category.get('value'))
+
+        mechanics = []
+        for mechanic in root.findall('item/link[@type="boardgamemechanic"]'):
+            mechanics.append(mechanic.get('value'))
+
+        # print(categories, mechanics)
+
+        return image_url, game_description, categories, mechanics
     except Exception as e:
         print(f"Error fetching game image: {e}")
         return None
+
+
+def get_bgg_url(game_id):
+    return f"https://boardgamegeek.com/boardgame/{game_id}"
 
 
 def refresh_table_propositions():
@@ -140,15 +157,21 @@ def view_table_propositions():
         st.info("No table propositions available.")
     else:
         for proposition in st.session_state.propositions:
-            print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP")
             print(proposition)
             (table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, proposed_by,
              joined_count) = proposition
-            st.subheader(f"Table {table_id}: {game_name}")
+            if bgg_game_id and int(bgg_game_id) > 1:
+                bgg_url = get_bgg_url(bgg_game_id)
+                st.subheader(f"Table {table_id}: [{game_name}]({bgg_url})")
+            else:
+                st.subheader(f"Table {table_id}: {game_name}")
             col1, col2, col3 = st.columns([1, 1, 1])
             with col1:
                 if bgg_game_id and int(bgg_game_id) > 1:
-                    st.image(get_bgg_game_image(bgg_game_id), width=300)
+                    image_url, game_description, categories, mechanics = get_bgg_game_info(bgg_game_id)
+                    st.image(image_url, width=300, caption=f"{game_description[:120]}...")
+                    st.write(f"**Categories:** {', '.join(categories)}")
+                    st.write(f"**Mechanics:** {', '.join(mechanics)}")
                 else:
                     st.image(DEFAULT_IMAGE_URL)
             with col2:
@@ -224,21 +247,23 @@ if 'username' not in st.session_state:
 refresh_table_propositions()
 
 # Add a username setting in the sidebar
-st.sidebar.header("Set Your Username")
-username = st.sidebar.text_input("Username")
+with st.sidebar:
+    st.image("images/logo.jpg")
+    st.header("Set Your Username")
+    username = st.text_input("Username")
 
-if username:
-    st.session_state['username'] = username
-    st.sidebar.success(f"Username set to: {username}")
-else:
-    st.session_state['username'] = None
-    st.sidebar.warning("Please set a username to join a table.")
+    if username:
+        st.session_state['username'] = username
+        st.success(f"Username set to: {username}")
+    else:
+        st.session_state['username'] = None
+        st.warning("Please set a username to join a table.")
 
-st.sidebar.text("""
-TODO: 
- - add filters
- - add logo
-""")
+    st.text("""
+    TODO: 
+     - add filters
+        - add "only mines"
+    """)
 
 
 tab1,  tab2 = st.tabs(["📜View and Join Table Propositions", "➕Create Table Proposition"])
