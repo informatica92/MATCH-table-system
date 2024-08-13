@@ -214,11 +214,11 @@ def view_table_propositions(compact=False):
                             sleep(1)
                             st.rerun()
 
-            col1, col2 = st.columns([1, 1])
+            col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
             with col1:
                 if joined_count < max_players:
                     if st.session_state['username']:
-                        if st.button(f"✅Join Table {table_id}", key=f"join_{table_id}"):
+                        if st.button(f"✅Join Table {table_id}", key=f"join_{table_id}", use_container_width=True):
                             # Insert into joined players
                             try:
                                 c.execute(
@@ -238,7 +238,7 @@ def view_table_propositions(compact=False):
                 else:
                     st.warning(f"Table {table_id} is full.")
             with col2:
-                if st.button("⛔Delete proposition", key=f"delete_{table_id}"):
+                if st.button("⛔Delete proposition", key=f"delete_{table_id}", use_container_width=True):
                     c.execute(
                         '''DELETE FROM table_propositions WHERE id = ?''',
                         (table_id, )
@@ -247,6 +247,10 @@ def view_table_propositions(compact=False):
                     st.success(f"You have successfully deleted Table {table_id}")
                     sleep(1)
                     st.rerun()
+            with col3:
+                pass
+            with col4:
+                pass
 
 
 st.title("🎴 Board Game Reservation Manager")
