@@ -151,7 +151,7 @@ def create_table_proposition():
         st.warning("Set a username to create a proposition.")
 
 
-def view_table_propositions():
+def view_table_propositions(compact=False):
     refresh_button = st.button("🔄️Refresh")
     if refresh_button:
         refresh_table_propositions()
@@ -172,18 +172,26 @@ def view_table_propositions():
             with col1:
                 if bgg_game_id and int(bgg_game_id) > 1:
                     image_url, game_description, categories, mechanics = get_bgg_game_info(bgg_game_id)
-                    st.image(image_url, width=300, caption=f"{game_description[:120]}...")
-                    st.write(f"**Categories:** {', '.join(categories)}")
-                    st.write(f"**Mechanics:** {', '.join(mechanics)}")
+                    image_width = 300 if not compact else 150
+                    caption = f"{game_description[:120]}..." if not compact else None
+                    st.image(image_url, width=image_width, caption=caption)
+                    if not compact:
+                        st.write(f"**Categories:** {', '.join(categories)}")
+                        st.write(f"**Mechanics:** {', '.join(mechanics)}")
                 else:
                     st.image(DEFAULT_IMAGE_URL)
             with col2:
-                st.write(f"**Proposed By:**&nbsp;{proposed_by}")
-                st.write(f"**Max Players:**&nbsp;&nbsp;{max_players}")
-                st.write(f"**Date Time:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{date} {time}")
-                st.write(f"**Duration:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{duration} hours")
-                st.write(f"**Notes:**")
-                st.write(notes)
+                if not compact:
+                    st.write(f"**Proposed By:**&nbsp;{proposed_by}")
+                    st.write(f"**Max Players:**&nbsp;&nbsp;{max_players}")
+                    st.write(f"**Date Time:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{date} {time}")
+                    st.write(f"**Duration:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{duration} hours")
+                    st.write(f"**Notes:**")
+                    st.write(notes)
+                if compact:
+                    st.write(f"**Proposed By:**&nbsp;{proposed_by}")
+                    st.write(f"**Date Time:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{date} {time}")
+                    st.write(f"**Duration:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{duration} hours")
             with col3:
                 st.write(f"**Joined Players ({joined_count}/{max_players}):**")
                 # Display joined players
@@ -262,6 +270,8 @@ with st.sidebar:
         st.session_state['username'] = None
         st.warning("Please set a username to join a table.")
 
+    st.toggle("Compact view", key="compact_view")
+
     st.text("""
     TODO: 
      - add filters
@@ -271,6 +281,6 @@ with st.sidebar:
 
 tab1,  tab2 = st.tabs(["📜View and Join Table Propositions", "➕Create Table Proposition"])
 with tab1:
-    view_table_propositions()
+    view_table_propositions(st.session_state['compact_view'])
 with tab2:
     create_table_proposition()
