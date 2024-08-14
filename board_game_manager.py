@@ -322,6 +322,8 @@ with st.sidebar:
     TODO: 
      - add filters
         - add "only mines"
+     - cache the username somehow
+     - download/restore db in case of database reset 
     """)
 
 
