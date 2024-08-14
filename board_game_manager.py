@@ -38,6 +38,8 @@ DEFAULT_IMAGE_URL = ("https://cf.geekdo-images.com/zxVVmggfpHJpmnJY9j-k1w__image
 BGG_GAME_ID_HELP = ("It's the id in the BGG URL. EX: for Wingspan the URL is "
                     "https://boardgamegeek.com/boardgame/266192/wingspan, hence the BGG game id is 266192")
 
+CUSTOM_TEXT_WITH_LABEL_AND_SIZE = "<p style='font-size:{size}px;'>{label}</p>"
+
 
 st.set_page_config(page_title="Board Game Proposals", layout="wide")
 
@@ -103,6 +105,10 @@ def search_bgg_games(game_name):
         return []
 
 
+def st_write(label, size=12):
+    st.write(CUSTOM_TEXT_WITH_LABEL_AND_SIZE.format(label=label, size=size), unsafe_allow_html=True)
+
+
 def refresh_table_propositions():
     c.execute(
         '''
@@ -127,13 +133,13 @@ def create_table_proposition():
 
     # Game Name Input
     game_name = st.text_input("Search for Game Name")
-    st.text("Write a game name in the above text box and press ENTER. The matching games from BGG will appear here:")
+    st_write("Write a game name in the above text box and press ENTER. The matching games from BGG will appear here:")
     bgg_game_id = None
 
     matching_games = search_bgg_games(game_name)
 
     selected_game = st.selectbox("Select the matching game", matching_games, format_func=lambda x: x[1])
-    st.text("Select the matching game from BGG for auto detecting information like the board game image")
+    st_write("Select the matching game from BGG for auto detecting information like the board game image")
     if selected_game:
         bgg_game_id = selected_game[0]  # Get the BGG game ID
 
@@ -211,8 +217,8 @@ def view_table_propositions(compact=False):
                     caption = f"{game_description[:120]}..." if not compact else None
                     st.image(image_url, width=image_width, caption=caption)
                     if not compact:
-                        st.write(f"**Categories:** {', '.join(categories)}")
-                        st.write(f"**Mechanics:** {', '.join(mechanics)}")
+                        st_write(label=f"<b>Categories:</b> {', '.join(categories)}")
+                        st_write(label=f"<b>Mechanics:</b> {', '.join(mechanics)}")
                 else:
                     st.image(DEFAULT_IMAGE_URL)
             with col2:
