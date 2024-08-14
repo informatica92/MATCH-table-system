@@ -32,8 +32,7 @@ c.execute('''CREATE TABLE IF NOT EXISTS joined_players (
 
 conn.commit()
 
-DEFAULT_IMAGE_URL = ("https://cf.geekdo-images.com/zxVVmggfpHJpmnJY9j-k1w__imagepage/img/6AJ0hDAeJlICZkzaeIhZA_fSiAI="
-                     "/fit-in/900x600/filters:no_upscale():strip_icc()/pic1657689.jpg")
+DEFAULT_IMAGE_URL = "images/no_image.jpg"
 
 BGG_GAME_ID_HELP = ("It's the id in the BGG URL. EX: for Wingspan the URL is "
                     "https://boardgamegeek.com/boardgame/266192/wingspan, hence the BGG game id is 266192")
@@ -215,6 +214,8 @@ def view_table_propositions(compact=False):
                     image_url, game_description, categories, mechanics = get_bgg_game_info(bgg_game_id)
                     image_width = 300 if not compact else 150
                     caption = f"{game_description[:120]}..." if not compact else None
+                    if not image_url:
+                        image_url = DEFAULT_IMAGE_URL
                     st.image(image_url, width=image_width, caption=caption)
                     if not compact:
                         st_write(label=f"<b>Categories:</b> {', '.join(categories)}")
