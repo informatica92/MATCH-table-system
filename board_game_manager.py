@@ -82,6 +82,27 @@ def get_bgg_url(game_id):
     return f"https://boardgamegeek.com/boardgame/{game_id}"
 
 
+def search_bgg_games(game_name):
+    url = f"https://boardgamegeek.com/xmlapi2/search?query={game_name}&type=boardgame"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        root = et.fromstring(response.content)
+
+        games = []
+        for item in root.findall('item'):
+            game_id = item.get('id')
+            name = item.find('name').get('value')
+            year = item.find('yearpublished')
+            year = year.get('value') if year is not None else "Unknown Year"
+            games.append((game_id, f"{name} ({year})"))
+
+        return games
+    except Exception as e:
+        st.error(f"Error searching for games: {e}")
+        return []
+
+
 def refresh_table_propositions():
     c.execute(
         '''
@@ -104,8 +125,22 @@ def refresh_table_propositions():
 def create_table_proposition():
     st.header("➕Create a New Table Proposition")
 
-    game_name = st.text_input("Game Name")
-    bgg_game_id = st.number_input("BGG Game ID", format="%.0f", help=BGG_GAME_ID_HELP)
+    # Game Name Input
+    game_name = st.text_input("Search for Game Name")
+    st.text("Write a game name in the above text box and press ENTER. The matching games from BGG will appear here:")
+    bgg_game_id = None
+
+    matching_games = search_bgg_games(game_name)
+
+    selected_game = st.selectbox("Select the matching game", matching_games, format_func=lambda x: x[1])
+    st.text("Select the matching game from BGG for auto detecting information like the board game image")
+    if selected_game:
+        bgg_game_id = selected_game[0]  # Get the BGG game ID
+
+    # Use the BGG game ID in the rest of your form
+    if bgg_game_id:
+        st.write(f"Selected BGG Game ID: {bgg_game_id}")
+
     col1, col2 = st.columns([1, 1])
     with col1:
         max_players = st.number_input("Max Number of Players", min_value=1, step=1)
