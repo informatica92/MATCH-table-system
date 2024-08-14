@@ -167,7 +167,7 @@ def create_table_proposition():
                     proposed_by
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
-                    game_name,
+                    selected_game[1],
                     max_players,
                     date_time.strftime('%Y-%m-%d'),
                     time.strftime('%H:%M:%S'),
