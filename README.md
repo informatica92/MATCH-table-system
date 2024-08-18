@@ -3,7 +3,7 @@
  Users can create new game table propositions, view available tables, and join them by specifying their username. 
  The app also fetches and displays the game's main image from BoardGameGeek using the game's BGG ID.
 
- [![Watch the video]()](https://raw.githubusercontent.com/informatica92/MATCH-table-system/main/images/202408181259.mp4)
+https://github.com/user-attachments/assets/74ca4b9c-25d9-4934-8c9f-a3f02dbdc303
 
 # 🇮🇹 Italian
 ## Come iniziare
