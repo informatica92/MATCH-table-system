@@ -6,12 +6,27 @@
 # Italian
 ## Come iniziare
 L'applicazione è live su https://match-table-system.streamlit.app/ utilizzando https://streamlit.io/cloud per un hosting gratuito.
-In caso si voglia invece eseguire l'applicazione in locale è necessario seguire i passi sotto indicati: 
-1. Clone del repository
-2. Creazione e attivazione di un virtualenv
-3. Installazione delle dipendenza
-4. Eseguire
 
+In caso si voglia invece eseguire l'applicazione in locale è necessario seguire i passi sotto indicati: 
+0. Installare Python (con Anaconda)
+ - https://docs.anaconda.com/anaconda/install/windows/
+1. Clone del repository
+  ```
+  git clone https://github.com/informatica92/MATCH-table-system.git
+  ```
+3. Creazione e attivazione di un virtualenv
+ ```
+ python -m venv venv
+ source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+ ```
+5. Installazione delle dipendenza
+ ```
+ pip install -r requirements.txt
+ ```
+7. Eseguire
+ ```
+ streamlit run board_game_manager.py
+ ```
 ## Funzionalità
 ### Inserimento username
 Se non è visibile, espandere la sidebar sulla sinistra, inserire un username nella casella di testo apposita e premere INVIO.
