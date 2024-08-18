@@ -3,6 +3,8 @@
  Users can create new game table propositions, view available tables, and join them by specifying their username. 
  The app also fetches and displays the game's main image from BoardGameGeek using the game's BGG ID.
 
+ 
+
 # 🇮🇹 Italian
 ## Come iniziare
 L'applicazione è live su https://match-table-system.streamlit.app/ utilizzando https://streamlit.io/cloud per un hosting gratuito.
