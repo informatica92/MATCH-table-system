@@ -287,24 +287,25 @@ def view_table_propositions(compact=False):
             with col3:
                 st.write(f"**Joined Players ({joined_count}/{max_players}):**")
                 for joined_player in joined_players:
-                    col1, col2 = st.columns([1, 1])
-                    with col1:
-                        st.write(f"- {joined_player}")
-                    with col2:
-                        leave_table = st.button("⛔Leave", key=f"leave_{table_id}_{joined_player}")
-                        if leave_table:
-                            conn = get_db_connection()
-                            c = conn.cursor()
-                            c.execute(
-                                '''DELETE FROM joined_players WHERE table_id = %s AND player_name = %s''',
-                                (table_id, joined_player)
-                            )
-                            conn.commit()
-                            c.close()
-                            conn.close()
-                            st.success(f"{joined_player} left Table {table_id}.")
-                            sleep(1)
-                            st.rerun()
+                    if joined_player is not None:
+                        col1, col2 = st.columns([1, 1])
+                        with col1:
+                            st.write(f"- {joined_player}")
+                        with col2:
+                            leave_table = st.button("⛔Leave", key=f"leave_{table_id}_{joined_player}")
+                            if leave_table:
+                                conn = get_db_connection()
+                                c = conn.cursor()
+                                c.execute(
+                                    '''DELETE FROM joined_players WHERE table_id = %s AND player_name = %s''',
+                                    (table_id, joined_player)
+                                )
+                                conn.commit()
+                                c.close()
+                                conn.close()
+                                st.success(f"{joined_player} left Table {table_id}.")
+                                sleep(1)
+                                st.rerun()
 
             col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
             with col1:
