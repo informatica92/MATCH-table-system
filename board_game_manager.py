@@ -5,6 +5,13 @@ import xml.etree.ElementTree as et
 from time import sleep
 import os
 
+st.set_page_config(page_title="Board Game Proposals", layout="wide")
+
+# Use the following code to reset the database:
+# # truncate table_propositions cascade;
+# # ALTER SEQUENCE table_propositions_id_seq RESTART;
+
+
 # Get PostgreSQL credentials from environment variables
 db_host = os.getenv('DB_HOST')
 db_name = os.getenv('DB_NAME')
@@ -66,7 +73,7 @@ BGG_GAME_ID_HELP = ("It's the id in the BGG URL. EX: for Wingspan the URL is "
 
 CUSTOM_TEXT_WITH_LABEL_AND_SIZE = "<p style='font-size:{size}px;'>{label}</p>"
 
-st.set_page_config(page_title="Board Game Proposals", layout="wide")
+
 
 
 def get_bgg_game_info(game_id):
@@ -349,12 +356,36 @@ refresh_table_propositions()
 with st.sidebar:
     st.image("images/logo.jpg")
     st.header("Set Your Username")
-    # st.info(st.experimental_user.email)  # test@example.com if local, otherwise Streamlit Cloud email
-    username = st.text_input("Username")
+
+    # check if st.experimental_user.email is inside the DB table "users", if so get the corresponding "username" value
+    # and set it in the session state. If not, set it to None. If no email is provided, set the username to None.
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('''SELECT username FROM users WHERE email = %s''', (st.experimental_user.email,))
+    result = c.fetchone()
+    c.close()
+    conn.close()
+
+    if result:
+        st.session_state['username'] = result[0]
+    else:
+        st.session_state['username'] = None
+
+    username = st.text_input("Username", value=st.session_state['username'])
 
     if username:
         st.session_state['username'] = username
         st.success(f"Username set to: {username}")
+        # insert or update the username in the DB table "users"
+        conn = get_db_connection()
+        c = conn.cursor()
+        c.execute(
+            '''INSERT INTO users (email, username) VALUES (%s, %s) ON CONFLICT (email) DO UPDATE SET username = %s''',
+            (st.experimental_user.email, username, username)
+        )
+        conn.commit()
+        c.close()
+        conn.close()
     else:
         st.session_state['username'] = None
         st.warning("Please set a username to join a table.")
@@ -365,7 +396,6 @@ with st.sidebar:
     TODO: 
      - add filters
         - add "only mines"
-     - cache the username somehow
      - download/restore db in case of database reset 
     """)
 
