@@ -300,7 +300,7 @@ def view_table_propositions(compact=False):
                             conn.commit()
                             c.close()
                             conn.close()
-                            st.success(f"{st.session_state.username} left Table {table_id}.")
+                            st.success(f"{joined_player} left Table {table_id}.")
                             sleep(1)
                             st.rerun()
 
