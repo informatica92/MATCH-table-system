@@ -152,8 +152,21 @@ def refresh_table_propositions():
                 tp.notes,
                 tp.bgg_game_id,
                 tp.proposed_by,
-                (SELECT COUNT(*) FROM joined_players jp WHERE jp.table_id = tp.id) as joined_count
-            FROM table_propositions tp
+                count(jp.id) as joined_count,
+                array_agg(jp.player_name) 
+            FROM 
+                table_propositions tp
+                join joined_players jp on jp.table_id = tp.id
+            group by 
+                tp.id,
+                tp.game_name,
+                tp.max_players,
+                tp.date, tp.time,
+                tp.duration,
+                tp.notes,
+                tp.bgg_game_id,
+                tp.proposed_by
+            order by tp.date, tp.time
         '''
     )
     st.session_state.propositions = c.fetchall()
@@ -237,7 +250,7 @@ def view_table_propositions(compact=False):
     else:
         for proposition in st.session_state.propositions:
             (table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, proposed_by,
-             joined_count) = proposition
+             joined_count, joined_players) = proposition
             if bgg_game_id and int(bgg_game_id) > 1:
                 bgg_url = get_bgg_url(bgg_game_id)
                 st.subheader(f"Table {table_id}: [{game_name}]({bgg_url})")
@@ -271,12 +284,6 @@ def view_table_propositions(compact=False):
                     st.write(f"**Duration:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{duration} hours")
             with col3:
                 st.write(f"**Joined Players ({joined_count}/{max_players}):**")
-                conn = get_db_connection()
-                c = conn.cursor()
-                c.execute('''SELECT player_name FROM joined_players WHERE table_id = %s''', (table_id,))
-                joined_players = [row[0] for row in c.fetchall()]
-                c.close()
-                conn.close()
                 for joined_player in joined_players:
                     col1, col2 = st.columns([1, 1])
                     with col1:
