@@ -190,54 +190,56 @@ def create_table_proposition():
 
     if bgg_game_id:
         st.write(f"Selected BGG Game ID: {bgg_game_id}")
+    with st.form(key="create_new_proposition_form", border=False):
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            max_players = st.number_input("Max Number of Players", min_value=1, max_value=100, step=1)
+        with col2:
+            duration = st.number_input("Duration (in hours)", min_value=1, max_value=24, step=1)
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            default_date_str = os.environ.get('DEFAULT_DATE')
+            default_date = datetime.strptime(default_date_str, '%Y-%m-%d') if default_date_str else datetime.now()
+            date_time = st.date_input("Date", value=default_date)
+        with col2:
+            time = st.time_input("Time", step=60*30)
+        notes = st.text_area("Notes")
 
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        max_players = st.number_input("Max Number of Players", min_value=1, step=1)
-    with col2:
-        duration = st.number_input("Duration (in hours)", min_value=1, step=1)
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        date_time = st.date_input("Date")
-    with col2:
-        time = st.time_input("Time")
-    notes = st.text_area("Notes")
-
-    if st.session_state['username']:
-        if st.button("Create Proposition", on_click=refresh_table_propositions()):
-            conn = get_db_connection()
-            c = conn.cursor()
-            c.execute('''
-                INSERT INTO table_propositions (
-                    game_name, 
-                    max_players, 
-                    date, 
-                    time, 
-                    duration, 
-                    notes, 
-                    bgg_game_id, 
-                    proposed_by
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            ''', (
-                    selected_game[1],
-                    max_players,
-                    date_time.strftime('%Y-%m-%d'),
-                    time.strftime('%H:%M:%S'),
-                    duration,
-                    notes,
-                    bgg_game_id,
-                    st.session_state.username
+        if st.session_state['username']:
+            if st.form_submit_button("Create Proposition", on_click=refresh_table_propositions()):
+                conn = get_db_connection()
+                c = conn.cursor()
+                c.execute('''
+                    INSERT INTO table_propositions (
+                        game_name, 
+                        max_players, 
+                        date, 
+                        time, 
+                        duration, 
+                        notes, 
+                        bgg_game_id, 
+                        proposed_by
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                ''', (
+                        selected_game[1],
+                        max_players,
+                        date_time.strftime('%Y-%m-%d'),
+                        time.strftime('%H:%M:%S'),
+                        duration,
+                        notes,
+                        bgg_game_id,
+                        st.session_state.username
+                    )
                 )
-            )
-            conn.commit()
-            c.close()
-            conn.close()
-
-            st.success("Table proposition created successfully!")
-            sleep(1)
-            st.rerun()
-    else:
-        st.warning("Set a username to create a proposition.")
+                st.success("Table proposition created successfully!")
+                sleep(1)
+                conn.commit()
+                c.close()
+                conn.close()
+                st.rerun()
+        else:
+            st.form_submit_button("Create Proposition", disabled=True)
+            st.warning("Set a username to create a proposition.")
 
 
 def view_table_propositions(compact=False):
