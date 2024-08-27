@@ -3,6 +3,7 @@ import psycopg2
 import requests
 import xml.etree.ElementTree as et
 from time import sleep
+from datetime import datetime
 import os
 
 st.set_page_config(page_title="Board Game Proposals", layout="wide")
