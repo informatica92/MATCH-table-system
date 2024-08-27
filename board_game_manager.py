@@ -376,16 +376,19 @@ with st.sidebar:
     if username:
         st.session_state['username'] = username
         st.success(f"Username set to: {username}")
-        # insert or update the username in the DB table "users"
-        conn = get_db_connection()
-        c = conn.cursor()
-        c.execute(
-            '''INSERT INTO users (email, username) VALUES (%s, %s) ON CONFLICT (email) DO UPDATE SET username = %s''',
-            (st.experimental_user.email, username, username)
-        )
-        conn.commit()
-        c.close()
-        conn.close()
+        if st.experimental_user.email:
+            # insert or update the username in the DB table "users"
+            conn = get_db_connection()
+            c = conn.cursor()
+            c.execute(
+                '''INSERT INTO users (email, username) VALUES (%s, %s) ON CONFLICT (email) DO UPDATE SET username = %s''',
+                (st.experimental_user.email, username, username)
+            )
+            conn.commit()
+            c.close()
+            conn.close()
+        else:
+            print("No email detected in st.experimental_user")
     else:
         st.session_state['username'] = None
         st.warning("Please set a username to join a table.")
