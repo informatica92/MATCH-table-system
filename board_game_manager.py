@@ -156,7 +156,7 @@ def refresh_table_propositions():
                 array_agg(jp.player_name) 
             FROM 
                 table_propositions tp
-                join joined_players jp on jp.table_id = tp.id
+                left join joined_players jp on jp.table_id = tp.id
             group by 
                 tp.id,
                 tp.game_name,
