@@ -368,38 +368,11 @@ with st.sidebar:
     st.image("images/logo.jpg")
     st.header("Set Your Username")
 
-    # check if st.experimental_user.email is inside the DB table "users", if so get the corresponding "username" value
-    # and set it in the session state. If not, set it to None. If no email is provided, set the username to None.
-    conn = get_db_connection()
-    c = conn.cursor()
-    c.execute('''SELECT username FROM users WHERE email = %s''', (st.experimental_user.email,))
-    result = c.fetchone()
-    c.close()
-    conn.close()
-
-    if result:
-        st.session_state['username'] = result[0]
-    else:
-        st.session_state['username'] = None
-
     username = st.text_input("Username", value=st.session_state['username'])
 
     if username:
         st.session_state['username'] = username
         st.success(f"Username set to: {username}")
-        if st.experimental_user.email:
-            # insert or update the username in the DB table "users"
-            conn = get_db_connection()
-            c = conn.cursor()
-            c.execute(
-                '''INSERT INTO users (email, username) VALUES (%s, %s) ON CONFLICT (email) DO UPDATE SET username = %s''',
-                (st.experimental_user.email, username, username)
-            )
-            conn.commit()
-            c.close()
-            conn.close()
-        else:
-            print("No email detected in st.experimental_user")
     else:
         st.session_state['username'] = None
         st.warning("Please set a username to join a table.")
@@ -410,7 +383,6 @@ with st.sidebar:
     TODO: 
      - add filters
         - add "only mines"
-     - download/restore db in case of database reset 
     """)
 
 tab1, tab2 = st.tabs(["📜View and Join Table Propositions", "➕Create Table Proposition"])
