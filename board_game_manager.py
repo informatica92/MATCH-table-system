@@ -1,36 +1,63 @@
 import streamlit as st
-import sqlite3
+import psycopg2
 import requests
 import xml.etree.ElementTree as et
 from time import sleep
+import os
 
-# Initialize SQLite database connection
-conn = sqlite3.connect('board_game_manager.db')
-c = conn.cursor()
+# Get PostgreSQL credentials from environment variables
+db_host = os.getenv('DB_HOST')
+db_name = os.getenv('DB_NAME')
+db_user = os.getenv('DB_USER')
+db_password = os.getenv('DB_PASSWORD')
+db_port = os.getenv('DB_PORT', '5432')
 
-# Create table propositions table if it doesn't exist
-c.execute('''CREATE TABLE IF NOT EXISTS table_propositions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                game_name TEXT,
-                max_players INTEGER,
-                date TEXT,
-                time TEXT,
-                duration INTEGER,
-                notes TEXT,
-                bgg_game_id INTEGER, 
-                proposed_by TEXT
-            )''')
 
-# Create joined players table if it doesn't exist
-c.execute('''CREATE TABLE IF NOT EXISTS joined_players (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                table_id INTEGER,
-                player_name TEXT,
-                FOREIGN KEY (table_id) REFERENCES table_propositions (id),
-                UNIQUE(table_id, player_name)
-            )''')
+def get_db_connection():
+    # Initialize the PostgreSQL connection
+    return psycopg2.connect(
+        host=db_host,
+        dbname=db_name,
+        user=db_user,
+        password=db_password,
+        port=db_port
+    )
 
-conn.commit()
+
+def create_tables():
+    # Create table propositions table if it doesn't exist
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS table_propositions (
+                    id SERIAL PRIMARY KEY,
+                    game_name TEXT,
+                    max_players INTEGER,
+                    date DATE,
+                    time TIME,
+                    duration INTEGER,
+                    notes TEXT,
+                    bgg_game_id INTEGER, 
+                    proposed_by TEXT
+                )''')
+
+    c.execute('''CREATE TABLE IF NOT EXISTS joined_players (
+                    id SERIAL PRIMARY KEY,
+                    table_id INTEGER REFERENCES table_propositions(id) ON DELETE CASCADE,
+                    player_name TEXT,
+                    UNIQUE(table_id, player_name)
+                )''')
+
+    c.execute('''CREATE TABLE IF NOT EXISTS users (
+                    email TEXT PRIMARY KEY,
+                    username TEXT,
+                    is_admin BOOLEAN DEFAULT FALSE)
+                ''')
+    conn.commit()
+    c.close()
+    conn.close()
+
+
+create_tables()
 
 DEFAULT_IMAGE_URL = "images/no_image.jpg"
 
@@ -38,7 +65,6 @@ BGG_GAME_ID_HELP = ("It's the id in the BGG URL. EX: for Wingspan the URL is "
                     "https://boardgamegeek.com/boardgame/266192/wingspan, hence the BGG game id is 266192")
 
 CUSTOM_TEXT_WITH_LABEL_AND_SIZE = "<p style='font-size:{size}px;'>{label}</p>"
-
 
 st.set_page_config(page_title="Board Game Proposals", layout="wide")
 
@@ -61,7 +87,6 @@ def get_bgg_game_info(game_id):
         image_url = root.find('item/image').text
 
         game_description = root.find('item/description').text
-        # print(game_description)
 
         categories = []
         for category in root.findall('item/link[@type="boardgamecategory"]'):
@@ -70,8 +95,6 @@ def get_bgg_game_info(game_id):
         mechanics = []
         for mechanic in root.findall('item/link[@type="boardgamemechanic"]'):
             mechanics.append(mechanic.get('value'))
-
-        # print(categories, mechanics)
 
         return image_url, game_description, categories, mechanics
     except Exception as e:
@@ -109,6 +132,8 @@ def st_write(label, size=12):
 
 
 def refresh_table_propositions():
+    conn = get_db_connection()
+    c = conn.cursor()
     c.execute(
         '''
             SELECT
@@ -125,12 +150,13 @@ def refresh_table_propositions():
         '''
     )
     st.session_state.propositions = c.fetchall()
+    c.close()
+    conn.close()
 
 
 def create_table_proposition():
     st.header("➕Create a New Table Proposition")
 
-    # Game Name Input
     game_name = st.text_input("Search for Game Name")
     st_write("Write a game name in the above text box and press ENTER. The matching games from BGG will appear here:")
     bgg_game_id = None
@@ -140,9 +166,8 @@ def create_table_proposition():
     selected_game = st.selectbox("Select the matching game", matching_games, format_func=lambda x: x[1])
     st_write("Select the matching game from BGG for auto detecting information like the board game image")
     if selected_game:
-        bgg_game_id = selected_game[0]  # Get the BGG game ID
+        bgg_game_id = selected_game[0]
 
-    # Use the BGG game ID in the rest of your form
     if bgg_game_id:
         st.write(f"Selected BGG Game ID: {bgg_game_id}")
 
@@ -160,6 +185,8 @@ def create_table_proposition():
 
     if st.session_state['username']:
         if st.button("Create Proposition", on_click=refresh_table_propositions()):
+            conn = get_db_connection()
+            c = conn.cursor()
             c.execute('''
                 INSERT INTO table_propositions (
                     game_name, 
@@ -170,7 +197,7 @@ def create_table_proposition():
                     notes, 
                     bgg_game_id, 
                     proposed_by
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             ''', (
                     selected_game[1],
                     max_players,
@@ -183,6 +210,8 @@ def create_table_proposition():
                 )
             )
             conn.commit()
+            c.close()
+            conn.close()
 
             st.success("Table proposition created successfully!")
             sleep(1)
@@ -200,7 +229,6 @@ def view_table_propositions(compact=False):
         st.info("No table propositions available.")
     else:
         for proposition in st.session_state.propositions:
-            print(proposition)
             (table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, proposed_by,
              joined_count) = proposition
             if bgg_game_id and int(bgg_game_id) > 1:
@@ -236,10 +264,12 @@ def view_table_propositions(compact=False):
                     st.write(f"**Duration:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{duration} hours")
             with col3:
                 st.write(f"**Joined Players ({joined_count}/{max_players}):**")
-                # Display joined players
-                c.execute('''SELECT player_name FROM joined_players WHERE table_id = ?''', (table_id,))
+                conn = get_db_connection()
+                c = conn.cursor()
+                c.execute('''SELECT player_name FROM joined_players WHERE table_id = %s''', (table_id,))
                 joined_players = [row[0] for row in c.fetchall()]
-                # st.write(", ".join(joined_players) if joined_players else "None")
+                c.close()
+                conn.close()
                 for joined_player in joined_players:
                     col1, col2 = st.columns([1, 1])
                     with col1:
@@ -247,11 +277,15 @@ def view_table_propositions(compact=False):
                     with col2:
                         leave_table = st.button("⛔Leave", key=f"leave_{table_id}_{joined_player}")
                         if leave_table:
+                            conn = get_db_connection()
+                            c = conn.cursor()
                             c.execute(
-                                '''DELETE FROM joined_players WHERE table_id = ? AND player_name = ?''',
+                                '''DELETE FROM joined_players WHERE table_id = %s AND player_name = %s''',
                                 (table_id, joined_player)
                             )
                             conn.commit()
+                            c.close()
+                            conn.close()
                             st.success(f"{st.session_state.username} left Table {table_id}.")
                             sleep(1)
                             st.rerun()
@@ -261,10 +295,11 @@ def view_table_propositions(compact=False):
                 if joined_count < max_players:
                     if st.session_state['username']:
                         if st.button(f"✅Join Table {table_id}", key=f"join_{table_id}", use_container_width=True):
-                            # Insert into joined players
+                            conn = get_db_connection()
+                            c = conn.cursor()
                             try:
                                 c.execute(
-                                    '''INSERT INTO joined_players (table_id, player_name) VALUES (?, ?)''',
+                                    '''INSERT INTO joined_players (table_id, player_name) VALUES (%s, %s)''',
                                     (table_id, st.session_state['username'])
                                 )
                                 conn.commit()
@@ -273,19 +308,26 @@ def view_table_propositions(compact=False):
                                 )
                                 sleep(1)
                                 st.rerun()
-                            except sqlite3.IntegrityError:
+                            except psycopg2.IntegrityError:
                                 st.warning("You have already joined this table.")
+                            finally:
+                                c.close()
+                                conn.close()
                     else:
                         st.warning("Set a username to join a table.")
                 else:
                     st.warning(f"Table {table_id} is full.")
             with col2:
                 if st.button("⛔Delete proposition", key=f"delete_{table_id}", use_container_width=True):
+                    conn = get_db_connection()
+                    c = conn.cursor()
                     c.execute(
-                        '''DELETE FROM table_propositions WHERE id = ?''',
+                        '''DELETE FROM table_propositions WHERE id = %s''',
                         (table_id, )
                     )
                     conn.commit()
+                    c.close()
+                    conn.close()
                     st.success(f"You have successfully deleted Table {table_id}")
                     sleep(1)
                     st.rerun()
@@ -307,6 +349,7 @@ refresh_table_propositions()
 with st.sidebar:
     st.image("images/logo.jpg")
     st.header("Set Your Username")
+    # st.info(st.experimental_user.email)  # test@example.com if local, otherwise Streamlit Cloud email
     username = st.text_input("Username")
 
     if username:
@@ -326,8 +369,7 @@ with st.sidebar:
      - download/restore db in case of database reset 
     """)
 
-
-tab1,  tab2 = st.tabs(["📜View and Join Table Propositions", "➕Create Table Proposition"])
+tab1, tab2 = st.tabs(["📜View and Join Table Propositions", "➕Create Table Proposition"])
 with tab1:
     view_table_propositions(st.session_state['compact_view'])
 with tab2:
