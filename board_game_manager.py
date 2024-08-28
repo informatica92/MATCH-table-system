@@ -320,7 +320,12 @@ def view_table_propositions(compact=False):
             with col1:
                 if joined_count < max_players:
                     if st.session_state['username']:
-                        if st.button(f"✅Join Table {table_id}", key=f"join_{table_id}", use_container_width=True):
+                        if st.button(
+                                f"✅Join Table {table_id}" if username not in joined_players else "✅*Already joined*",
+                                key=f"join_{table_id}",
+                                use_container_width=True,
+                                disabled=username in joined_players
+                        ):
                             conn = get_db_connection()
                             c = conn.cursor()
                             try:
@@ -344,7 +349,12 @@ def view_table_propositions(compact=False):
                 else:
                     st.warning(f"Table {table_id} is full.")
             with col2:
-                if st.button("⛔Delete proposition", key=f"delete_{table_id}", use_container_width=True):
+                if st.button(
+                        "⛔Delete proposition" if not joined_count else "⛔*Can't delete non empty tables*",
+                        key=f"delete_{table_id}",
+                        use_container_width=True,
+                        disabled=joined_count
+                ):
                     conn = get_db_connection()
                     c = conn.cursor()
                     c.execute(
