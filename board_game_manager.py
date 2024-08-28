@@ -6,6 +6,8 @@ from time import sleep
 from datetime import datetime
 import os
 
+from utils.telegram_notifications import TelegramNotifications
+
 st.set_page_config(page_title="Board Game Proposals", layout="wide")
 
 # Use the following code to reset the database:
@@ -73,8 +75,6 @@ BGG_GAME_ID_HELP = ("It's the id in the BGG URL. EX: for Wingspan the URL is "
                     "https://boardgamegeek.com/boardgame/266192/wingspan, hence the BGG game id is 266192")
 
 CUSTOM_TEXT_WITH_LABEL_AND_SIZE = "<p style='font-size:{size}px;'>{label}</p>"
-
-
 
 
 def get_bgg_game_info(game_id):
@@ -233,6 +233,14 @@ def create_table_proposition():
                     )
                 )
                 st.success("Table proposition created successfully!")
+                telegram_bot = TelegramNotifications()
+                telegram_bot.send_new_table_message(
+                    selected_game[1],
+                    max_players, date_time.strftime('%Y-%m-%d'),
+                    time.strftime('%H:%M:%S'),
+                    duration,
+                    st.session_state.username
+                )
                 sleep(1)
                 conn.commit()
                 c.close()
