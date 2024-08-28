@@ -73,11 +73,13 @@ NB:
 Valorizzando le variabili d'ambiente 
  - TELEGRAM_CHAT_ID
  - TELEGRAM_BOT_TOKEN
+
 Una notifica sul rispettivo canale (chat id/channel id) verrà inviata automaticamente: 
  - al momento della creazione di un tavolo
 ### (OPZIONALE) Data precompilata
 Valorizzando le variabili d'ambiente
  - DEFAULT_DATE
+
 il selettore della data nella tab di creazione verrà inizializzato a quel valore.
 
 ATTENZIONE: il formato deve essere YYYY-MM-DD, es: 2024-09-29
