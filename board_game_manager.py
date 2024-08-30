@@ -1,12 +1,12 @@
 import streamlit as st
-import requests
-import xml.etree.ElementTree as et
+
 from time import sleep
 from datetime import datetime
 import os
 
 from utils.telegram_notifications import TelegramNotifications
 from utils.sql_manager import SQLManager
+from utils.bgg_manager import search_bgg_games, get_bgg_game_info, get_bgg_url
 
 st.set_page_config(page_title="Board Game Proposals", layout="wide")
 
@@ -21,64 +21,6 @@ sql_manager = SQLManager()
 sql_manager.create_tables()
 
 telegram_bot = TelegramNotifications()
-
-
-def get_bgg_game_info(game_id):
-    # BGG API URL for game details
-    url = f"https://boardgamegeek.com/xmlapi2/thing?id={game_id}"
-
-    try:
-        # Make a GET request to fetch the game data
-        response = requests.get(url)
-
-        # Raise an HTTPError for bad responses
-        response.raise_for_status()
-
-        # Parse the XML response
-        root = et.fromstring(response.content)
-
-        # Find the image tag and extract the URL
-        image_url = root.find('item/image').text
-
-        game_description = root.find('item/description').text
-
-        categories = []
-        for category in root.findall('item/link[@type="boardgamecategory"]'):
-            categories.append(category.get('value'))
-
-        mechanics = []
-        for mechanic in root.findall('item/link[@type="boardgamemechanic"]'):
-            mechanics.append(mechanic.get('value'))
-
-        return image_url, game_description, categories, mechanics
-    except Exception as e:
-        print(f"Error fetching game image: {e}")
-        return None
-
-
-def get_bgg_url(game_id):
-    return f"https://boardgamegeek.com/boardgame/{game_id}"
-
-
-def search_bgg_games(game_name):
-    url = f"https://boardgamegeek.com/xmlapi2/search?query={game_name}&type=boardgame"
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        root = et.fromstring(response.content)
-
-        games = []
-        for item in root.findall('item'):
-            game_id = item.get('id')
-            name = item.find('name').get('value')
-            year = item.find('yearpublished')
-            year = year.get('value') if year is not None else "Unknown Year"
-            games.append((game_id, f"{name} ({year})"))
-
-        return games
-    except Exception as e:
-        st.error(f"Error searching for games: {e}")
-        return []
 
 
 def st_write(label, size=12):
@@ -96,7 +38,11 @@ def create_table_proposition():
     st_write("Write a game name in the above text box and press ENTER. The matching games from BGG will appear here:")
     bgg_game_id = None
 
-    matching_games = search_bgg_games(game_name)
+    try:
+        matching_games = search_bgg_games(game_name)
+    except AttributeError as e:
+        st.error(f"Error searching for games: {e}")
+        matching_games = []
 
     selected_game = st.selectbox("Select the matching game", matching_games, format_func=lambda x: x[1])
     st_write("Select the matching game from BGG for auto detecting information like the board game image")
@@ -269,12 +215,6 @@ with st.sidebar:
         st.warning("Please set a username to join a table.")
 
     st.toggle("Compact view", key="compact_view")
-
-    # st.text("""
-    # TODO:
-    #  - add filters
-    #     - add "only mines"
-    # """)
 
 tab1, tab2 = st.tabs(["📜View and Join Table Propositions", "➕Create Table Proposition"])
 with tab1:
