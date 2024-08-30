@@ -1,8 +1,11 @@
 import requests
 import xml.etree.ElementTree as et
+from cachetools import cached, LRUCache
 
 
+@cached(cache=LRUCache(maxsize=128))
 def get_bgg_game_info(game_id):
+    print(f"\tquerying BGG for {game_id}")
     # BGG API URL for game details
     url = f"https://boardgamegeek.com/xmlapi2/thing?id={game_id}"
 
