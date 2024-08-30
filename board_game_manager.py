@@ -1,5 +1,4 @@
 import streamlit as st
-import psycopg2
 import requests
 import xml.etree.ElementTree as et
 from time import sleep
