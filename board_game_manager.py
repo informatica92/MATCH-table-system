@@ -1,6 +1,6 @@
 import streamlit as st
 
-from time import sleep
+from time import sleep, time as time_time
 from datetime import datetime
 import os
 
@@ -28,7 +28,10 @@ def st_write(label, size=12):
 
 
 def refresh_table_propositions():
+    query_start_time = time_time()
     st.session_state.propositions = sql_manager.get_table_propositions()
+    print(f"Table propositions QUERY refreshed in {(time_time() - query_start_time):2f}s "
+          f"({len(st.session_state.propositions)} rows)")
 
 
 def create_table_proposition():
@@ -218,6 +221,8 @@ with st.sidebar:
 
 tab1, tab2 = st.tabs(["📜View and Join Table Propositions", "➕Create Table Proposition"])
 with tab1:
+    view_start_time = time_time()
     view_table_propositions(st.session_state['compact_view'])
+    print(f"Table propositions VIEW refreshed in {(time_time() - view_start_time):2f}s")
 with tab2:
     create_table_proposition()
