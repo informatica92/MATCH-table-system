@@ -1,8 +1,10 @@
 import streamlit as st
 
 from time import sleep, time as time_time
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
+
+from streamlit_timeline import st_timeline
 
 from utils.telegram_notifications import TelegramNotifications
 from utils.sql_manager import SQLManager
@@ -112,9 +114,9 @@ def view_table_propositions(compact=False):
              joined_count, joined_players) = proposition
             if bgg_game_id and int(bgg_game_id) > 1:
                 bgg_url = get_bgg_url(bgg_game_id)
-                st.subheader(f"Table {table_id}: [{game_name}]({bgg_url})")
+                st.subheader(f"Table {table_id}: [{game_name}]({bgg_url})", anchor=f"table-{table_id}")
             else:
-                st.subheader(f"Table {table_id}: {game_name}")
+                st.subheader(f"Table {table_id}: {game_name}", anchor=f"table-{table_id}")
             col1, col2, col3 = st.columns([1, 1, 1])
             with col1:
                 if bgg_game_id and int(bgg_game_id) > 1:
@@ -200,6 +202,134 @@ def view_table_propositions(compact=False):
                 pass
 
 
+def timeline_table_propositions():
+    refresh_button = st.button("🔄️Refresh", key="timeline_refresh")
+    if refresh_button:
+        refresh_table_propositions()
+
+    if len(st.session_state.propositions) == 0:
+        st.info("No table propositions available.")
+    else:
+        items = []
+        groups = [
+            {"id": 0, "content": "Morning (09:00 - 12:00)", "style": "background: #f7eda6"},
+            {"id": 1, "content": "Afternoon (12:00pm - 18:00)", "style": "background: #a6f7ee"},  # light blue
+            {"id": 2, "content": "Evening (18:00 - 00:00)", "style": "background: #a6adf7"}
+        ]
+        for proposition in st.session_state.propositions:
+            (table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, proposed_by,
+             joined_count, joined_players) = proposition
+
+            start_datetime_str = f"{date} {time}"
+            end_datetime = datetime.strptime(start_datetime_str, '%Y-%m-%d %H:%M:%S') + timedelta(hours=duration)
+            end_datetime_str = end_datetime.strftime('%Y-%m-%d %H:%M:%S')
+            # create a "group" variable that is "morning", "afternoon" or "evening" based on the time of day
+            group = 0 if time.hour < 12 else "1" if time.hour < 18 else "2"
+
+            items.append(
+                {
+                    "id": table_id,
+                    "content": game_name,
+                    "start": start_datetime_str,
+                    "end": end_datetime_str,
+                    "max_players": max_players,
+                    "joined_count": joined_count,
+                    "joined_players": joined_players,
+                    "proposed_by": proposed_by,
+                    "group": group,
+                    "bgg_game_id": bgg_game_id,
+                    "duration": duration,
+                    "notes": notes,
+                    "style": "background: #FF5733" if joined_count == max_players else "background: #DAF7A6"
+                }
+            )
+        timeline = st_timeline(items, groups=groups, options={}, height="300px")
+        st.subheader("Selected item")
+        if timeline:
+            bgg_url = get_bgg_url(timeline['bgg_game_id'])
+            st.subheader(f"Table {timeline['id']}: [{timeline['content']}]({bgg_url})")
+            col1, col2, col3 = st.columns([1, 1, 1])
+            with col1:
+                if timeline['bgg_game_id'] and int(timeline['bgg_game_id']) > 1:
+                    image_url, game_description, categories, mechanics = get_bgg_game_info(timeline['bgg_game_id'])
+                    image_width = 300
+                    caption = f"{game_description[:120]}..."
+                    if not image_url:
+                        image_url = DEFAULT_IMAGE_URL
+                    st.image(image_url, width=image_width, caption=caption)
+                    st_write(label=f"<b>Categories:</b> {', '.join(categories)}")
+                    st_write(label=f"<b>Mechanics:</b> {', '.join(mechanics)}")
+                else:
+                    st.image(DEFAULT_IMAGE_URL)
+            with col2:
+                st.write(f"**Proposed By:**&nbsp;{timeline['proposed_by']}")
+                st.write(f"**Max Players:**&nbsp;&nbsp;{timeline['max_players']}")
+                st.write(f"**Date Time:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{timeline['start']}")
+                st.write(f"**Duration:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{timeline['duration']} hours")
+                st.write(f"**Notes:**")
+                st.write(timeline['notes'])
+
+            with col3:
+                is_full = timeline['joined_count'] >= timeline['max_players']
+                st.write(f":{'red' if is_full else 'green'}[**Joined Players ({timeline['joined_count']}/{timeline['max_players']}):**]")
+                for joined_player in timeline['joined_players']:
+                    if joined_player is not None:
+                        col1, col2 = st.columns([1, 1])
+                        with col1:
+                            st.write(f"- {joined_player}")
+                        with col2:
+                            leave_table = st.button("⛔Leave", key=f"leave_{timeline['id']}_{joined_player}_timeline")
+                            if leave_table:
+                                sql_manager.leave_table(timeline['id'], joined_player)
+                                st.success(f"{joined_player} left Table {timeline['id']}.")
+                                sleep(1)
+                                refresh_table_propositions()
+                                st.rerun()
+
+            col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+            with col1:
+                if not is_full:
+                    if st.session_state['username']:
+                        if st.button(
+                                f"✅Join Table {timeline['id']}" if username not in timeline['joined_players'] else "✅*Already joined*",
+                                key=f"join_{timeline['id']}_timeline",
+                                use_container_width=True,
+                                disabled=username in timeline['joined_players']
+                        ):
+                            try:
+                                sql_manager.join_table(timeline['id'], st.session_state.username)
+                                st.success(
+                                    f"You have successfully joined Table {timeline['id']} as {st.session_state.username}!"
+                                )
+                                sleep(1)
+                                refresh_table_propositions()
+                                st.rerun()
+                            except AttributeError:
+                                st.warning("You have already joined this table.")
+                    else:
+                        st.warning("Set a username to join a table.")
+                else:
+                    st.warning(f"Table {timeline['id']} is full.")
+            with col2:
+                if st.button(
+                        "⛔Delete proposition" if not timeline['joined_count'] else "⛔*Can't delete non empty tables*",
+                        key=f"delete_{timeline['id']}_timeline",
+                        use_container_width=True,
+                        disabled=timeline['joined_count']
+                ):
+                    sql_manager.delete_proposition(timeline['id'])
+                    st.success(f"You have successfully deleted Table {timeline['id']}")
+                    sleep(1)
+                    refresh_table_propositions()
+                    st.rerun()
+            with col3:
+                pass
+            with col4:
+                pass
+
+
+
+
 st.title("🎴 Board Game Reservation Manager")
 
 # Initialize username in session state
@@ -227,10 +357,12 @@ with st.sidebar:
 
     st.toggle("Compact view", key="compact_view")
 
-tab1, tab2 = st.tabs(["📜View and Join Table Propositions", "➕Create Table Proposition"])
+tab1, tab2, tab3 = st.tabs(["📜View and Join Table Propositions", "➕Create Table Proposition", "📊Timeline"])
 with tab1:
     view_start_time = time_time()
     view_table_propositions(st.session_state['compact_view'])
     print(f"Table propositions VIEW refreshed in {(time_time() - view_start_time):2f}s")
 with tab2:
     create_table_proposition()
+with tab3:
+    timeline_table_propositions()
