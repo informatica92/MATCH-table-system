@@ -142,7 +142,8 @@ def view_table_propositions(compact=False):
                     st.write(f"**Date Time:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{date} {time}")
                     st.write(f"**Duration:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{duration} hours")
             with col3:
-                st.write(f"**Joined Players ({joined_count}/{max_players}):**")
+                is_full = joined_count >= max_players
+                st.write(f":{'red' if is_full else 'green'}[**Joined Players ({joined_count}/{max_players}):**]")
                 for joined_player in joined_players:
                     if joined_player is not None:
                         col1, col2 = st.columns([1, 1])
@@ -154,11 +155,12 @@ def view_table_propositions(compact=False):
                                 sql_manager.leave_table(table_id, joined_player)
                                 st.success(f"{joined_player} left Table {table_id}.")
                                 sleep(1)
+                                refresh_table_propositions()
                                 st.rerun()
 
             col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
             with col1:
-                if joined_count < max_players:
+                if not is_full:
                     if st.session_state['username']:
                         if st.button(
                                 f"✅Join Table {table_id}" if username not in joined_players else "✅*Already joined*",
