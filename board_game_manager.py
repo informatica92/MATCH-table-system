@@ -218,6 +218,7 @@ with st.sidebar:
     username = st.text_input("Username", value=st.session_state['username'])
 
     if username:
+        username = username.strip()
         st.session_state['username'] = username
         st.success(f"Username set to: {username}")
     else:
