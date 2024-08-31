@@ -70,7 +70,7 @@ def create_table_proposition():
         notes = st.text_area("Notes")
 
         if st.session_state['username']:
-            if st.form_submit_button("Create Proposition", on_click=refresh_table_propositions()):
+            if st.form_submit_button("Create Proposition"):
                 sql_manager.create_proposition(
                     selected_game[1],
                     max_players,
@@ -92,6 +92,7 @@ def create_table_proposition():
                     st.session_state.username
                 )
                 sleep(1)
+                refresh_table_propositions()
                 st.rerun()
         else:
             st.form_submit_button("Create Proposition", disabled=True)
@@ -171,6 +172,7 @@ def view_table_propositions(compact=False):
                                     f"You have successfully joined Table {table_id} as {st.session_state.username}!"
                                 )
                                 sleep(1)
+                                refresh_table_propositions()
                                 st.rerun()
                             except AttributeError:
                                 st.warning("You have already joined this table.")
@@ -188,6 +190,7 @@ def view_table_propositions(compact=False):
                     sql_manager.delete_proposition(table_id)
                     st.success(f"You have successfully deleted Table {table_id}")
                     sleep(1)
+                    refresh_table_propositions()
                     st.rerun()
             with col3:
                 pass
@@ -201,7 +204,9 @@ st.title("🎴 Board Game Reservation Manager")
 if 'username' not in st.session_state:
     st.session_state['username'] = None
 
-refresh_table_propositions()
+if "propositions" not in st.session_state:
+    print("Initializing st.session_state.propositions")
+    refresh_table_propositions()
 
 # Add a username setting in the sidebar
 with st.sidebar:
