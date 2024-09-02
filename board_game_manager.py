@@ -293,7 +293,7 @@ def timeline_table_propositions(compact=False):
     # # selected_data = selection.resolve(df)
 
     if selected_data:
-        if len(selected_data["selection"]["param_1"]) != 0:
+        if selected_data.get("", {}.get("param_1", {})) and len(selected_data["selection"]["param_1"]) != 0:
             _id = selected_data["selection"]["param_1"][0]['table_id']
             selected_row = df[df['table_id'] == _id].iloc[0]
             display_table_proposition(
