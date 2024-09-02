@@ -343,7 +343,7 @@ with st.sidebar:
     st.toggle("Compact view", key="compact_view")
     st.selectbox("View mode", options=["📜List", "📊Timeline"], key="view_mode")
 
-tab1, tab2 = st.tabs(["📜View and Join Table Propositions", "➕Create Table Proposition"])
+tab1, tab2, tab3 = st.tabs(["📜View and Join Table Propositions", "➕Create Table Proposition", "🗺️Map"])
 with tab1:
     view_start_time = time_time()
 
@@ -370,3 +370,9 @@ with tab1:
     print(f"Table propositions VIEW refreshed in {(time_time() - view_start_time):2f}s")
 with tab2:
     create_table_proposition()
+with tab3:
+    gmap_url = os.environ.get('GMAP_MAP_URL')
+    if gmap_url:
+        st.components.v1.iframe(gmap_url, height=500)
+    else:
+        st.warning("GMAP_MAP_URL environment variable not set")
