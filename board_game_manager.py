@@ -31,8 +31,14 @@ def st_write(label, size=12):
 
 def refresh_table_propositions():
     query_start_time = time_time()
-    joined_by_me = st.session_state.joined_by_me
-    filter_username = st.session_state.username
+    if "joined_by_me" in st.session_state:
+        joined_by_me = st.session_state.joined_by_me
+    else:
+        joined_by_me = False
+    if "username" in st.session_state:
+        filter_username = st.session_state.username
+    else:
+        filter_username = None
     st.session_state.propositions = sql_manager.get_table_propositions(joined_by_me, filter_username)
     print(f"Table propositions QUERY refreshed in {(time_time() - query_start_time):2f}s "
           f"({len(st.session_state.propositions)} rows)")
