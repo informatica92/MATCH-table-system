@@ -1,4 +1,6 @@
 import streamlit as st
+import altair as alt
+import pandas as pd
 
 from time import sleep, time as time_time
 from datetime import datetime, timedelta
@@ -225,58 +227,90 @@ def view_table_propositions(compact=False):
 
 
 def timeline_table_propositions(compact=False):
-    items = []
-    groups = [
-        {"id": 0, "content": "Morning (09:00 - 12:00)", "style": "background: #f7eda6"},
-        {"id": 1, "content": "Afternoon (12:00pm - 18:00)", "style": "background: #a6f7ee"},  # light blue
-        {"id": 2, "content": "Evening (18:00 - 00:00)", "style": "background: #a6adf7"}
-    ]
-    for proposition in st.session_state.propositions:
+    propositions = st.session_state.propositions
+    data = []
+
+    for proposition in propositions:
         (table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, proposed_by,
          joined_count, joined_players) = proposition
 
         start_datetime_str = f"{date} {time}"
-        end_datetime = datetime.strptime(start_datetime_str, '%Y-%m-%d %H:%M:%S') + timedelta(hours=duration)
-        end_datetime_str = end_datetime.strftime('%Y-%m-%d %H:%M:%S')
-        # create a "group" variable that is "morning", "afternoon" or "evening" based on the time of day
-        group = 0 if time.hour < 12 else "1" if time.hour < 18 else "2"
+        start_datetime = datetime.strptime(start_datetime_str, '%Y-%m-%d %H:%M:%S')
+        end_datetime = start_datetime + timedelta(hours=duration)
 
-        items.append(
-            {
-                "id": table_id,
-                "content": game_name,
-                "start": start_datetime_str,
-                "date": str(date),
-                "time": str(time),
-                "end": end_datetime_str,
-                "max_players": max_players,
-                "joined_count": joined_count,
-                "joined_players": joined_players,
-                "proposed_by": proposed_by,
-                "group": group,
-                "bgg_game_id": bgg_game_id,
-                "duration": duration,
-                "notes": notes,
-                "style": "background: #FF5733" if joined_count == max_players else "background: #DAF7A6"
-            }
-        )
-    timeline = st_timeline(items, groups=groups, options={}, height="300px")
+        # Determine the group based on the time of day
+        group = 'Morning' if start_datetime.hour < 12 else 'Afternoon' if start_datetime.hour < 18 else 'Evening'
+
+        data.append({
+            'table_id': table_id,
+            'game_name': game_name,
+            'start_datetime': start_datetime,
+            'end_datetime': end_datetime,
+            'max_players': max_players,
+            'joined_count': joined_count,
+            'joined_players': joined_players,
+            'proposed_by': proposed_by,
+            'group': group,
+            'bgg_game_id': bgg_game_id,
+            'duration': duration,
+            'notes': notes,
+            'status': 'Full' if joined_count == max_players else 'Available'
+        })
+
+    # Create a DataFrame
+    df = pd.DataFrame(data)
+
+    # Create the Altair chart
+    # # Handle user selection based on Altair interaction (using nearest or selection)
+    selection = alt.selection_single(
+        fields=['table_id'],
+        # on='mouseover',
+        # empty='none',
+        # clear='mouseout'
+    )
+    chart = alt.Chart(df).mark_bar().encode(
+        x='start_datetime:T',
+        x2='end_datetime:T',
+        y=alt.Y('game_name:N', title=None),
+        color=alt.Color('status:N', scale=alt.Scale(domain=['Full', 'Available'], range=['#FF5733', '#DAF7A6'])),
+        tooltip=['game_name:N', 'proposed_by:N', 'max_players:Q', 'joined_count:Q', 'duration:Q']
+    ).properties(
+        width='container',
+        height=300
+    ).interactive(
+
+    ).add_selection(
+        selection
+    ).encode(
+        opacity=alt.condition(selection, alt.value(1), alt.value(0.1))
+    )
+
+    selected_data = st.altair_chart(chart, use_container_width=True, on_select=lambda: print("aaaa"))
+
+    # st.altair_chart(selected_chart, use_container_width=True)
+
     st.subheader("Selected item")
-    if timeline:
+
+    # Check if an item is selected
+    # # selected_data = selection.resolve(df)
+
+    if len(selected_data["selection"]["param_1"]) != 0:
+        _id = selected_data["selection"]["param_1"][0]['table_id']
+        selected_row = df[df['table_id'] == _id].iloc[0]
         display_table_proposition(
             section_name="timeline",
             compact=compact,
-            table_id=timeline['id'],
-            game_name=timeline['content'],
-            bgg_game_id=timeline['bgg_game_id'],
-            proposed_by=timeline['proposed_by'],
-            max_players=timeline['max_players'],
-            date=timeline['date'],
-            time=timeline['time'],
-            duration=timeline['duration'],
-            notes=timeline['notes'],
-            joined_count=timeline['joined_count'],
-            joined_players=timeline['joined_players']
+            table_id=selected_row['table_id'],
+            game_name=selected_row['game_name'],
+            bgg_game_id=selected_row['bgg_game_id'],
+            proposed_by=selected_row['proposed_by'],
+            max_players=selected_row['max_players'],
+            date=selected_row['start_datetime'].date(),
+            time=selected_row['start_datetime'].time(),
+            duration=selected_row['duration'],
+            notes=selected_row['notes'],
+            joined_count=selected_row['joined_count'],
+            joined_players=selected_row['joined_players']
         )
 
 
