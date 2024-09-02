@@ -276,16 +276,14 @@ def timeline_table_propositions(compact=False):
         # clear='mouseout'
     )
     chart = alt.Chart(df).mark_bar().encode(
-        x='start_datetime:T',
+        x=alt.X('start_datetime:T', title="date time"),
         x2='end_datetime:T',
-        y=alt.Y('game_name:N', title=None),
+        y=alt.Y('game_name:N', title=None, axis=alt.Axis(labelLimit=600)),
         color=alt.Color('status:N', scale=alt.Scale(domain=['Full', 'Available'], range=['#FF5733', '#DAF7A6'])),
         tooltip=['game_name:N', 'proposed_by:N', 'max_players:Q', 'joined_count:Q', 'duration:Q']
     ).properties(
         width='container',
         height=300
-    ).interactive(
-
     ).add_params(
         selection
     ).encode(
