@@ -343,7 +343,7 @@ with st.sidebar:
     st.toggle("Compact view", key="compact_view")
     st.selectbox("View mode", options=["📜List", "📊Timeline"], key="view_mode")
 
-tab1, tab2, tab3 = st.tabs(["📜View and Join Table Propositions", "➕Create Table Proposition", "🗺️Map"])
+tab1, tab2, tab3 = st.tabs(["📜View/Join", "➕Create", "🗺️Map"])
 with tab1:
     view_start_time = time_time()
 
