@@ -283,17 +283,12 @@ def timeline_table_propositions(compact=False):
         opacity=alt.condition(selection, alt.value(1), alt.value(0.1))
     )
 
-    selected_data = st.altair_chart(chart, use_container_width=True, on_select=lambda: print("aaaa"))
-
-    # st.altair_chart(selected_chart, use_container_width=True)
+    selected_data = st.altair_chart(chart, use_container_width=True, on_select=lambda: print("timeline selection"))
 
     st.subheader("Selected item")
 
-    # Check if an item is selected
-    # # selected_data = selection.resolve(df)
-
     if selected_data:
-        if selected_data.get("", {}.get("param_1", {})) and len(selected_data["selection"]["param_1"]) != 0:
+        if selected_data.get("selection", {}).get("param_1", {}) and len(selected_data["selection"]["param_1"]) != 0:
             _id = selected_data["selection"]["param_1"][0]['table_id']
             selected_row = df[df['table_id'] == _id].iloc[0]
             display_table_proposition(
