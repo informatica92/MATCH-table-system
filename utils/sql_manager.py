@@ -58,11 +58,16 @@ class SQLManager(object):
         c.close()
         conn.close()
 
-    def get_table_propositions(self):
+    def get_table_propositions(self, joined_by_me, filter_username):
+
+        if joined_by_me:
+            joined_by_me_clause = "and tp.id in (SELECT table_id FROM joined_players jp WHERE jp.player_name = %s)"
+        else:
+            joined_by_me_clause = "and TRUE"
         conn = self.get_db_connection()
         c = conn.cursor()
         c.execute(
-            '''
+            f'''
                 SELECT
                     tp.id,
                     tp.game_name,
@@ -77,6 +82,9 @@ class SQLManager(object):
                 FROM 
                     table_propositions tp
                     left join joined_players jp on jp.table_id = tp.id
+                WHERE
+                    TRUE
+                    {joined_by_me_clause}
                 group by 
                     tp.id,
                     tp.game_name,
@@ -87,7 +95,7 @@ class SQLManager(object):
                     tp.bgg_game_id,
                     tp.proposed_by
                 order by tp.date, tp.time
-            '''
+            ''', (filter_username,)
         )
         propositions = c.fetchall()
         c.close()

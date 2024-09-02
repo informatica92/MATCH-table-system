@@ -31,7 +31,9 @@ def st_write(label, size=12):
 
 def refresh_table_propositions():
     query_start_time = time_time()
-    st.session_state.propositions = sql_manager.get_table_propositions()
+    joined_by_me = st.session_state.joined_by_me
+    filter_username = st.session_state.username
+    st.session_state.propositions = sql_manager.get_table_propositions(joined_by_me, filter_username)
     print(f"Table propositions QUERY refreshed in {(time_time() - query_start_time):2f}s "
           f"({len(st.session_state.propositions)} rows)")
 
@@ -341,9 +343,17 @@ tab1, tab2 = st.tabs(["📜View and Join Table Propositions", "➕Create Table P
 with tab1:
     view_start_time = time_time()
 
-    refresh_button = st.button("🔄️Refresh", key="refresh")
-    if refresh_button:
-        refresh_table_propositions()
+    col1, col2, col3, col4 = st.columns([1, 1, 1, 4])
+    with col1:
+        refresh_button = st.button("🔄️Refresh", key="refresh", use_container_width=True)
+        if refresh_button:
+            refresh_table_propositions()
+    with col2:
+        st_write("🔍 Filters:", size=25)
+    with col3:
+        st.toggle("Joined by me", key="joined_by_me", value=False, on_change=refresh_table_propositions(), disabled=not st.session_state['username'])
+    with col4:
+        pass
 
     if len(st.session_state.propositions) == 0:
         st.info("No table propositions available.")
