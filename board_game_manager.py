@@ -292,24 +292,25 @@ def timeline_table_propositions(compact=False):
     # Check if an item is selected
     # # selected_data = selection.resolve(df)
 
-    if len(selected_data["selection"]["param_1"]) != 0:
-        _id = selected_data["selection"]["param_1"][0]['table_id']
-        selected_row = df[df['table_id'] == _id].iloc[0]
-        display_table_proposition(
-            section_name="timeline",
-            compact=compact,
-            table_id=int(selected_row['table_id']),
-            game_name=selected_row['game_name'],
-            bgg_game_id=selected_row['bgg_game_id'],
-            proposed_by=selected_row['proposed_by'],
-            max_players=selected_row['max_players'],
-            date=selected_row['start_datetime'].date(),
-            time=selected_row['start_datetime'].time(),
-            duration=selected_row['duration'],
-            notes=selected_row['notes'],
-            joined_count=selected_row['joined_count'],
-            joined_players=selected_row['joined_players']
-        )
+    if selected_data:
+        if len(selected_data["selection"]["param_1"]) != 0:
+            _id = selected_data["selection"]["param_1"][0]['table_id']
+            selected_row = df[df['table_id'] == _id].iloc[0]
+            display_table_proposition(
+                section_name="timeline",
+                compact=compact,
+                table_id=int(selected_row['table_id']),
+                game_name=selected_row['game_name'],
+                bgg_game_id=selected_row['bgg_game_id'],
+                proposed_by=selected_row['proposed_by'],
+                max_players=selected_row['max_players'],
+                date=selected_row['start_datetime'].date(),
+                time=selected_row['start_datetime'].time(),
+                duration=selected_row['duration'],
+                notes=selected_row['notes'],
+                joined_count=selected_row['joined_count'],
+                joined_players=selected_row['joined_players']
+            )
 
 
 st.title("🎴 Board Game Reservation Manager")
