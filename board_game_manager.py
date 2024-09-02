@@ -6,8 +6,6 @@ from time import sleep, time as time_time
 from datetime import datetime, timedelta
 import os
 
-from streamlit_timeline import st_timeline
-
 from utils.telegram_notifications import TelegramNotifications
 from utils.sql_manager import SQLManager
 from utils.bgg_manager import search_bgg_games, get_bgg_game_info, get_bgg_url
