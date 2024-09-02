@@ -298,7 +298,7 @@ def timeline_table_propositions(compact=False):
         display_table_proposition(
             section_name="timeline",
             compact=compact,
-            table_id=selected_row['table_id'],
+            table_id=int(selected_row['table_id']),
             game_name=selected_row['game_name'],
             bgg_game_id=selected_row['bgg_game_id'],
             proposed_by=selected_row['proposed_by'],
