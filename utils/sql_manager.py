@@ -108,7 +108,7 @@ class SQLManager(object):
                     notes, 
                     bgg_game_id, 
                     proposed_by
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
             ''', (
                 selected_game,
                 max_players,
@@ -122,8 +122,11 @@ class SQLManager(object):
         )
 
         conn.commit()
+        last_row_id = c.fetchone()[0]
         c.close()
         conn.close()
+
+        return last_row_id
 
     def leave_table(self, table_id, joined_player):
         conn = self.get_db_connection()

@@ -175,7 +175,7 @@ def create_table_proposition():
 
         if st.session_state['username']:
             if st.form_submit_button("Create Proposition"):
-                sql_manager.create_proposition(
+                last_row_id = sql_manager.create_proposition(
                     selected_game[1],
                     max_players,
                     date_time,
@@ -185,7 +185,7 @@ def create_table_proposition():
                     bgg_game_id,
                     st.session_state.username
                 )
-                st.success("Table proposition created successfully!")
+                st.success(f"Table proposition created successfully! (id: {last_row_id})")
 
                 telegram_bot.send_new_table_message(
                     selected_game[1],
@@ -193,7 +193,8 @@ def create_table_proposition():
                     date_time.strftime('%Y-%m-%d'),
                     time.strftime('%H:%M:%S'),
                     duration,
-                    st.session_state.username
+                    st.session_state.username,
+                    last_row_id
                 )
                 sleep(1)
                 refresh_table_propositions()

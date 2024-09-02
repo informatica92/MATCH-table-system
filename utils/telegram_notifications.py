@@ -6,14 +6,14 @@ import asyncio
 TEXTS = {
     'IT': {
         'new_table_simple': "*{proposed_by}* ha appena creato un tavolo di *{game_name}* per {max_players} giocatori "
-                            "il {date} alle *{time}* ({duration} ore)."
+                            "il {date} alle *{time}* ({duration} ore) - (id: {table_id})."
                             "\n\nDai un'occhiata qui: https://match-table-system.streamlit.app/",
         'new_table': "*{proposed_by}* ha appena proposto un nuovo tavolo:"
-                     "\n - 🀄 *{game_name}* "
+                     "\n - 🀄 *{game_name}* (id: {table_id})"
                      "\n - 👤 {max_players} giocatori "
                      "\n - 📅 {date} alle *{time}* "
                      "\n - ⌛ {duration} ore."
-                     "\n\nDai un'occhiata qui: https://match-table-system.streamlit.app/"
+                     "\n\nDai un'occhiata qui: https://match-table-system.streamlit.app/#table-{table_id}"
     }
 }
 
@@ -31,7 +31,7 @@ class TelegramNotifications(object):
         else:
             self._bot = telegram.Bot(token=_bot_token)
 
-    def send_new_table_message(self, game_name, max_players, date, time, duration, proposed_by):
+    def send_new_table_message(self, game_name, max_players, date, time, duration, proposed_by, table_id):
 
         text = TEXTS[self.language]['new_table'].format(
             game_name=game_name,
@@ -39,7 +39,8 @@ class TelegramNotifications(object):
             date=date,
             time=time,
             duration=duration,
-            proposed_by=proposed_by
+            proposed_by=proposed_by,
+            table_id=table_id
         )
 
         if self._bot:
