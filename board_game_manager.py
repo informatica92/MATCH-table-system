@@ -260,7 +260,7 @@ def timeline_table_propositions(compact=False):
 
     # Create the Altair chart
     # # Handle user selection based on Altair interaction (using nearest or selection)
-    selection = alt.selection_single(
+    selection = alt.selection_point(
         fields=['table_id'],
         # on='mouseover',
         # empty='none',
@@ -277,7 +277,7 @@ def timeline_table_propositions(compact=False):
         height=300
     ).interactive(
 
-    ).add_selection(
+    ).add_params(
         selection
     ).encode(
         opacity=alt.condition(selection, alt.value(1), alt.value(0.1))
