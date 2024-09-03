@@ -116,4 +116,17 @@ Usando il toggle, la vista (che sia lista o timeline) viene filtrata per i SOLI 
 
 NB: richiede l'inserimento dell'username, altrimenti il toggle è disattivato
 
+### Modifica Tavolo
+![image](https://github.com/user-attachments/assets/bb1d99c0-9b30-4953-bec7-3dbf5261ff73)
+Usando il tasto "Edit" disponibile sotto ogni gioco, è possibile aprire una finestra per modificare alcune voci del gioco selezionato: 
+ - Numero massimo di giocatori (Max Players)
+ - Durata (in ore) (Duration)
+ - Data (Date)
+ - Ora (Time)
+ - Note (Notes)
+
+Clicca poi "Update" per applicare le modifiche
+
+NB: **Non è possibile modificare** il **nome** del tavolo e il **BGG game id** 
+
 # English
