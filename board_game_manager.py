@@ -71,7 +71,7 @@ def refresh_table_propositions():
 
 def display_table_proposition(section_name, compact, table_id, game_name, bgg_game_id, proposed_by, max_players, date, time, duration, notes, joined_count, joined_players):
     # Check if the BGG game ID is valid and set the BGG URL
-    if bgg_game_id and int(bgg_game_id) > 1:
+    if bgg_game_id and int(bgg_game_id) >= 1:
         bgg_url = get_bgg_url(bgg_game_id)
         st.subheader(f"Table {table_id}: [{game_name}]({bgg_url})", anchor=f"table-{table_id}")
     else:
@@ -81,7 +81,7 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
     col1, col2, col3 = st.columns([1, 1, 1])
 
     with col1:
-        if bgg_game_id and int(bgg_game_id) > 1:
+        if bgg_game_id and int(bgg_game_id) >= 1:
             image_url, game_description, categories, mechanics = get_bgg_game_info(bgg_game_id)
             image_width = 300 if not compact else 150
             caption = f"{game_description[:120]}..." if not compact else None
