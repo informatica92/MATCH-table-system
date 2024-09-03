@@ -8,8 +8,8 @@ TEXTS = {
         'new_table_simple': "*{proposed_by}* ha appena creato un tavolo di *{game_name}* per {max_players} giocatori "
                             "il {date} alle *{time}* ({duration} ore) - (id: {table_id})."
                             "\n\nDai un'occhiata qui: https://match-table-system.streamlit.app/",
-        'new_table': "*{proposed_by}* ha appena proposto un nuovo tavolo:"
-                     "\n - 🀄 *{game_name}* (id: {table_id})"
+        'new_table': "*{proposed_by}* ha appena proposto un nuovo tavolo (id: {table_id}):"
+                     "\n - 🀄 *{game_name}* "
                      "\n - 👤 {max_players} giocatori "
                      "\n - 📅 {date} alle *{time}* "
                      "\n - ⌛ {duration} ore."
