@@ -30,12 +30,12 @@ def st_write(label, size=12):
 
 
 @st.dialog("🖋️Edit Table")
-def dialog_edit_table_proposition(table_id, old_name, old_max_players, old_date, old_time, old_duration, old_notes, old_bgg_game_id):
-    with st.form(key=f"form-edit-{table_id}", clear_on_submit=True):
+def dialog_edit_table_proposition(table_id, old_name, old_max_players, old_date, old_time, old_duration, old_notes, old_bgg_game_id, joined_count):
+    with st.form(key=f"form-edit-{table_id}"):
         col1, col2 = st.columns([1, 1])
         with col1:
             game_name = st.text_input("Game Name", value=old_name, disabled=True)
-            max_players = st.number_input("Max Players", value=old_max_players, step=1)
+            max_players = st.number_input("Max Players", value=old_max_players, step=1, min_value=joined_count)
             date = st.date_input("Date", value=old_date)
         with col2:
             bgg_game_id = st.text_input("BGG Game ID", value=old_bgg_game_id, help=BGG_GAME_ID_HELP, disabled=True)
@@ -48,7 +48,6 @@ def dialog_edit_table_proposition(table_id, old_name, old_max_players, old_date,
             sql_manager.update_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id)
             refresh_table_propositions()
             st.rerun()
-
 
 
 def refresh_table_propositions():
@@ -167,7 +166,7 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
                 key=f"edit_{table_id}_{section_name}",
                 use_container_width=True
         ):
-            dialog_edit_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id)
+            dialog_edit_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, joined_count)
 
     with col4:
         pass
