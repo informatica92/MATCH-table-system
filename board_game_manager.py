@@ -29,6 +29,28 @@ def st_write(label, size=12):
     st.write(CUSTOM_TEXT_WITH_LABEL_AND_SIZE.format(label=label, size=size), unsafe_allow_html=True)
 
 
+@st.dialog("🖋️Edit Table")
+def dialog_edit_table_proposition(table_id, old_name, old_max_players, old_date, old_time, old_duration, old_notes, old_bgg_game_id):
+    with st.form(key=f"form-edit-{table_id}", clear_on_submit=True):
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            game_name = st.text_input("Game Name", value=old_name, disabled=True)
+            max_players = st.number_input("Max Players", value=old_max_players, step=1)
+            date = st.date_input("Date", value=old_date)
+        with col2:
+            bgg_game_id = st.text_input("BGG Game ID", value=old_bgg_game_id, help=BGG_GAME_ID_HELP, disabled=True)
+            duration = st.number_input("Duration (hours)", value=old_duration, step=1)
+            time = st.time_input("Time", value=old_time)
+        notes = st.text_area("Notes", value=old_notes)
+
+        submitted = st.form_submit_button("💾Update")
+        if submitted:
+            sql_manager.update_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id)
+            refresh_table_propositions()
+            st.rerun()
+
+
+
 def refresh_table_propositions():
     query_start_time = time_time()
     if "joined_by_me" in st.session_state:
@@ -140,7 +162,12 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
             st.rerun()
 
     with col3:
-        pass
+        if st.button(
+                "🖋️Edit",
+                key=f"edit_{table_id}_{section_name}",
+                use_container_width=True
+        ):
+            dialog_edit_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id)
 
     with col4:
         pass

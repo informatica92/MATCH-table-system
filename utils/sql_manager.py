@@ -172,3 +172,24 @@ class SQLManager(object):
         conn.commit()
         c.close()
         conn.close()
+
+    def update_table_proposition(self, table_id, game_name, max_players, date, time, duration, notes, bgg_game_id):
+        conn = self.get_db_connection()
+        c = conn.cursor()
+        c.execute(
+            '''
+                UPDATE table_propositions
+                SET game_name = %s,
+                    max_players = %s,
+                    date = %s,
+                    time = %s,
+                    duration = %s,
+                    notes = %s,
+                    bgg_game_id = %s
+                WHERE id = %s
+            ''',
+            (game_name, max_players, date, time, duration, notes, bgg_game_id, table_id)
+        )
+        conn.commit()
+        c.close()
+        conn.close()
