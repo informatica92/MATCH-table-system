@@ -10,6 +10,10 @@ from utils.telegram_notifications import TelegramNotifications
 from utils.sql_manager import SQLManager
 from utils.bgg_manager import search_bgg_games, get_bgg_game_info, get_bgg_url
 
+# TODO: add 3 slots (morning -> 9:00, afternoon -> 13:00, evening -> 21:00)
+# TODO: add "join me by default" in Creation tab (after the creation, join the current user automatically)
+# TODO: add possibility (filter) to hide/unhide the past tables (ended tables => current time > start + duration)
+
 st.set_page_config(page_title="Board Game Proposals", layout="wide")
 
 DEFAULT_IMAGE_URL = "images/no_image.jpg"
@@ -94,7 +98,7 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
         if not compact:
             st.write(f"**Proposed By:**&nbsp;{proposed_by}")
             st.write(f"**Max Players:**&nbsp;&nbsp;{max_players}")
-            st.write(f"**Date Time:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{date} {time}")
+            st.write(f"**Date Time:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{date} {time.strftime('%H:%M')}")
             st.write(f"**Duration:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{duration} hours")
             st.write(f"**Notes:**")
             st.write(notes)
