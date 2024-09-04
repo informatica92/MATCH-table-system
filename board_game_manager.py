@@ -1,6 +1,7 @@
 import streamlit as st
 import altair as alt
 import pandas as pd
+import extra_streamlit_components as stx
 
 from time import sleep, time as time_time
 from datetime import datetime, timedelta
@@ -27,6 +28,8 @@ sql_manager = SQLManager()
 sql_manager.create_tables()
 
 telegram_bot = TelegramNotifications()
+
+cookie_manager = stx.CookieManager()
 
 
 def st_write(label, size=12):
@@ -351,6 +354,8 @@ st.title("🎴 Board Game Reservation Manager")
 if 'username' not in st.session_state:
     st.session_state['username'] = None
 
+st.session_state['username'] = cookie_manager.get("username")
+
 if "propositions" not in st.session_state:
     print("Initializing st.session_state.propositions")
     refresh_table_propositions()
@@ -365,6 +370,7 @@ with st.sidebar:
     if username:
         username = username.strip()
         st.session_state['username'] = username
+        cookie_manager.set("username", username, max_age=30*24*60*60)  # expires in 30days
         st.success(f"Username set to: {username}")
     else:
         st.session_state['username'] = None
