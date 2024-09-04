@@ -29,7 +29,7 @@ sql_manager.create_tables()
 
 telegram_bot = TelegramNotifications()
 
-cookie_manager = stx.CookieManager()
+
 
 
 def st_write(label, size=12):
@@ -354,11 +354,12 @@ st.title("🎴 Board Game Reservation Manager")
 if 'username' not in st.session_state:
     st.session_state['username'] = None
 
-st.session_state['username'] = cookie_manager.get("username")
-
 if "propositions" not in st.session_state:
     print("Initializing st.session_state.propositions")
     refresh_table_propositions()
+
+cookie_manager = stx.CookieManager()
+st.session_state['username'] = cookie_manager.get("username")
 
 # Add a username setting in the sidebar
 with st.sidebar:
