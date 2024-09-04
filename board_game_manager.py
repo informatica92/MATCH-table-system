@@ -29,12 +29,7 @@ sql_manager.create_tables()
 
 telegram_bot = TelegramNotifications()
 
-with st.empty():  # https://github.com/Mohamed-512/Extra-Streamlit-Components/issues/70#issuecomment-2230966532
-    @st.cache_resource
-    def get_manager():
-        return stx.CookieManager()
-
-    cookie_manager = get_manager()
+cookie_manager = stx.CookieManager()
 
 
 def st_write(label, size=12):
