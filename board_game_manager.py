@@ -29,7 +29,7 @@ sql_manager.create_tables()
 
 telegram_bot = TelegramNotifications()
 
-
+cookie_manager = stx.CookieManager()
 
 
 def st_write(label, size=12):
@@ -358,8 +358,7 @@ if "propositions" not in st.session_state:
     print("Initializing st.session_state.propositions")
     refresh_table_propositions()
 
-st.info(st.context.cookies.to_dict())
-st.session_state['username'] = st.context.cookies.get("username")
+st.session_state['username'] = cookie_manager.get("username")
 
 # Add a username setting in the sidebar
 with st.sidebar:
@@ -373,7 +372,6 @@ with st.sidebar:
         st.session_state['username'] = username
         if username != st.context.cookies.get("username"):
             print("Setting new username into Cookies")
-            cookie_manager = stx.CookieManager()
             cookie_manager.set("username", username, max_age=30*24*60*60)  # expires in 30days
         st.success(f"Username set to: {username}")
     else:
