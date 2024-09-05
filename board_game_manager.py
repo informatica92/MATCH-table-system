@@ -370,9 +370,7 @@ with st.sidebar:
     if username:
         username = username.strip()
         st.session_state['username'] = username
-        if username != st.context.cookies.get("username"):
-            print("Setting new username into Cookies")
-            cookie_manager.set("username", username, max_age=30*24*60*60)  # expires in 30days
+        cookie_manager.set("username", username, max_age=30*24*60*60)  # expires in 30days
         st.success(f"Username set to: {username}")
     else:
         st.session_state['username'] = None
