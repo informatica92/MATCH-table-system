@@ -358,6 +358,7 @@ if "propositions" not in st.session_state:
     print("Initializing st.session_state.propositions")
     refresh_table_propositions()
 
+st.info(st.context.cookies.to_dict())
 st.session_state['username'] = st.context.cookies.get("username")
 
 # Add a username setting in the sidebar
