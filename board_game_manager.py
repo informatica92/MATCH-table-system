@@ -309,7 +309,7 @@ def timeline_table_propositions(compact=False):
         # clear='mouseout'
     )
     chart = alt.Chart(df).mark_bar().encode(
-        x=alt.X('start_datetime:T', title="date time"),
+        x=alt.X('start_datetime:T', title="date time", axis=alt.Axis(format='%H:%M')),
         x2='end_datetime:T',
         y=alt.Y('game_name:N', title=None, axis=alt.Axis(labelLimit=600)),
         color=alt.Color('status:N', scale=alt.Scale(domain=['Full', 'Available'], range=['#FF5733', '#DAF7A6'])),
@@ -383,16 +383,15 @@ tab1, tab2, tab3 = st.tabs(["📜View/Join", "➕Create", "🗺️Map"])
 with tab1:
     view_start_time = time_time()
 
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 4])
+    col1, col2, col3 = st.columns([1, 1, 4])
     with col1:
         refresh_button = st.button("🔄️Refresh", key="refresh", use_container_width=True)
         if refresh_button:
             refresh_table_propositions()
     with col2:
-        st_write("🔍 Filters:", size=25)
+        with st.popover("🔍 Filters:", use_container_width=True):
+            st.toggle("Joined by me", key="joined_by_me", value=False, on_change=refresh_table_propositions(), disabled=not st.session_state['username'])
     with col3:
-        st.toggle("Joined by me", key="joined_by_me", value=False, on_change=refresh_table_propositions(), disabled=not st.session_state['username'])
-    with col4:
         pass
 
     if len(st.session_state.propositions) == 0:
