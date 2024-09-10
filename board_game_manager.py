@@ -14,6 +14,9 @@ from utils.bgg_manager import search_bgg_games, get_bgg_game_info, get_bgg_url
 # TODO: add 3 slots (morning -> 9:00, afternoon -> 13:00, evening -> 21:00)
 # TODO: add "join me by default" in Creation tab (after the creation, join the current user automatically)
 # TODO: add possibility (filter) to hide/unhide the past tables (ended tables => current time > start + duration)
+# TODO: evaluate chance to remove sidebar (logo and username in the top - no tab, view_mode and compact in view Tab)
+# TODO: evaluate chance to switch from st.success (join, leave, delete and create) to st.toast
+# TODO: replace text + search to bgg with: https://github.com/m-wrzr/streamlit-searchbox https://pypi.org/project/streamlit-searchbox/
 
 st.set_page_config(page_title="Board Game Proposals", layout="wide")
 
@@ -53,22 +56,22 @@ def dialog_edit_table_proposition(table_id, old_name, old_max_players, old_date,
         submitted = st.form_submit_button("💾Update")
         if submitted:
             sql_manager.update_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id)
-            refresh_table_propositions()
+            refresh_table_propositions("Table Update")
             st.rerun()
 
 
-def refresh_table_propositions():
+def refresh_table_propositions(reason):
     query_start_time = time_time()
     if "joined_by_me" in st.session_state:
         joined_by_me = st.session_state.joined_by_me
     else:
         joined_by_me = False
-    if "username" in st.session_state:
+    if joined_by_me and "username" in st.session_state:
         filter_username = st.session_state.username
     else:
         filter_username = None
     st.session_state.propositions = sql_manager.get_table_propositions(joined_by_me, filter_username)
-    print(f"Table propositions QUERY refreshed in {(time_time() - query_start_time):2f}s "
+    print(f"Table propositions QUERY [{reason}] refreshed in {(time_time() - query_start_time):2f}s "
           f"({len(st.session_state.propositions)} rows)")
 
 
@@ -124,7 +127,7 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
                         sql_manager.leave_table(table_id, joined_player)
                         st.success(f"{joined_player} left Table {table_id}.")
                         sleep(1)
-                        refresh_table_propositions()
+                        refresh_table_propositions("Leave")
                         st.rerun()
 
     # Create four columns for action buttons
@@ -145,7 +148,7 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
                             f"You have successfully joined Table {table_id} as {st.session_state['username']}!"
                         )
                         sleep(1)
-                        refresh_table_propositions()
+                        refresh_table_propositions("Join")
                         st.rerun()
                     except AttributeError:
                         st.warning("You have already joined this table.")
@@ -164,7 +167,7 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
             sql_manager.delete_proposition(table_id)
             st.success(f"You have successfully deleted Table {table_id}")
             sleep(1)
-            refresh_table_propositions()
+            refresh_table_propositions("Deleted")
             st.rerun()
 
     with col3:
@@ -238,7 +241,7 @@ def create_table_proposition():
                     last_row_id
                 )
                 sleep(1)
-                refresh_table_propositions()
+                refresh_table_propositions("Created")
                 st.rerun()
         else:
             st.form_submit_button("Create Proposition", disabled=True)
@@ -356,7 +359,7 @@ if 'username' not in st.session_state:
 
 if "propositions" not in st.session_state:
     print("Initializing st.session_state.propositions")
-    refresh_table_propositions()
+    refresh_table_propositions("Init")
 
 st.session_state['username'] = cookie_manager.get("username")
 
@@ -387,10 +390,10 @@ with tab1:
     with col1:
         refresh_button = st.button("🔄️Refresh", key="refresh", use_container_width=True)
         if refresh_button:
-            refresh_table_propositions()
+            refresh_table_propositions("Refresh")
     with col2:
         with st.popover("🔍 Filters:", use_container_width=True):
-            st.toggle("Joined by me", key="joined_by_me", value=False, on_change=refresh_table_propositions(), disabled=not st.session_state['username'])
+            st.toggle("Joined by me", key="joined_by_me", value=False, on_change=refresh_table_propositions, kwargs={"reason": "Filtering"}, disabled=not st.session_state['username'])
     with col3:
         pass
 
