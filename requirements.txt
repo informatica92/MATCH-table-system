@@ -1,6 +1,7 @@
-streamlit==1.37.1
+streamlit==1.38.0
 requests==2.32.3
 psycopg2-binary==2.9.9
 sqlalchemy==2.0.32
 python-telegram-bot==21.4
 extra-streamlit-components==0.1.71
+streamlit-searchbox==0.1.17  # only works with streamlit 1.38.0

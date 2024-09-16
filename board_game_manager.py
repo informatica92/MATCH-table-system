@@ -2,6 +2,7 @@ import streamlit as st
 import altair as alt
 import pandas as pd
 import extra_streamlit_components as stx
+from streamlit_searchbox import st_searchbox
 
 from time import sleep, time as time_time
 from datetime import datetime, timedelta
