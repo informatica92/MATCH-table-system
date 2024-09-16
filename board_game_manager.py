@@ -316,21 +316,25 @@ def timeline_table_propositions(compact=False):
         # clear='mouseout'
     )
     chart = alt.Chart(df).mark_bar().encode(
-        x=alt.X('start_datetime:T', title="date time", axis=alt.Axis(format='%H:%M')),
-        x2='end_datetime:T',
-        y=alt.Y('game_name:N', title=None, axis=alt.Axis(labelLimit=600)),
+        y=alt.Y('start_datetime:T', title="date time", axis=alt.Axis(format='%H:%M', labelLimit=600, labelColor='#999999'), scale=alt.Scale(reverse=True)),
+        y2='end_datetime:T',
+        x=alt.X('game_name:N', title=None, axis=alt.Axis(labelLimit=600, labelColor='#999999')),
         color=alt.Color('status:N', scale=alt.Scale(domain=['Full', 'Available'], range=['#FF5733', '#DAF7A6'])),
         tooltip=['game_name:N', 'proposed_by:N', 'max_players:Q', 'joined_count:Q', 'duration:Q']
     ).properties(
-        width='container',
-        height=300
+        # width=500,
+        height=700
     ).add_params(
         selection
     ).encode(
         opacity=alt.condition(selection, alt.value(1), alt.value(0.1))
+    ).configure_view(
+        strokeWidth=0
+    ).configure_axis(
+        domain=False
     )
 
-    selected_data = st.altair_chart(chart, use_container_width=True, on_select=lambda: print("timeline selection"))
+    selected_data = st.altair_chart(chart, use_container_width=True, on_select="rerun", theme=None)
 
     st.subheader("Selected item")
 
