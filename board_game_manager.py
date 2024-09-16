@@ -315,7 +315,13 @@ def timeline_table_propositions(compact=False):
         # empty='none',
         # clear='mouseout'
     )
-    chart = alt.Chart(df).mark_bar().encode(
+    chart = alt.Chart(df).mark_bar(
+        cornerRadiusTopLeft=5,
+        cornerRadiusTopRight=5,
+        cornerRadiusBottomRight=5,
+        cornerRadiusBottomLeft=5,
+        
+    ).encode(
         y=alt.Y('start_datetime:T', title="date time", axis=alt.Axis(format='%H:%M', labelLimit=600, labelColor='#999999'), scale=alt.Scale(reverse=True)),
         y2='end_datetime:T',
         x=alt.X('game_name:N', title=None, axis=alt.Axis(labelLimit=600, labelColor='#999999')),
