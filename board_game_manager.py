@@ -11,12 +11,16 @@ from utils.telegram_notifications import TelegramNotifications
 from utils.sql_manager import SQLManager
 from utils.bgg_manager import search_bgg_games, get_bgg_game_info, get_bgg_url
 
+# # FEATURES
 # TODO: add 3 slots (morning -> 9:00, afternoon -> 13:00, evening -> 21:00)
 # TODO: add "join me by default" in Creation tab (after the creation, join the current user automatically)
 # TODO: add possibility (filter) to hide/unhide the past tables (ended tables => current time > start + duration)
-# TODO: evaluate chance to remove sidebar (logo and username in the top - no tab, view_mode and compact in view Tab)
+# TODO: remove sidebar (logo and username in the top - no tab, view_mode and compact in view Tab)
+# TODO: add button for "Add event to Google Calendar" -> https://parcel.io/tools/calendar
+# # IMPROVEMENTS
 # TODO: evaluate chance to switch from st.success (join, leave, delete and create) to st.toast
-# TODO: replace text + search to bgg with: https://github.com/m-wrzr/streamlit-searchbox https://pypi.org/project/streamlit-searchbox/
+# TODO: move create/leave/join/delete into buttons callbacks (code executed BEFORE auto-rerun) + st.toast in button body
+# TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (st.link_button)
 
 st.set_page_config(page_title="Board Game Proposals", layout="wide")
 
