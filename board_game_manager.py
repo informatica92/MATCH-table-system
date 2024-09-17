@@ -1,5 +1,4 @@
 import streamlit as st
-import altair as alt
 import pandas as pd
 import extra_streamlit_components as stx
 
@@ -10,6 +9,7 @@ import os
 from utils.telegram_notifications import TelegramNotifications
 from utils.sql_manager import SQLManager
 from utils.bgg_manager import search_bgg_games, get_bgg_game_info, get_bgg_url
+from utils.altair_manager import timeline_chart
 
 # # FEATURES
 # TODO: add 3 slots (morning -> 9:00, afternoon -> 13:00, evening -> 21:00)
@@ -307,39 +307,7 @@ def timeline_table_propositions(compact=False):
     # Create a DataFrame
     df = pd.DataFrame(data)
 
-    # Create the Altair chart
-    # # Handle user selection based on Altair interaction (using nearest or selection)
-    selection = alt.selection_point(
-        fields=['table_id'],
-        # on='mouseover',
-        # empty='none',
-        # clear='mouseout'
-    )
-    chart = alt.Chart(df).mark_bar(
-        cornerRadiusTopLeft=5,
-        cornerRadiusTopRight=5,
-        cornerRadiusBottomRight=5,
-        cornerRadiusBottomLeft=5,
-        
-    ).encode(
-        y=alt.Y('start_datetime:T', title="date time", axis=alt.Axis(format='%H:%M', labelLimit=600, labelColor='#999999'), scale=alt.Scale(reverse=True)),
-        y2='end_datetime:T',
-        x=alt.X('game_name:N', title=None, axis=alt.Axis(labelLimit=600, labelColor='#999999')),
-        color=alt.Color('status:N', scale=alt.Scale(domain=['Full', 'Available'], range=['#FF5733', '#DAF7A6'])),
-        tooltip=['game_name:N', 'proposed_by:N', 'max_players:Q', 'joined_count:Q', 'duration:Q']
-    ).properties(
-        # width=500,
-        height=700
-    ).add_params(
-        selection
-    ).encode(
-        opacity=alt.condition(selection, alt.value(1), alt.value(0.1))
-    ).configure_view(
-        strokeWidth=0
-    ).configure_axis(
-        domain=False
-    )
-
+    chart = timeline_chart(df)
     selected_data = st.altair_chart(chart, use_container_width=True, on_select="rerun", theme=None)
 
     st.subheader("Selected item")
