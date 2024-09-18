@@ -1,4 +1,5 @@
 import requests
+import html
 import xml.etree.ElementTree as et
 from cachetools import cached, LRUCache
 
@@ -32,7 +33,7 @@ def get_bgg_game_info(game_id):
         for mechanic in root.findall('item/link[@type="boardgamemechanic"]'):
             mechanics.append(mechanic.get('value'))
 
-        return image_url, game_description, categories, mechanics
+        return image_url, html.unescape(game_description), categories, mechanics
     except Exception as e:
         print(f"Error fetching game image: {e}")
         return None
