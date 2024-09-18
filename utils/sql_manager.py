@@ -61,7 +61,7 @@ class SQLManager(object):
     def get_table_propositions(self, joined_by_me, filter_username):
 
         if joined_by_me:
-            joined_by_me_clause = "and tp.id in (SELECT table_id FROM joined_players jp WHERE jp.player_name = %s)"
+            joined_by_me_clause = "and tp.id in (SELECT table_id FROM joined_players jp WHERE LOWER(jp.player_name) = LOWER(%s))"
         else:
             joined_by_me_clause = "and TRUE"
         conn = self.get_db_connection()
