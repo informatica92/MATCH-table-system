@@ -10,9 +10,11 @@ https://github.com/user-attachments/assets/74ca4b9c-25d9-4934-8c9f-a3f02dbdc303
 L'applicazione è live su https://match-table-system.streamlit.app/ utilizzando https://streamlit.io/cloud per un hosting gratuito.
 
 In caso si voglia invece eseguire l'applicazione in locale è necessario seguire i passi sotto indicati: 
-0. Installare Python (con Anaconda)
- - https://docs.anaconda.com/anaconda/install/windows/
-1. Clone del repository
+
+1. Installare Python
+- con [Anaconda](https://docs.anaconda.com/anaconda/install/windows/)
+- tramite [sito ufficiale](https://www.python.org/downloads/)
+2. Clone del repository
   ```
   git clone https://github.com/informatica92/MATCH-table-system.git
   ```
