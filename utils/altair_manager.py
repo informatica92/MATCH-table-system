@@ -36,7 +36,8 @@ def timeline_chart(df: pd.DataFrame):
         x=alt.X(
             'game_name:N',
             title=None,
-            axis=alt.Axis(labelLimit=600, labelColor='#999999')
+            axis=alt.Axis(labelLimit=600, labelColor='#999999'),
+            sort="y"
         ),
         color=alt.Color(
             'status:N',
