@@ -39,6 +39,13 @@ telegram_bot = TelegramNotifications()
 cookie_manager = stx.CookieManager()
 
 
+def username_in_joined_players(joined_players: list[str]):
+    if st.session_state.username:
+        return st.session_state.username.lower() in [player.lower() for player in joined_players if player]
+    else:
+        return False
+
+
 def st_write(label, size=12):
     st.write(CUSTOM_TEXT_WITH_LABEL_AND_SIZE.format(label=label, size=size), unsafe_allow_html=True)
 
@@ -141,10 +148,10 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
         if not is_full:
             if st.session_state['username']:
                 if st.button(
-                        f"✅Join Table {table_id}" if st.session_state['username'] not in joined_players else "✅*Already joined*",
+                        f"✅Join Table {table_id}" if not username_in_joined_players(joined_players) else "✅*Already joined*",
                         key=f"join_{table_id}_{section_name}",
                         use_container_width=True,
-                        disabled=st.session_state['username'] in joined_players
+                        disabled=username_in_joined_players(joined_players)
                 ):
                     try:
                         sql_manager.join_table(table_id, st.session_state['username'])
