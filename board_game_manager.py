@@ -31,6 +31,25 @@ BGG_GAME_ID_HELP = ("It's the id in the BGG URL. EX: for Wingspan the URL is "
 
 CUSTOM_TEXT_WITH_LABEL_AND_SIZE = "<p style='font-size:{size}px;'>{label}</p>"
 
+st.markdown(
+    r"""
+    <style>
+    .st-emotion-cache-1f3w014 {
+            animation: bounce 2s ease infinite;
+        }
+    @keyframes bounce {
+        70% { transform:translateY(0%); }
+        80% { transform:translateY(-15%); }
+        90% { transform:translateY(0%); }
+        95% { transform:translateY(-7%); }
+        97% { transform:translateY(0%); }
+        99% { transform:translateY(-3%); }
+        100% { transform:translateY(0); }
+    }
+    </style>
+    """, unsafe_allow_html=True
+)
+
 sql_manager = SQLManager()
 sql_manager.create_tables()
 
