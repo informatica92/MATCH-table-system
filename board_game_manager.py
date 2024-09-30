@@ -129,6 +129,32 @@ def delete_callback(table_id):
     refresh_table_propositions("Delete")
     st.toast(f"⛔ Deleted Table {table_id}")
 
+def create_callback(game_name, max_players, date, time, duration, notes, bgg_game_id):
+    last_row_id = sql_manager.create_proposition(
+        game_name,
+        max_players,
+        date,
+        time,
+        duration,
+        notes,
+        bgg_game_id,
+        st.session_state.username
+    )
+
+    telegram_bot.send_new_table_message(
+        game_name,
+        max_players,
+        date.strftime('%Y-%m-%d'),
+        time.strftime('%H:%M'),
+        duration,
+        st.session_state.username,
+        last_row_id
+    )
+
+    refresh_table_propositions("Created")
+    st.toast(f"➕ Table proposition created successfully!\nTable ID: {last_row_id} - {game_name}")
+
+
 
 def display_table_proposition(section_name, compact, table_id, game_name, bgg_game_id, proposed_by, max_players, date, time, duration, notes, joined_count, joined_players):
     # Check if the BGG game ID is valid and set the BGG URL
@@ -260,31 +286,8 @@ def create_table_proposition():
         notes = st.text_area("Notes")
 
         if st.session_state['username']:
-            if st.form_submit_button("Create Proposition"):
-                last_row_id = sql_manager.create_proposition(
-                    selected_game[1],
-                    max_players,
-                    date_time,
-                    time,
-                    duration,
-                    notes,
-                    bgg_game_id,
-                    st.session_state.username
-                )
-                st.success(f"Table proposition created successfully! (id: {last_row_id})")
-
-                telegram_bot.send_new_table_message(
-                    selected_game[1],
-                    max_players,
-                    date_time.strftime('%Y-%m-%d'),
-                    time.strftime('%H:%M:%S'),
-                    duration,
-                    st.session_state.username,
-                    last_row_id
-                )
-                sleep(1)
-                refresh_table_propositions("Created")
-                st.rerun()
+            if st.form_submit_button("Create Proposition", on_click=create_callback, args=[selected_game[1], max_players, date_time, time, duration, notes, bgg_game_id]):
+                st.success(f"Table proposition created successfully: {selected_game[1]} - {date_time} {time.strftime('%H:%M')}")
         else:
             st.form_submit_button("Create Proposition", disabled=True)
             st.warning("Set a username to create a proposition.")
