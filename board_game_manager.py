@@ -108,6 +108,27 @@ def refresh_table_propositions(reason):
     print(f"Table propositions QUERY [{reason}] refreshed in {(time_time() - query_start_time):2f}s "
           f"({len(st.session_state.propositions)} rows)")
 
+# CALLBACKS
+
+def join_callback(table_id, joining_username):
+    try:
+        sql_manager.join_table(table_id, joining_username)
+        refresh_table_propositions("Join")
+        st.toast(f"✅ Joined Table {table_id} as {joining_username}!")
+    except AttributeError:
+        st.toast("🚫 You have already joined this table.")
+
+
+def leave_callback(table_id, leaving_username):
+    sql_manager.leave_table(table_id, leaving_username)
+    refresh_table_propositions("Leave")
+    st.toast(f"⛔ {leaving_username} left Table {table_id}")
+
+def delete_callback(table_id):
+    sql_manager.delete_proposition(table_id)
+    refresh_table_propositions("Delete")
+    st.toast(f"⛔ Deleted Table {table_id}")
+
 
 def display_table_proposition(section_name, compact, table_id, game_name, bgg_game_id, proposed_by, max_players, date, time, duration, notes, joined_count, joined_players):
     # Check if the BGG game ID is valid and set the BGG URL
@@ -156,13 +177,12 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
                 with player_col1:
                     st.write(f"- {joined_player}")
                 with player_col2:
-                    leave_table = st.button("⛔Leave", key=f"leave_{table_id}_{joined_player}_{section_name}")
-                    if leave_table:
-                        sql_manager.leave_table(table_id, joined_player)
-                        st.success(f"{joined_player} left Table {table_id}.")
-                        sleep(1)
-                        refresh_table_propositions("Leave")
-                        st.rerun()
+                    # LEAVE
+                    st.button(
+                        "⛔Leave",
+                        key=f"leave_{table_id}_{joined_player}_{section_name}",
+                        on_click=leave_callback, args=[table_id, joined_player]
+                    )
 
     # Create four columns for action buttons
     col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
@@ -170,40 +190,28 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
     with col1:
         if not is_full:
             if st.session_state['username']:
-                if st.button(
-                        f"✅Join Table {table_id}" if not username_in_joined_players(joined_players) else "✅*Already joined*",
-                        key=f"join_{table_id}_{section_name}",
-                        use_container_width=True,
-                        disabled=username_in_joined_players(joined_players)
-                ):
-                    try:
-                        sql_manager.join_table(table_id, st.session_state['username'])
-                        st.success(
-                            f"You have successfully joined Table {table_id} as {st.session_state['username']}!"
-                        )
-                        sleep(1)
-                        refresh_table_propositions("Join")
-                        st.rerun()
-                    except AttributeError:
-                        st.warning("You have already joined this table.")
+                st.button(
+                    # JOIN
+                    f"✅Join Table {table_id}" if not username_in_joined_players(joined_players) else "✅*Already joined*",
+                    key=f"join_{table_id}_{section_name}",
+                    use_container_width=True,
+                    disabled=username_in_joined_players(joined_players),
+                    on_click=join_callback, args=[table_id, st.session_state['username']]
+                )
             else:
                 st.warning("Set a username to join a table.")
         else:
             st.warning(f"Table {table_id} is full.")
 
     with col2:
-        if st.button(
-                "⛔Delete proposition" if not joined_count else "⛔*Can't delete non empty tables*",
-                key=f"delete_{table_id}_{section_name}",
-                use_container_width=True,
-                disabled=joined_count
-        ):
-            sql_manager.delete_proposition(table_id)
-            st.success(f"You have successfully deleted Table {table_id}")
-            sleep(1)
-            refresh_table_propositions("Deleted")
-            st.rerun()
-
+        # DELETE
+        st.button(
+            "⛔Delete proposition" if not joined_count else "⛔*Can't delete non empty tables*",
+            key=f"delete_{table_id}_{section_name}",
+            use_container_width=True,
+            disabled=joined_count,
+            on_click=delete_callback, args=[table_id]
+        )
     with col3:
         if st.button(
                 "🖋️Edit",
@@ -211,7 +219,6 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
                 use_container_width=True
         ):
             dialog_edit_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, joined_count)
-
 
     with col4:
         pass
