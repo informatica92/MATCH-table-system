@@ -39,13 +39,15 @@ class SQLManager(object):
                         duration INTEGER,
                         notes TEXT,
                         bgg_game_id INTEGER, 
-                        proposed_by TEXT
+                        proposed_by TEXT,
+                        creation_timestamp_tz timestamptz NULL DEFAULT now(),
                     )''')
 
         c.execute('''CREATE TABLE IF NOT EXISTS joined_players (
                         id SERIAL PRIMARY KEY,
                         table_id INTEGER REFERENCES table_propositions(id) ON DELETE CASCADE,
                         player_name TEXT,
+                        creation_timestamp_tz timestamptz NULL DEFAULT now(),
                         UNIQUE(table_id, player_name)
                     )''')
 

@@ -21,7 +21,6 @@ from utils.altair_manager import timeline_chart
 # # IMPROVEMENTS
 # TODO: use @st.fragments
 # TODO: add possibility (filter) to hide/unhide the past tables (ended tables => current time > start + duration)
-# TODO: add "creation_date" and "join_date" in tables
 # TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (st.link_button)
 
 st.set_page_config(page_title="Board Game Proposals", layout="wide")
