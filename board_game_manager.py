@@ -112,7 +112,7 @@ def join_callback(table_id, joining_username):
         refresh_table_propositions("Join")
         st.toast(f"✅ Joined Table {table_id} as {joining_username}!")
     except AttributeError:
-        st.toast("🚫 You have already joined this table.")
+        st.toast("🚫 Error joining the table, refresh the page and retry")
 
 
 def leave_callback(table_id, leaving_username):
