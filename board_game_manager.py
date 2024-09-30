@@ -273,9 +273,9 @@ def create_table_proposition():
     with st.form(key="create_new_proposition_form", border=False):
         col1, col2 = st.columns([1, 1])
         with col1:
-            max_players = st.number_input("Max Number of Players", min_value=1, max_value=100, step=1, key="max_players")
+            st.number_input("Max Number of Players", min_value=1, max_value=100, step=1, key="max_players")
         with col2:
-            duration = st.number_input("Duration (in hours)", min_value=1, max_value=24, step=1, key="duration")
+            st.number_input("Duration (in hours)", min_value=1, max_value=24, step=1, key="duration")
         col1, col2 = st.columns([1, 1])
         with col1:
             default_date_str = os.environ.get('DEFAULT_DATE')
@@ -283,7 +283,7 @@ def create_table_proposition():
             date_time = st.date_input("Date", value=default_date, key="date_time")
         with col2:
             time = st.time_input("Time", step=60*30, key="time")
-        notes = st.text_area("Notes", key="notes")
+        st.text_area("Notes", key="notes")
 
         if st.session_state['username']:
             if st.form_submit_button(
