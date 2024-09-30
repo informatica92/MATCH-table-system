@@ -19,7 +19,6 @@ from utils.altair_manager import timeline_chart
 # TODO: remove sidebar (logo and username in the top - no tab, view_mode and compact in view Tab)
 # TODO: add button for "Add event to Google Calendar" -> https://parcel.io/tools/calendar
 # # IMPROVEMENTS
-# TODO: use @st.fragments
 # TODO: add possibility (filter) to hide/unhide the past tables (ended tables => current time > start + duration)
 # TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (st.link_button)
 
