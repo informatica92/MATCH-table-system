@@ -126,25 +126,27 @@ def delete_callback(table_id):
     refresh_table_propositions("Delete")
     st.toast(f"⛔ Deleted Table {table_id}")
 
-def create_callback(game_name, max_players, date, time, duration, notes, bgg_game_id):
+def create_callback(game_name, bgg_game_id):
     if game_name:
+        # print(game_name, max_players, date, time, duration, notes, bgg_game_id)
+        # print(game_name, st.session_state.max_players, st.session_state.date_time, st.session_state.time, st.session_state.duration, st.session_state.notes, bgg_game_id)
         last_row_id = sql_manager.create_proposition(
             game_name,
-            max_players,
-            date,
-            time,
-            duration,
-            notes,
+            st.session_state.max_players,
+            st.session_state.date_time,
+            st.session_state.time,
+            st.session_state.duration,
+            st.session_state.notes,
             bgg_game_id,
             st.session_state.username
         )
 
         telegram_bot.send_new_table_message(
             game_name,
-            max_players,
-            date.strftime('%Y-%m-%d'),
-            time.strftime('%H:%M'),
-            duration,
+            st.session_state.max_players,
+            st.session_state.date_time.strftime('%Y-%m-%d'),
+            st.session_state.time.strftime('%H:%M'),
+            st.session_state.duration,
             st.session_state.username,
             last_row_id
         )
@@ -271,20 +273,22 @@ def create_table_proposition():
     with st.form(key="create_new_proposition_form", border=False):
         col1, col2 = st.columns([1, 1])
         with col1:
-            max_players = st.number_input("Max Number of Players", min_value=1, max_value=100, step=1)
+            max_players = st.number_input("Max Number of Players", min_value=1, max_value=100, step=1, key="max_players")
         with col2:
-            duration = st.number_input("Duration (in hours)", min_value=1, max_value=24, step=1)
+            duration = st.number_input("Duration (in hours)", min_value=1, max_value=24, step=1, key="duration")
         col1, col2 = st.columns([1, 1])
         with col1:
             default_date_str = os.environ.get('DEFAULT_DATE')
             default_date = datetime.strptime(default_date_str, '%Y-%m-%d') if default_date_str else datetime.now()
-            date_time = st.date_input("Date", value=default_date)
+            date_time = st.date_input("Date", value=default_date, key="date_time")
         with col2:
-            time = st.time_input("Time", step=60*30)
-        notes = st.text_area("Notes")
+            time = st.time_input("Time", step=60*30, key="time")
+        notes = st.text_area("Notes", key="notes")
 
         if st.session_state['username']:
-            if st.form_submit_button("Create Proposition", on_click=create_callback, args=[selected_game[1] if selected_game else None, max_players, date_time, time, duration, notes, bgg_game_id]):
+            if st.form_submit_button(
+                    "Create Proposition",
+                    on_click=create_callback, args=[selected_game[1] if selected_game else None, bgg_game_id]):
                 st.success(f"Table proposition created successfully: {selected_game[1]} - {date_time} {time.strftime('%H:%M')}")
         else:
             st.form_submit_button("Create Proposition", disabled=True)
