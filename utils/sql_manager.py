@@ -40,7 +40,7 @@ class SQLManager(object):
                         notes TEXT,
                         bgg_game_id INTEGER, 
                         proposed_by TEXT,
-                        creation_timestamp_tz timestamptz NULL DEFAULT now(),
+                        creation_timestamp_tz timestamptz NULL DEFAULT now()
                     )''')
 
         c.execute('''CREATE TABLE IF NOT EXISTS joined_players (
