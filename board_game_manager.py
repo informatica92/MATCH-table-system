@@ -294,7 +294,7 @@ def create_table_proposition():
             st.form_submit_button("Create Proposition", disabled=True)
             st.warning("Set a username to create a proposition.")
 
-
+@st.fragment
 def view_table_propositions(compact=False):
     for proposition in st.session_state.propositions:
         (table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, proposed_by,
