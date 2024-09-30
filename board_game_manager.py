@@ -14,10 +14,14 @@ from utils.altair_manager import timeline_chart
 # # FEATURES
 # TODO: add 3 slots (morning -> 9:00, afternoon -> 13:00, evening -> 21:00)
 # TODO: add "join me by default" in Creation tab (after the creation, join the current user automatically)
-# TODO: add possibility (filter) to hide/unhide the past tables (ended tables => current time > start + duration)
+# TODO: add possibility to create a table silently => no Telegram notifications (for already organized tables)
+# TODO: make "Leave"/"Delete" possible only for table admin | "Leave" possible only for "myself"
 # TODO: remove sidebar (logo and username in the top - no tab, view_mode and compact in view Tab)
 # TODO: add button for "Add event to Google Calendar" -> https://parcel.io/tools/calendar
 # # IMPROVEMENTS
+# TODO: use @st.fragments
+# TODO: add possibility (filter) to hide/unhide the past tables (ended tables => current time > start + duration)
+# TODO: add "creation_date" and "join_date" in tables
 # TODO: evaluate chance to switch from st.success (join, leave, delete and create) to st.toast
 # TODO: move create/leave/join/delete into buttons callbacks (code executed BEFORE auto-rerun) + st.toast in button body
 # TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (st.link_button)
@@ -207,6 +211,7 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
                 use_container_width=True
         ):
             dialog_edit_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, joined_count)
+
 
     with col4:
         pass
