@@ -6,10 +6,14 @@ from time import time as time_time
 from datetime import datetime, timedelta
 import os
 
-from utils.telegram_notifications import TelegramNotifications
-from utils.sql_manager import SQLManager
 from utils.bgg_manager import search_bgg_games, get_bgg_game_info, get_bgg_url
 from utils.altair_manager import timeline_chart
+from utils.streamlit_utils import (
+    DEFAULT_IMAGE_URL, BGG_GAME_ID_HELP, BOUNCE_SIDEBAR_ICON,
+    st_write, refresh_table_propositions, username_in_joined_players, update_table_propositions,
+    delete_callback, leave_callback, join_callback, create_callback,
+    table_propositions_to_df
+)
 
 # # FEATURES
 # TODO: add 3 slots (morning -> 9:00, afternoon -> 13:00, evening -> 21:00)
@@ -25,49 +29,12 @@ from utils.altair_manager import timeline_chart
 
 st.set_page_config(page_title="Board Game Proposals", layout="wide")
 
-DEFAULT_IMAGE_URL = "images/no_image.jpg"
+st.markdown(BOUNCE_SIDEBAR_ICON, unsafe_allow_html=True)
 
-BGG_GAME_ID_HELP = ("It's the id in the BGG URL. EX: for Wingspan the URL is "
-                    "https://boardgamegeek.com/boardgame/266192/wingspan, hence the BGG game id is 266192")
-
-CUSTOM_TEXT_WITH_LABEL_AND_SIZE = "<p style='font-size:{size}px;'>{label}</p>"
-
-st.markdown(
-    r"""
-    <style>
-    .st-emotion-cache-1f3w014 {
-            animation: bounce 2s ease infinite;
-        }
-    @keyframes bounce {
-        70% { transform:translateY(0%); }
-        80% { transform:translateY(-15%); }
-        90% { transform:translateY(0%); }
-        95% { transform:translateY(-7%); }
-        97% { transform:translateY(0%); }
-        99% { transform:translateY(-3%); }
-        100% { transform:translateY(0); }
-    }
-    </style>
-    """, unsafe_allow_html=True
-)
-
-sql_manager = SQLManager()
-sql_manager.create_tables()
-
-telegram_bot = TelegramNotifications()
 
 cookie_manager = stx.CookieManager()
 
 
-def username_in_joined_players(joined_players: list[str]):
-    if st.session_state.username:
-        return st.session_state.username.lower() in [player.lower() for player in joined_players if player]
-    else:
-        return False
-
-
-def st_write(label, size=12):
-    st.write(CUSTOM_TEXT_WITH_LABEL_AND_SIZE.format(label=label, size=size), unsafe_allow_html=True)
 
 
 @st.dialog("🖋️Edit Table")
@@ -86,71 +53,8 @@ def dialog_edit_table_proposition(table_id, old_name, old_max_players, old_date,
 
         submitted = st.form_submit_button("💾Update")
         if submitted:
-            sql_manager.update_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id)
-            refresh_table_propositions("Table Update")
+            update_table_propositions(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id)
             st.rerun()
-
-
-def refresh_table_propositions(reason):
-    query_start_time = time_time()
-    if "joined_by_me" in st.session_state:
-        joined_by_me = st.session_state.joined_by_me
-    else:
-        joined_by_me = False
-    if joined_by_me and "username" in st.session_state:
-        filter_username = st.session_state.username
-    else:
-        filter_username = None
-    st.session_state.propositions = sql_manager.get_table_propositions(joined_by_me, filter_username)
-    print(f"Table propositions QUERY [{reason}] refreshed in {(time_time() - query_start_time):2f}s "
-          f"({len(st.session_state.propositions)} rows)")
-
-# CALLBACKS
-
-def join_callback(table_id, joining_username):
-    try:
-        sql_manager.join_table(table_id, joining_username)
-        refresh_table_propositions("Join")
-        st.toast(f"✅ Joined Table {table_id} as {joining_username}!")
-    except AttributeError:
-        st.toast("🚫 You have already joined this table.")
-
-
-def leave_callback(table_id, leaving_username):
-    sql_manager.leave_table(table_id, leaving_username)
-    refresh_table_propositions("Leave")
-    st.toast(f"⛔ {leaving_username} left Table {table_id}")
-
-def delete_callback(table_id):
-    sql_manager.delete_proposition(table_id)
-    refresh_table_propositions("Delete")
-    st.toast(f"⛔ Deleted Table {table_id}")
-
-def create_callback(game_name, bgg_game_id):
-    if game_name:
-        last_row_id = sql_manager.create_proposition(
-            game_name,
-            st.session_state.max_players,
-            st.session_state.date,
-            st.session_state.time,
-            st.session_state.duration,
-            st.session_state.notes,
-            bgg_game_id,
-            st.session_state.username
-        )
-
-        telegram_bot.send_new_table_message(
-            game_name,
-            st.session_state.max_players,
-            st.session_state.date.strftime('%Y-%m-%d'),
-            st.session_state.time.strftime('%H:%M'),
-            st.session_state.duration,
-            st.session_state.username,
-            last_row_id
-        )
-
-        refresh_table_propositions("Created")
-        st.toast(f"➕ Table proposition created successfully!\nTable ID: {last_row_id} - {game_name}")
 
 
 
@@ -313,38 +217,7 @@ def view_table_propositions(compact=False):
 
 
 def timeline_table_propositions(compact=False):
-    propositions = st.session_state.propositions
-    data = []
-
-    for proposition in propositions:
-        (table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, proposed_by,
-         joined_count, joined_players) = proposition
-
-        start_datetime_str = f"{date} {time}"
-        start_datetime = datetime.strptime(start_datetime_str, '%Y-%m-%d %H:%M:%S')
-        end_datetime = start_datetime + timedelta(hours=duration)
-
-        # Determine the group based on the time of day
-        group = 'Morning' if start_datetime.hour < 12 else 'Afternoon' if start_datetime.hour < 18 else 'Evening'
-
-        data.append({
-            'table_id': table_id,
-            'game_name': game_name,
-            'start_datetime': start_datetime,
-            'end_datetime': end_datetime,
-            'max_players': max_players,
-            'joined_count': joined_count,
-            'joined_players': joined_players,
-            'proposed_by': proposed_by,
-            'group': group,
-            'bgg_game_id': bgg_game_id,
-            'duration': duration,
-            'notes': notes,
-            'status': 'Full' if joined_count == max_players else 'Available'
-        })
-
-    # Create a DataFrame
-    df = pd.DataFrame(data)
+    df = table_propositions_to_df(add_group=True, add_status=True, add_start_and_end_date=True)
 
     chart = timeline_chart(df)
     selected_data = st.altair_chart(chart, use_container_width=True, on_select="rerun", theme=None)
@@ -377,34 +250,8 @@ def dataframe_table_propositions(compact=False):
     all_columns = ['table_id', 'image', 'time', 'game_name', 'duration', 'date', 'players', 'joined_players', 'proposed_by', 'joined', 'bgg']
     st.multiselect("Columns", options=all_columns, default=default_columns, key="columns_order")
 
-    propositions = st.session_state.propositions
-    data = []
+    df = table_propositions_to_df(add_image_url=True, add_bgg_url=True, add_players_fraction=True, add_joined=True)
 
-    for proposition in propositions:
-        (table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, proposed_by,
-         joined_count, joined_players) = proposition
-
-        image_url, _, _, _ = get_bgg_game_info(bgg_game_id)
-
-        data.append({
-            'table_id': table_id,
-            'image': image_url,
-            'game_name': game_name,
-            'duration': duration,
-            'bgg': get_bgg_url(bgg_game_id),
-            'date': date,
-            'time': time,
-            'max_players': max_players,
-            'joined_count': joined_count,
-            'players': f"{joined_count}/{max_players}",
-            'joined_players': joined_players,
-            'proposed_by': proposed_by,
-            'bgg_game_id': bgg_game_id,
-            'notes': notes,
-            'joined': username_in_joined_players(joined_players)
-        })
-
-    df = pd.DataFrame(data).sort_values(["date", "time"])
     column_config = {
         "table_id":  st.column_config.TextColumn("ID", width="small"),
         "image": st.column_config.ImageColumn("Image", width="small"),
