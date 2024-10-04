@@ -148,7 +148,7 @@ def create_callback(game_name, bgg_game_id):
         )
 
         refresh_table_propositions("Created")
-        st.toast(f"➕ Table proposition created successfully!\nTable ID: {last_row_id} - {game_name}")
         if st.session_state.join_me_by_default:
             st.toast(f"✅ Joined Table {last_row_id} as {st.session_state.username}!")
+        st.toast(f"➕ Table proposition created successfully!\nTable ID: {last_row_id} - {game_name}")
 
