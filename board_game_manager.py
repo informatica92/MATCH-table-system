@@ -19,6 +19,7 @@ from utils.altair_manager import timeline_chart
 # TODO: remove sidebar (logo and username in the top - no tab, view_mode and compact in view Tab)
 # TODO: add button for "Add event to Google Calendar" -> https://parcel.io/tools/calendar
 # # IMPROVEMENTS
+# TODO: use @st.fragments
 # TODO: add possibility (filter) to hide/unhide the past tables (ended tables => current time > start + duration)
 # TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (st.link_button)
 
@@ -112,7 +113,7 @@ def join_callback(table_id, joining_username):
         refresh_table_propositions("Join")
         st.toast(f"✅ Joined Table {table_id} as {joining_username}!")
     except AttributeError:
-        st.toast("🚫 Error joining the table, refresh the page and retry")
+        st.toast("🚫 You have already joined this table.")
 
 
 def leave_callback(table_id, leaving_username):
@@ -125,27 +126,25 @@ def delete_callback(table_id):
     refresh_table_propositions("Delete")
     st.toast(f"⛔ Deleted Table {table_id}")
 
-def create_callback(game_name, bgg_game_id):
+def create_callback(game_name, max_players, date, time, duration, notes, bgg_game_id):
     if game_name:
-        # print(game_name, max_players, date, time, duration, notes, bgg_game_id)
-        # print(game_name, st.session_state.max_players, st.session_state.date_time, st.session_state.time, st.session_state.duration, st.session_state.notes, bgg_game_id)
         last_row_id = sql_manager.create_proposition(
             game_name,
-            st.session_state.max_players,
-            st.session_state.date_time,
-            st.session_state.time,
-            st.session_state.duration,
-            st.session_state.notes,
+            max_players,
+            date,
+            time,
+            duration,
+            notes,
             bgg_game_id,
             st.session_state.username
         )
 
         telegram_bot.send_new_table_message(
             game_name,
-            st.session_state.max_players,
-            st.session_state.date_time.strftime('%Y-%m-%d'),
-            st.session_state.time.strftime('%H:%M'),
-            st.session_state.duration,
+            max_players,
+            date.strftime('%Y-%m-%d'),
+            time.strftime('%H:%M'),
+            duration,
             st.session_state.username,
             last_row_id
         )
@@ -272,28 +271,26 @@ def create_table_proposition():
     with st.form(key="create_new_proposition_form", border=False):
         col1, col2 = st.columns([1, 1])
         with col1:
-            st.number_input("Max Number of Players", min_value=1, max_value=100, step=1, key="max_players")
+            max_players = st.number_input("Max Number of Players", min_value=1, max_value=100, step=1)
         with col2:
-            st.number_input("Duration (in hours)", min_value=1, max_value=24, step=1, key="duration")
+            duration = st.number_input("Duration (in hours)", min_value=1, max_value=24, step=1)
         col1, col2 = st.columns([1, 1])
         with col1:
             default_date_str = os.environ.get('DEFAULT_DATE')
             default_date = datetime.strptime(default_date_str, '%Y-%m-%d') if default_date_str else datetime.now()
-            date_time = st.date_input("Date", value=default_date, key="date_time")
+            date_time = st.date_input("Date", value=default_date)
         with col2:
-            time = st.time_input("Time", step=60*30, key="time")
-        st.text_area("Notes", key="notes")
+            time = st.time_input("Time", step=60*30)
+        notes = st.text_area("Notes")
 
         if st.session_state['username']:
-            if st.form_submit_button(
-                    "Create Proposition",
-                    on_click=create_callback, args=[selected_game[1] if selected_game else None, bgg_game_id]):
+            if st.form_submit_button("Create Proposition", on_click=create_callback, args=[selected_game[1] if selected_game else None, max_players, date_time, time, duration, notes, bgg_game_id]):
                 st.success(f"Table proposition created successfully: {selected_game[1]} - {date_time} {time.strftime('%H:%M')}")
         else:
             st.form_submit_button("Create Proposition", disabled=True)
             st.warning("Set a username to create a proposition.")
 
-@st.fragment
+
 def view_table_propositions(compact=False):
     for proposition in st.session_state.propositions:
         (table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, proposed_by,
