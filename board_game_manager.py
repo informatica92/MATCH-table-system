@@ -373,8 +373,8 @@ def timeline_table_propositions(compact=False):
 
 def dataframe_table_propositions(compact=False):
 
-    default_columns = ['image', 'game_name', 'duration', 'time', 'players', 'proposed_by', 'joined', 'bgg']
-    all_columns = ['table_id', 'image', 'game_name', 'duration', 'date', 'time', 'players', 'joined_players', 'proposed_by', 'joined', 'bgg']
+    default_columns = ['image', 'time', 'game_name', 'duration', 'players', 'proposed_by', 'joined', 'bgg']
+    all_columns = ['table_id', 'image', 'time', 'game_name', 'duration', 'date', 'players', 'joined_players', 'proposed_by', 'joined', 'bgg']
     st.multiselect("Columns", options=all_columns, default=default_columns, key="columns_order")
 
     propositions = st.session_state.propositions
