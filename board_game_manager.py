@@ -371,6 +371,78 @@ def timeline_table_propositions(compact=False):
                 joined_players=selected_row['joined_players']
             )
 
+def dataframe_table_propositions(compact=False):
+
+    default_columns = ['image', 'game_name', 'duration', 'time', 'players', 'proposed_by', 'joined', 'bgg']
+    all_columns = ['table_id', 'image', 'game_name', 'duration', 'date', 'time', 'players', 'joined_players', 'proposed_by', 'joined', 'bgg']
+    st.multiselect("Columns", options=all_columns, default=default_columns, key="columns_order")
+
+    propositions = st.session_state.propositions
+    data = []
+
+    for proposition in propositions:
+        (table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, proposed_by,
+         joined_count, joined_players) = proposition
+
+        image_url, _, _, _ = get_bgg_game_info(bgg_game_id)
+
+        data.append({
+            'table_id': table_id,
+            'image': image_url,
+            'game_name': game_name,
+            'duration': duration,
+            'bgg': get_bgg_url(bgg_game_id),
+            'date': date,
+            'time': time,
+            'max_players': max_players,
+            'joined_count': joined_count,
+            'players': f"{joined_count}/{max_players}",
+            'joined_players': joined_players,
+            'proposed_by': proposed_by,
+            'bgg_game_id': bgg_game_id,
+            'notes': notes,
+            'joined': username_in_joined_players(joined_players)
+        })
+
+    df = pd.DataFrame(data).sort_values(["date", "time"])
+    column_config = {
+        "table_id":  st.column_config.TextColumn("ID", width="small"),
+        "image": st.column_config.ImageColumn("Image", width="small"),
+        "bgg":  st.column_config.LinkColumn("BGG", display_text="link"),
+        "date":  st.column_config.DateColumn("Date"),
+        "time": st.column_config.TimeColumn("Time", format='HH:mm'),
+        "duration": st.column_config.NumberColumn("Duration", format="%dh", width="small"),
+        "players": st.column_config.TextColumn("Players"),
+        "joined_players": st.column_config.ListColumn("Joined Players"),
+        "game_name": st.column_config.TextColumn("Name"),
+        "proposed_by": st.column_config.TextColumn("Proposed By"),
+        "joined": st.column_config.CheckboxColumn("Joined", width="small")
+    }
+
+    selected_data = st.dataframe(df, hide_index=True, use_container_width=True, column_config=column_config, column_order=st.session_state.columns_order, on_select="rerun", selection_mode="single-row")
+
+    st.subheader("Selected item")
+
+    if selected_data:
+        if selected_data.get("selection", {}).get("rows", {}) and len(selected_data["selection"]["rows"]) != 0:
+            _id = selected_data["selection"]["rows"][0]
+            selected_row = df.iloc[_id]
+            display_table_proposition(
+                section_name="timeline",
+                compact=compact,
+                table_id=int(selected_row['table_id']),
+                game_name=selected_row['game_name'],
+                bgg_game_id=selected_row['bgg_game_id'],
+                proposed_by=selected_row['proposed_by'],
+                max_players=selected_row['max_players'],
+                date=selected_row['date'],
+                time=selected_row['time'],
+                duration=selected_row['duration'],
+                notes=selected_row['notes'],
+                joined_count=selected_row['joined_count'],
+                joined_players=selected_row['joined_players']
+            )
+
 
 st.title("🎴 Board Game Reservation Manager")
 
@@ -401,7 +473,7 @@ with st.sidebar:
         st.warning("Please set a username to join a table.")
 
     st.toggle("Compact view", key="compact_view")
-    st.selectbox("View mode", options=["📜List", "📊Timeline"], key="view_mode")
+    st.selectbox("View mode", options=["📜List", "📊Timeline", "◻️Table"], key="view_mode")
 
 tab1, tab2, tab3 = st.tabs(["📜View/Join", "➕Create", "🗺️Map"])
 with tab1:
@@ -423,8 +495,10 @@ with tab1:
     else:
         if st.session_state['view_mode'] == "📜List":
             view_table_propositions(st.session_state['compact_view'])
-        else:
+        elif st.session_state['view_mode'] == "📊Timeline":
             timeline_table_propositions(st.session_state['compact_view'])
+        else:
+            dataframe_table_propositions(st.session_state['compact_view'])
 
     print(f"Table propositions VIEW refreshed in {(time_time() - view_start_time):2f}s")
 with tab2:
