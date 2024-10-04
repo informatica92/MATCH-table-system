@@ -187,9 +187,13 @@ def create_table_proposition():
             time = st.time_input("Time", step=60*30, key="time")
         st.text_area("Notes", key="notes")
 
+        st.checkbox("Join me by default", key="join_me_by_default", value=True)
+
         if st.session_state['username']:
             if st.form_submit_button("Create Proposition", on_click=create_callback, args=[selected_game[1] if selected_game else None, bgg_game_id]):
                 st.success(f"Table proposition created successfully: {selected_game[1]} - {date_time} {time.strftime('%H:%M')}")
+                if st.session_state.join_me_by_default:
+                    st.success(f"You have also joined this table by default as {st.session_state.username}.")
         else:
             st.form_submit_button("Create Proposition", disabled=True)
             st.warning("Set a username to create a proposition.")

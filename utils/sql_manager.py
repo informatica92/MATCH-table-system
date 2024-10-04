@@ -105,7 +105,7 @@ class SQLManager(object):
 
         return propositions
 
-    def create_proposition(self, selected_game, max_players, date_time, time, duration, notes, bgg_game_id, username):
+    def create_proposition(self, selected_game, max_players, date_time, time, duration, notes, bgg_game_id, username, join_me_by_default):
         conn = self.get_db_connection()
         c = conn.cursor()
         c.execute('''
@@ -133,6 +133,10 @@ class SQLManager(object):
 
         conn.commit()
         last_row_id = c.fetchone()[0]
+
+        if join_me_by_default:
+            self.join_table(last_row_id, username)
+
         c.close()
         conn.close()
 
@@ -158,7 +162,8 @@ class SQLManager(object):
                 (table_id, username)
             )
             conn.commit()
-        except psycopg2.IntegrityError:
+        except psycopg2.IntegrityError as e:
+            print(e)
             raise AttributeError("You have already joined this table.")
         finally:
             c.close()
