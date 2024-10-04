@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import extra_streamlit_components as stx
 
-from time import sleep, time as time_time
+from time import time as time_time
 from datetime import datetime, timedelta
 import os
 
@@ -271,9 +271,9 @@ def create_table_proposition():
     with st.form(key="create_new_proposition_form", border=False):
         col1, col2 = st.columns([1, 1])
         with col1:
-            max_players = st.number_input("Max Number of Players", min_value=1, max_value=100, step=1, key="max_players")
+            st.number_input("Max Number of Players", min_value=1, max_value=100, step=1, key="max_players")
         with col2:
-            duration = st.number_input("Duration (in hours)", min_value=1, max_value=24, step=1, key="duration")
+            st.number_input("Duration (in hours)", min_value=1, max_value=24, step=1, key="duration")
         col1, col2 = st.columns([1, 1])
         with col1:
             default_date_str = os.environ.get('DEFAULT_DATE')
@@ -281,7 +281,7 @@ def create_table_proposition():
             date_time = st.date_input("Date", value=default_date, key="date")
         with col2:
             time = st.time_input("Time", step=60*30, key="time")
-        notes = st.text_area("Notes", key="notes")
+        st.text_area("Notes", key="notes")
 
         if st.session_state['username']:
             if st.form_submit_button("Create Proposition", on_click=create_callback, args=[selected_game[1] if selected_game else None, bgg_game_id]):
@@ -479,15 +479,15 @@ tab1, tab2, tab3 = st.tabs(["📜View/Join", "➕Create", "🗺️Map"])
 with tab1:
     view_start_time = time_time()
 
-    col1, col2, col3 = st.columns([1, 1, 4])
-    with col1:
+    refresh_col, filter_col, fake_col = st.columns([1, 1, 4])
+    with refresh_col:
         refresh_button = st.button("🔄️Refresh", key="refresh", use_container_width=True)
         if refresh_button:
             refresh_table_propositions("Refresh")
-    with col2:
+    with filter_col:
         with st.popover("🔍 Filters:", use_container_width=True):
             st.toggle("Joined by me", key="joined_by_me", value=False, on_change=refresh_table_propositions, kwargs={"reason": "Filtering"}, disabled=not st.session_state['username'])
-    with col3:
+    with fake_col:
         pass
 
     if len(st.session_state.propositions) == 0:
