@@ -17,11 +17,7 @@ from utils.streamlit_utils import (
 
 # # FEATURES
 # TODO: add 3 slots (morning -> 9:00, afternoon -> 13:00, evening -> 21:00)
-# TODO: add "join me by default" in Creation tab (after the creation, join the current user automatically)
-# TODO: add possibility to create a table silently => no Telegram notifications (for already organized tables)
 # TODO: make "Leave"/"Delete" possible only for table admin | "Leave" possible only for "myself"
-# TODO: remove sidebar (logo and username in the top - no tab, view_mode and compact in view Tab)
-# TODO: add button for "Add event to Google Calendar" -> https://parcel.io/tools/calendar
 # # IMPROVEMENTS
 # TODO: use @st.fragments
 # TODO: add possibility (filter) to hide/unhide the past tables (ended tables => current time > start + duration)
@@ -187,13 +183,15 @@ def create_table_proposition():
             time = st.time_input("Time", step=60*30, key="time")
         st.text_area("Notes", key="notes")
 
-        st.checkbox("Join me by default", key="join_me_by_default", value=True)
+        st.checkbox("Join me by default to this table once created", key="join_me_by_default", value=True)
+        st_write("By default, you'll be added to this table once created. To avoid this, disable the above option")
 
         if st.session_state['username']:
             if st.form_submit_button("Create Proposition", on_click=create_callback, args=[selected_game[1] if selected_game else None, bgg_game_id]):
-                st.success(f"Table proposition created successfully: {selected_game[1]} - {date_time} {time.strftime('%H:%M')}")
                 if st.session_state.join_me_by_default:
                     st.success(f"You have also joined this table by default as {st.session_state.username}.")
+                st.success(f"Table proposition created successfully: {selected_game[1]} - {date_time} {time.strftime('%H:%M')}")
+
         else:
             st.form_submit_button("Create Proposition", disabled=True)
             st.warning("Set a username to create a proposition.")
