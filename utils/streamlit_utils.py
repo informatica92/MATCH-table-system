@@ -104,6 +104,11 @@ def table_propositions_to_df(
 
 # CALLBACKS
 
+def time_option_to_time(time_option):
+    # time_option is a string with the following format "HH:MM - Morning|Afternoon|Evening|Night"
+    time = datetime.strptime(time_option.split(" - ")[0], "%H:%M").time()
+    return time
+
 def join_callback(table_id, joining_username):
     try:
         sql_manager.join_table(table_id, joining_username)
@@ -129,7 +134,7 @@ def create_callback(game_name, bgg_game_id):
             game_name,
             st.session_state.max_players,
             st.session_state.date,
-            st.session_state.time,
+            time_option_to_time(st.session_state.time_option),
             st.session_state.duration,
             st.session_state.notes,
             bgg_game_id,
@@ -141,7 +146,7 @@ def create_callback(game_name, bgg_game_id):
             game_name,
             st.session_state.max_players,
             st.session_state.date.strftime('%Y-%m-%d'),
-            st.session_state.time.strftime('%H:%M'),
+            time_option_to_time(st.session_state.time_option).strftime('%H:%M'),
             st.session_state.duration,
             st.session_state.username,
             last_row_id

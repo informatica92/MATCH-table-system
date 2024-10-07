@@ -12,7 +12,7 @@ from utils.streamlit_utils import (
     DEFAULT_IMAGE_URL, BGG_GAME_ID_HELP, BOUNCE_SIDEBAR_ICON,
     st_write, refresh_table_propositions, username_in_joined_players, update_table_propositions,
     delete_callback, leave_callback, join_callback, create_callback,
-    table_propositions_to_df
+    table_propositions_to_df, time_option_to_time
 )
 
 # # FEATURES
@@ -44,7 +44,7 @@ def dialog_edit_table_proposition(table_id, old_name, old_max_players, old_date,
         with col2:
             bgg_game_id = st.text_input("BGG Game ID", value=old_bgg_game_id, help=BGG_GAME_ID_HELP, disabled=True)
             duration = st.number_input("Duration (hours)", value=old_duration, step=1)
-            time = st.time_input("Time", value=old_time)
+            time = st.time_input("Time", value=old_time, step=60*30)
         notes = st.text_area("Notes", value=old_notes)
 
         submitted = st.form_submit_button("💾Update")
@@ -180,7 +180,13 @@ def create_table_proposition():
             default_date = datetime.strptime(default_date_str, '%Y-%m-%d') if default_date_str else datetime.now()
             date_time = st.date_input("Date", value=default_date, key="date")
         with col2:
-            time = st.time_input("Time", step=60*30, key="time")
+            # OLD version with granular time selection:
+            # time = st.time_input("Time", step=60*30, key="time")
+            # NEW version with Morning, Afternoon, Evening and Night
+            time_options = ["09:00 - Morning", "14:00 - Afternoon", "18:00 - Evening", "22:00 - Night"]
+            time_option = st.selectbox("Time Slot", options=time_options, key="time_option", help="Choose a time slot, you can change it in a more granular way once created, using '🖋️Edit'")
+            time = time_option_to_time(time_option)
+
         st.text_area("Notes", key="notes")
 
         st.checkbox("Join me by default to this table once created", key="join_me_by_default", value=True)
