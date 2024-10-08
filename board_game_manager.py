@@ -1,9 +1,8 @@
 import streamlit as st
-import pandas as pd
 import extra_streamlit_components as stx
 
 from time import time as time_time
-from datetime import datetime, timedelta
+from datetime import datetime
 import os
 
 from utils.bgg_manager import search_bgg_games, get_bgg_game_info, get_bgg_url
@@ -16,8 +15,7 @@ from utils.streamlit_utils import (
 )
 
 # # FEATURES
-# TODO: add 3 slots (morning -> 9:00, afternoon -> 13:00, evening -> 21:00)
-# TODO: make "Leave"/"Delete" possible only for table admin | "Leave" possible only for "myself"
+
 # # IMPROVEMENTS
 # TODO: use @st.fragments
 # TODO: add possibility (filter) to hide/unhide the past tables (ended tables => current time > start + duration)
