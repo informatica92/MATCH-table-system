@@ -12,7 +12,7 @@ from utils.streamlit_utils import (
     DEFAULT_IMAGE_URL, BGG_GAME_ID_HELP, BOUNCE_SIDEBAR_ICON,
     st_write, refresh_table_propositions, username_in_joined_players, update_table_propositions,
     delete_callback, leave_callback, join_callback, create_callback,
-    table_propositions_to_df, time_option_to_time
+    table_propositions_to_df, time_option_to_time, can_current_user_leave, can_current_user_delete
 )
 
 # # FEATURES
@@ -52,6 +52,20 @@ def dialog_edit_table_proposition(table_id, old_name, old_max_players, old_date,
             update_table_propositions(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id)
             st.rerun()
 
+@st.dialog("⛔Delete Proposition")
+def dialog_delete_table_proposition(table_id: int, game_name: str, joined_count: int, joined_players: list):
+    with st.form(key=f"form-delete-{table_id}"):
+        st.write(f"Please, confirm you want to delete Table {table_id}:")
+        st.write(f"**{game_name}**")
+        if joined_count:
+            joined_players_markdown = '\n - '  + '\n - '.join(joined_players)
+            st.write(f"with its {joined_count} player(s): {joined_players_markdown}")
+        else:
+            st.write("without any joined player")
+        submitted = st.form_submit_button("⛔Yes, delete table and its joined player(s)")
+        if submitted:
+            delete_callback(table_id)
+            st.rerun()
 
 
 def display_table_proposition(section_name, compact, table_id, game_name, bgg_game_id, proposed_by, max_players, date, time, duration, notes, joined_count, joined_players):
@@ -105,7 +119,9 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
                     st.button(
                         "⛔Leave",
                         key=f"leave_{table_id}_{joined_player}_{section_name}",
-                        on_click=leave_callback, args=[table_id, joined_player]
+                        on_click=leave_callback, args=[table_id, joined_player],
+                        disabled=not can_current_user_leave(joined_player, proposed_by),
+                        help="Only the table owner or the player himself can leave a table."
                     )
 
     # Create four columns for action buttons
@@ -125,22 +141,23 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
             else:
                 st.warning("Set a username to join a table.")
         else:
-            st.warning(f"Table {table_id} is full.")
+            st.warning(f"Table {table_id} is full.", )
 
     with col2:
         # DELETE
-        st.button(
-            "⛔Delete proposition" if not joined_count else "⛔*Can't delete non empty tables*",
+        if st.button(
+            "⛔Delete proposition",
             key=f"delete_{table_id}_{section_name}",
             use_container_width=True,
-            disabled=joined_count,
-            on_click=delete_callback, args=[table_id]
-        )
+            disabled=not can_current_user_delete(proposed_by),
+            help="Only the table owner can delete their tables."
+        ):
+            dialog_delete_table_proposition(table_id, game_name, joined_count, joined_players)
     with col3:
         if st.button(
-                "🖋️Edit",
-                key=f"edit_{table_id}_{section_name}",
-                use_container_width=True
+            "🖋️Edit",
+            key=f"edit_{table_id}_{section_name}",
+            use_container_width=True
         ):
             dialog_edit_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, joined_count)
 
@@ -309,26 +326,44 @@ if "propositions" not in st.session_state:
     print("Initializing st.session_state.propositions")
     refresh_table_propositions("Init")
 
+if "god_mode" not in st.session_state:
+    st.session_state['god_mode'] = False
+
 st.session_state['username'] = cookie_manager.get("username")
 
 # Add a username setting in the sidebar
 with st.sidebar:
     st.image("images/logo.jpg")
-    st.header("Set Your Username")
 
-    username = st.text_input("Username", value=st.session_state['username'])
-
-    if username:
-        username = username.strip()
-        st.session_state['username'] = username
-        cookie_manager.set("username", username, max_age=30*24*60*60)  # expires in 30days
-        st.success(f"Username set to: {username}")
-    else:
-        st.session_state['username'] = None
-        st.warning("Please set a username to join a table.")
-
-    st.toggle("Compact view", key="compact_view")
-    st.selectbox("View mode", options=["📜List", "📊Timeline", "◻️Table"], key="view_mode")
+    with st.container(border=True):
+        username = st.text_input("Username", value=st.session_state['username'])
+        if username:
+            username = username.strip()
+            st.session_state['username'] = username
+            cookie_manager.set("username", username, max_age=30*24*60*60)  # expires in 30days
+            st.success(f"Username set to: {username}")
+        else:
+            st.session_state['username'] = None
+            st.warning("Please set a username to join a table.")
+    with st.container(border=True):
+        st.selectbox("View mode", options=["📜List", "📊Timeline", "◻️Table"], key="view_mode")
+        st.toggle("Compact view", key="compact_view")
+    with st.expander("🔒 God Mode"):
+        god_mode_password = st.text_input("Enter God Mode Password", type="password")
+        if os.environ.get('GOD_MODE_PASSWORD'):
+            if god_mode_password:
+                if god_mode_password == os.environ.get('GOD_MODE_PASSWORD'):
+                    st.session_state['god_mode'] = True
+                    print("God Mode ACTIVATED")
+                    st.success("God Mode activated")
+                else:
+                    st.session_state['god_mode'] = False
+                    print("God Mode DEACTIVATED")
+                    st.error("Incorrect God Mode Password")
+            else:
+                st.session_state['god_mode'] = False
+        else:
+            st.warning("GOD_MODE_PASSWORD environment variable not set")
 
 tab1, tab2, tab3 = st.tabs(["📜View/Join", "➕Create", "🗺️Map"])
 with tab1:

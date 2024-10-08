@@ -173,6 +173,10 @@ class SQLManager(object):
         conn = self.get_db_connection()
         c = conn.cursor()
         c.execute(
+            '''DELETE FROM joined_players WHERE table_id = %s''',
+            (table_id,)
+        )
+        c.execute(
             '''DELETE FROM table_propositions WHERE id = %s''',
             (table_id,)
         )

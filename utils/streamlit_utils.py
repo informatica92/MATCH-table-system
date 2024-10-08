@@ -102,6 +102,26 @@ def table_propositions_to_df(
 
     return df.sort_values(["date", "time"])
 
+# CAN THIS USER LEAVE / DELETE?
+
+def can_current_user_leave(player_to_remove, proposed_by):
+    if st.session_state.god_mode:
+        return True  # god mode can leave anyone
+    elif st.session_state.username and player_to_remove.lower() == st.session_state.username.lower():
+        return True  # users can remove themselves
+    elif st.session_state.username and proposed_by.lower() == st.session_state.username.lower():
+        return True  # table owner can remove anyone at their tables
+    else:
+        return False
+
+def can_current_user_delete(proposed_by):
+    if st.session_state.god_mode:
+        return True  # god mode can delete anything
+    elif st.session_state.username and proposed_by.lower() == st.session_state.username.lower():
+        return True  # table owner can remove their own tables
+    else:
+        return False
+
 # CALLBACKS
 
 def time_option_to_time(time_option):
