@@ -32,6 +32,23 @@ In caso si voglia invece eseguire l'applicazione in locale è necessario seguire
  streamlit run board_game_manager.py
  ```
 ## Funzionalità
+### 🎉 Novità: Delete ha ora una finestra di conferma e permette anche l'eliminazione di tavoli con 1+ giocatori
+![image](https://github.com/user-attachments/assets/b3589ef2-7869-43fa-9f53-94d2d6562e5a)
+
+Delete ha ora una finestra di conferma e permette anche l'eliminazione di tavoli con 1+ giocatori
+
+### 🎉 Novità: Leave/Delete/Edit possibili solo per se stessi e per i propri tavoli
+![image](https://github.com/user-attachments/assets/53569a54-15a5-4961-b48d-a4fef435f709)
+
+Leave/Delete/Edit possibili solo per se stessi e per i propri tavoli: 
+ - Leave è quindi abilitata solo per se stessi e per i giocatori ai propri tavoli
+ - Delete/Edit è quindi possibile solo per i propri tavoli 
+
+### 🎉 Novità: GOD MODE introdotta per rendere Leave/Delete/Edit possibili sempre
+![image](https://github.com/user-attachments/assets/2c133444-8b32-46a0-bc41-ae115bf36d71)
+
+La GOD MODE permette, in caso si disponga di una password, di superare il vincolo per cui Leave/Delete/Edit è possibile solo per sè stessi e per i propri tavoli 
+
 ### 🎉 Novità: Vista a Tabella
 ![image](https://github.com/user-attachments/assets/9d5dd314-2af6-4d2d-9114-5d3464e9d993)
 
