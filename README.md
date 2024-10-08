@@ -33,9 +33,38 @@ In caso si voglia invece eseguire l'applicazione in locale è necessario seguire
  ```
 ## Funzionalità
 ### 🎉 Novità: Vista a Tabella
+![image](https://github.com/user-attachments/assets/9d5dd314-2af6-4d2d-9114-5d3464e9d993)
+
+E' stata aggiunta una visualizzazione a tabella oltre a quella standard a lista e a timeline. 
+
+Ancora una volta, selezionando una riga, in basso si aprirà la scheda del gioco e potrete fare Join/Leave/Delete
+
 ### 🎉 Novità: Aggiungi proponente al tavolo di default
+![image](https://github.com/user-attachments/assets/a8044443-9632-4ced-8030-69c01fa6f5be)
+
+E' ora presente un flag che permette, di default, di aggiungere il proponente al tavolo da lui creato.
+
+Se deselezionata, il tavolo verrà creato comunque ma senza aggiungere l'utente allo stesso.
+
 ### 🎉 Novità: Inserimento Time Slot (Mattina, Pomeriggio, Sera, Notte) in Creation
+![image](https://github.com/user-attachments/assets/2fe06532-bc69-417f-84c0-0f8ee4ab6af4)
+
+Per semplificare la parte di crezione e velocizzarla, l'orario è stato sostituito con dei Time Slot (mattina, pomeriggio, sera, notte).
+
+In fase di Edit è comunque ancora possibile selezionare l'orario desiderato con la consueta precisione di mezz'ora (08:30, 09:00, 09:30...) 
+
 ### 🎉 Novità: Utilizzo toast/notifiche per creazione/join/rimozione/delete
+<p><img src="https://github.com/user-attachments/assets/16183656-9053-49be-af19-8b18458ad6db" alt="leave toast" width="300"/></p>
+<p><img src="https://github.com/user-attachments/assets/d549927b-021f-4323-a9b8-eb2ddc864217" alt="join toast" width="300"/></p>
+
+I messaggi di successo e conseguente aggiornamento sono stati sostituiti con delle notifiche per maggiore reattività della pagina.
+
+Disponibili per: 
+ - Creazione (ora il suo messaggio si successo in basso è inoltre permanente per evitare creazioni doppie)
+ - Join
+ - Leave
+ - Delete
+ 
 ### Inserimento username
 ![image](https://github.com/user-attachments/assets/728ae551-418b-49ab-97b9-26f0cb589071)
 
