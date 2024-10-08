@@ -114,7 +114,7 @@ def can_current_user_leave(player_to_remove, proposed_by):
     else:
         return False
 
-def can_current_user_delete(proposed_by):
+def can_current_user_delete_and_edit(proposed_by):
     if st.session_state.god_mode:
         return True  # god mode can delete anything
     elif st.session_state.username and proposed_by.lower() == st.session_state.username.lower():

@@ -12,7 +12,7 @@ from utils.streamlit_utils import (
     DEFAULT_IMAGE_URL, BGG_GAME_ID_HELP, BOUNCE_SIDEBAR_ICON,
     st_write, refresh_table_propositions, username_in_joined_players, update_table_propositions,
     delete_callback, leave_callback, join_callback, create_callback,
-    table_propositions_to_df, time_option_to_time, can_current_user_leave, can_current_user_delete
+    table_propositions_to_df, time_option_to_time, can_current_user_leave, can_current_user_delete_and_edit
 )
 
 # # FEATURES
@@ -53,10 +53,11 @@ def dialog_edit_table_proposition(table_id, old_name, old_max_players, old_date,
             st.rerun()
 
 @st.dialog("⛔Delete Proposition")
-def dialog_delete_table_proposition(table_id: int, game_name: str, joined_count: int, joined_players: list):
+def dialog_delete_table_proposition(table_id: int, game_name: str, joined_count: int, joined_players: list, proposed_by:str):
     with st.form(key=f"form-delete-{table_id}"):
         st.write(f"Please, confirm you want to delete Table {table_id}:")
         st.write(f"**{game_name}**")
+        st.write(f"proposed by **{proposed_by}**")
         if joined_count:
             joined_players_markdown = '\n - '  + '\n - '.join(joined_players)
             st.write(f"with its {joined_count} player(s): {joined_players_markdown}")
@@ -149,15 +150,17 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
             "⛔Delete proposition",
             key=f"delete_{table_id}_{section_name}",
             use_container_width=True,
-            disabled=not can_current_user_delete(proposed_by),
+            disabled=not can_current_user_delete_and_edit(proposed_by),
             help="Only the table owner can delete their tables."
         ):
-            dialog_delete_table_proposition(table_id, game_name, joined_count, joined_players)
+            dialog_delete_table_proposition(table_id, game_name, joined_count, joined_players, proposed_by)
     with col3:
         if st.button(
             "🖋️Edit",
             key=f"edit_{table_id}_{section_name}",
-            use_container_width=True
+            use_container_width=True,
+            disabled=not can_current_user_delete_and_edit(proposed_by),
+            help="Only the table owner can edit their tables."
         ):
             dialog_edit_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, joined_count)
 
