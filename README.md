@@ -32,6 +32,10 @@ In caso si voglia invece eseguire l'applicazione in locale è necessario seguire
  streamlit run board_game_manager.py
  ```
 ## Funzionalità
+### 🎉 Novità: Vista a Tabella
+### 🎉 Novità: Aggiungi proponente al tavolo di default
+### 🎉 Novità: Inserimento Time Slot (Mattina, Pomeriggio, Sera, Notte) in Creation
+### 🎉 Novità: Utilizzo toast/notifiche per creazione/join/rimozione/delete
 ### Inserimento username
 ![image](https://github.com/user-attachments/assets/728ae551-418b-49ab-97b9-26f0cb589071)
 
