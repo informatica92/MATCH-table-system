@@ -37,11 +37,11 @@ In caso si voglia invece eseguire l'applicazione in locale è necessario seguire
 
 Delete ha ora una finestra di conferma e permette anche l'eliminazione di tavoli con 1+ giocatori
 
-### 🎉 Novità: Leave/Delete/Edit possibili solo per se stessi e per i propri tavoli
+### 🎉 Novità: Leave/Delete/Edit possibili solo per sè stessi e per i propri tavoli
 ![image](https://github.com/user-attachments/assets/53569a54-15a5-4961-b48d-a4fef435f709)
 
-Leave/Delete/Edit possibili solo per se stessi e per i propri tavoli: 
- - Leave è quindi abilitata solo per se stessi e per i giocatori ai propri tavoli
+Leave/Delete/Edit possibili solo per sè stessi e per i propri tavoli: 
+ - Leave è quindi abilitata solo per sè stessi e per i giocatori ai propri tavoli
  - Delete/Edit è quindi possibile solo per i propri tavoli 
 
 ### 🎉 Novità: GOD MODE introdotta per rendere Leave/Delete/Edit possibili sempre
