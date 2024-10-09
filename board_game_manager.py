@@ -55,12 +55,17 @@ def dialog_delete_table_proposition(table_id: int, game_name: str, joined_count:
     with st.form(key=f"form-delete-{table_id}"):
         st.write(f"Please, confirm you want to delete Table {table_id}:")
         st.write(f"**{game_name}**")
-        st.write(f"proposed by **{proposed_by}**")
+
         if joined_count:
-            joined_players_markdown = '\n - '  + '\n - '.join(joined_players)
-            st.write(f"with its {joined_count} player(s): {joined_players_markdown}")
+            joined_players_markdown = '\n\t - '  + '\n\t - '.join(joined_players)
+            st.write(f"Details:\n "
+                     f"- proposed by **{proposed_by}**\n "
+                     f"- with {joined_count} player(s): {joined_players_markdown}\n ")
         else:
-            st.write("without any joined player")
+            st.write(f"Details:\n "
+                     f"- proposed by **{proposed_by}**\n "
+                     f"- without any joined player\n ")
+        st.write("")
         submitted = st.form_submit_button("⛔Yes, delete table and its joined player(s)")
         if submitted:
             delete_callback(table_id)
