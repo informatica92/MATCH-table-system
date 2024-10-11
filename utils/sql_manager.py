@@ -56,6 +56,55 @@ class SQLManager(object):
                         username TEXT,
                         is_admin BOOLEAN DEFAULT FALSE)
                     ''')
+
+        c.execute('''CREATE OR REPLACE FUNCTION public.check_max_players()
+                     RETURNS trigger
+                     LANGUAGE plpgsql
+                    AS $function$
+                        DECLARE
+                            current_player_count INTEGER;
+                            max_players_allowed INTEGER;
+                        BEGIN
+                            -- Get the current count of players joined for this table
+                            SELECT COUNT(*)
+                            INTO current_player_count
+                            FROM joined_players
+                            WHERE table_id = NEW.table_id;
+                            
+                            -- Get the max_players allowed for this table
+                            SELECT max_players
+                            INTO max_players_allowed
+                            FROM table_propositions
+                            WHERE id = NEW.table_id;
+                            
+                            -- Check if adding another player exceeds max_players
+                            IF current_player_count + 1 > max_players_allowed THEN
+                                RAISE EXCEPTION 'Maximum number of players exceeded for this table';
+                            END IF;
+                            
+                            RETURN NEW;
+                        END;
+                    $function$
+                    ;
+                    ''')
+
+        c.execute('''DO $$
+                    BEGIN
+                        -- Check if the trigger already exists in information_schema.triggers
+                        IF NOT EXISTS (
+                            SELECT 1
+                            FROM information_schema.triggers
+                            WHERE trigger_name = 'before_insert_or_update_joined_players'
+                        ) THEN
+                            -- Create the trigger if it doesn't exist
+                            CREATE TRIGGER before_insert_or_update_joined_players
+                            BEFORE INSERT OR UPDATE ON public.joined_players
+                            FOR EACH ROW
+                            EXECUTE FUNCTION check_max_players();
+                        END IF;
+                    END $$;
+                    ''')
+
         conn.commit()
         c.close()
         conn.close()
