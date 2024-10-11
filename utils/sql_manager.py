@@ -15,6 +15,7 @@ class SQLManager(object):
         self._db_user = os.getenv('DB_USER')
         self._db_password = os.getenv('DB_PASSWORD')
         self._db_port = os.getenv('DB_PORT', '5432')
+        self._schema = os.getenv('DB_SCHEMA', 'public')
 
     def get_db_connection(self):
         # Initialize the PostgreSQL connection
@@ -23,7 +24,8 @@ class SQLManager(object):
             dbname=self._db_name,
             user=self._db_user,
             password=self._db_password,
-            port=self._db_port
+            port=self._db_port,
+            options=f'-c search_path={self._schema}'
         )
 
     def create_tables(self):
@@ -57,7 +59,7 @@ class SQLManager(object):
                         is_admin BOOLEAN DEFAULT FALSE)
                     ''')
 
-        c.execute('''CREATE OR REPLACE FUNCTION public.check_max_players()
+        c.execute('''CREATE OR REPLACE FUNCTION check_max_players()
                      RETURNS trigger
                      LANGUAGE plpgsql
                     AS $function$
@@ -98,7 +100,7 @@ class SQLManager(object):
                         ) THEN
                             -- Create the trigger if it doesn't exist
                             CREATE TRIGGER before_insert_or_update_joined_players
-                            BEFORE INSERT OR UPDATE ON public.joined_players
+                            BEFORE INSERT OR UPDATE ON joined_players
                             FOR EACH ROW
                             EXECUTE FUNCTION check_max_players();
                         END IF;
