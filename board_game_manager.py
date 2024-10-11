@@ -9,7 +9,7 @@ from utils.bgg_manager import search_bgg_games, get_bgg_game_info, get_bgg_url
 from utils.altair_manager import timeline_chart
 from utils.streamlit_utils import (
     DEFAULT_IMAGE_URL, BGG_GAME_ID_HELP, BOUNCE_SIDEBAR_ICON,
-    st_write, refresh_table_propositions, username_in_joined_players, update_table_propositions,
+    st_write, refresh_table_propositions, username_in_joined_players, update_table_propositions, get_title, get_logo,
     delete_callback, leave_callback, join_callback, create_callback,
     table_propositions_to_df, time_option_to_time, can_current_user_leave, can_current_user_delete_and_edit
 )
@@ -21,7 +21,7 @@ from utils.streamlit_utils import (
 # TODO: add possibility (filter) to hide/unhide the past tables (ended tables => current time > start + duration)
 # TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (st.link_button)
 
-st.set_page_config(page_title="Board Game Proposals", layout="wide")
+st.set_page_config(page_title=get_title(), layout="wide")
 
 st.markdown(BOUNCE_SIDEBAR_ICON, unsafe_allow_html=True)
 
@@ -322,7 +322,7 @@ def dataframe_table_propositions(compact=False):
             )
 
 
-st.title("🎴 Board Game Reservation Manager")
+st.title(f"🎴 {get_title()}")
 
 # Initialize username in session state
 if 'username' not in st.session_state:
@@ -339,7 +339,7 @@ st.session_state['username'] = cookie_manager.get("username")
 
 # Add a username setting in the sidebar
 with st.sidebar:
-    st.image("images/logo.jpg")
+    st.image(get_logo())
 
     with st.container(border=True):
         username = st.text_input("Username", value=st.session_state['username'])

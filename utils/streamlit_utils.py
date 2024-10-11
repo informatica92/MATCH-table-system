@@ -1,3 +1,5 @@
+import os
+
 import streamlit as st
 
 import pandas as pd
@@ -37,6 +39,12 @@ sql_manager = SQLManager()
 sql_manager.create_tables()
 
 telegram_bot = TelegramNotifications()
+
+def get_title():
+    return os.environ.get("TITLE") or "Board Game Proposals"
+
+def get_logo():
+    return os.environ.get("LOGO") or "images/logo.jpg"
 
 def username_in_joined_players(joined_players: list[str]):
     if st.session_state.username:
