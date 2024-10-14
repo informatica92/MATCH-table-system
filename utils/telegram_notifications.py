@@ -13,7 +13,7 @@ TEXTS = {
                      "\n - 👤 {max_players} giocatori "
                      "\n - 📅 {date} alle *{time}* "
                      "\n - ⌛ {duration} ore."
-                     "\n\nDai un'occhiata qui: https://match-table-system.streamlit.app/#table-{table_id}"
+                     "\n\n🔗 Dai un'occhiata qui:\nhttps://match-table-system.streamlit.app/#table-{table_id}"
     }
 }
 
@@ -28,8 +28,10 @@ class TelegramNotifications(object):
 
         if not _bot_token:
             self._bot = None
+            self.loop = None
         else:
             self._bot = telegram.Bot(token=_bot_token)
+            self.loop = asyncio.new_event_loop()
 
     def send_new_table_message(self, game_name, max_players, date, time, duration, proposed_by, table_id):
 
@@ -44,6 +46,7 @@ class TelegramNotifications(object):
         )
 
         if self._bot:
-            asyncio.run(self._bot.send_message(chat_id=self.channel_id, text=text, parse_mode='Markdown', disable_web_page_preview=True))
+            self.loop.run_until_complete(self._bot.send_message(chat_id=self.channel_id, text=text, parse_mode='Markdown', disable_web_page_preview=True))
+            #asyncio.run(self._bot.send_message(chat_id=self.channel_id, text=text, parse_mode='Markdown', disable_web_page_preview=True))
         else:
             print("Skipping Telegram notification since no bot token has been found")

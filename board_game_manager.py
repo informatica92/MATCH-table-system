@@ -18,7 +18,7 @@ from utils.streamlit_utils import (
 
 # # IMPROVEMENTS
 # TODO: use @st.fragments
-# TODO: add possibility (filter) to hide/unhide the past tables (ended tables => current time > start + duration)
+# TODO: add possibility (filter) to hide/un-hide the past tables (ended tables => current time > start + duration)
 # TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (st.link_button)
 
 st.set_page_config(page_title=get_title(), layout="wide")
