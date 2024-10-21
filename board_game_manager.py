@@ -31,7 +31,7 @@ cookie_manager = stx.CookieManager()
 
 
 
-@st.dialog("🖋️Edit Table")
+@st.dialog("🖋️ Edit Table")
 def dialog_edit_table_proposition(table_id, old_name, old_max_players, old_date, old_time, old_duration, old_notes, old_bgg_game_id, joined_count):
     with st.form(key=f"form-edit-{table_id}"):
         col1, col2 = st.columns([1, 1])
@@ -45,12 +45,12 @@ def dialog_edit_table_proposition(table_id, old_name, old_max_players, old_date,
             time = st.time_input("Time", value=old_time, step=60*30)
         notes = st.text_area("Notes", value=old_notes)
 
-        submitted = st.form_submit_button("💾Update")
+        submitted = st.form_submit_button("💾 Update")
         if submitted:
             update_table_propositions(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id)
             st.rerun()
 
-@st.dialog("⛔Delete Proposition")
+@st.dialog("⛔ Delete Proposition")
 def dialog_delete_table_proposition(table_id: int, game_name: str, joined_count: int, joined_players: list, proposed_by:str):
     with st.form(key=f"form-delete-{table_id}"):
         st.write(f"Please, confirm you want to delete Table {table_id}:")
@@ -66,7 +66,7 @@ def dialog_delete_table_proposition(table_id: int, game_name: str, joined_count:
                      f"- proposed by **{proposed_by}**\n "
                      f"- without any joined player\n ")
         st.write("")
-        submitted = st.form_submit_button("⛔Yes, delete table and its joined player(s)")
+        submitted = st.form_submit_button("⛔ Yes, delete table and its joined player(s)")
         if submitted:
             delete_callback(table_id)
             st.rerun()
@@ -121,7 +121,7 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
                 with player_col2:
                     # LEAVE
                     st.button(
-                        "⛔Leave",
+                        "⛔ Leave",
                         key=f"leave_{table_id}_{joined_player}_{section_name}",
                         on_click=leave_callback, args=[table_id, joined_player],
                         disabled=not can_current_user_leave(joined_player, proposed_by),
@@ -136,7 +136,7 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
             if st.session_state['username']:
                 st.button(
                     # JOIN
-                    f"✅Join Table {table_id}" if not username_in_joined_players(joined_players) else "✅*Already joined*",
+                    f"✅ Join Table {table_id}" if not username_in_joined_players(joined_players) else "✅ *Already joined*",
                     key=f"join_{table_id}_{section_name}",
                     use_container_width=True,
                     disabled=username_in_joined_players(joined_players),
@@ -150,7 +150,7 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
     with col2:
         # DELETE
         if st.button(
-            "⛔Delete proposition",
+            "⛔ Delete proposition",
             key=f"delete_{table_id}_{section_name}",
             use_container_width=True,
             disabled=not can_current_user_delete_and_edit(proposed_by),
@@ -159,7 +159,7 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
             dialog_delete_table_proposition(table_id, game_name, joined_count, joined_players, proposed_by)
     with col3:
         if st.button(
-            "🖋️Edit",
+            "🖋️ Edit",
             key=f"edit_{table_id}_{section_name}",
             use_container_width=True,
             disabled=not can_current_user_delete_and_edit(proposed_by),
@@ -172,7 +172,7 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
 
 
 def create_table_proposition():
-    st.header("➕Create a New Table Proposition")
+    st.header("➕ Create a New Table Proposition")
 
     game_name = st.text_input("Search for Game Name")
     st_write("Write a game name in the above text box and press ENTER. The matching games from BGG will appear here:")
@@ -377,7 +377,7 @@ with tab1:
 
     refresh_col, filter_col, fake_col = st.columns([1, 1, 4])
     with refresh_col:
-        refresh_button = st.button("🔄️Refresh", key="refresh", use_container_width=True)
+        refresh_button = st.button("🔄️ Refresh", key="refresh", use_container_width=True)
         if refresh_button:
             refresh_table_propositions("Refresh")
     with filter_col:
