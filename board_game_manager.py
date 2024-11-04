@@ -11,7 +11,8 @@ from utils.streamlit_utils import (
     DEFAULT_IMAGE_URL, BGG_GAME_ID_HELP, BOUNCE_SIDEBAR_ICON,
     st_write, refresh_table_propositions, username_in_joined_players, update_table_propositions, get_title, get_logo,
     delete_callback, leave_callback, join_callback, create_callback,
-    table_propositions_to_df, time_option_to_time, can_current_user_leave, can_current_user_delete_and_edit
+    table_propositions_to_df, time_option_to_time, can_current_user_leave, can_current_user_delete_and_edit,
+    get_num_active_filters
 )
 
 # # FEATURES
@@ -381,7 +382,8 @@ with tab1:
         if refresh_button:
             refresh_table_propositions("Refresh")
     with filter_col:
-        with st.popover("🔍 Filters:", use_container_width=True):
+        filter_label_num_active_filters = get_num_active_filters(as_str=True)
+        with st.popover(f"🔍 {filter_label_num_active_filters}Filters:", use_container_width=True):
             st.toggle("Joined by me", key="joined_by_me", value=False, on_change=refresh_table_propositions, kwargs={"reason": "Filtering"}, disabled=not st.session_state['username'])
     with fake_col:
         pass

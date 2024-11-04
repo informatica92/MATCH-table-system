@@ -185,3 +185,9 @@ def create_callback(game_name, bgg_game_id):
             st.toast(f"✅ Joined Table {last_row_id} as {st.session_state.username}!")
         st.toast(f"➕ Table proposition created successfully!\nTable ID: {last_row_id} - {game_name}")
 
+def get_num_active_filters(as_str=True):
+    number_of_active_filters = 0
+    if st.session_state.get('joined_by_me', False):
+        number_of_active_filters += 1
+    filter_label_num_active_filters = "" if number_of_active_filters == 0 else f" ({number_of_active_filters}) "
+    return filter_label_num_active_filters if as_str else number_of_active_filters
