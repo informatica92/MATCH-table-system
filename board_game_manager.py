@@ -387,7 +387,8 @@ with tab1:
         pass
 
     if len(st.session_state.propositions) == 0:
-        st.info("No table propositions available.")
+        st.info("No table propositions available, use the \"**➕Create**\" tab to create a new one."
+                "\n\n*NB: tables are automatically hidden after 1 day*")
     else:
         if st.session_state['view_mode'] == "📜List":
             view_table_propositions(st.session_state['compact_view'])

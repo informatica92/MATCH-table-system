@@ -138,6 +138,8 @@ class SQLManager(object):
                 WHERE
                     TRUE
                     {joined_by_me_clause}
+                    -- check if date is in the future with 1 day of margin
+                    and tp.date >= current_date - INTERVAL '1 day'
                 group by 
                     tp.id,
                     tp.game_name,
