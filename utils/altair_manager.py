@@ -41,7 +41,8 @@ def timeline_chart(df: pd.DataFrame):
         ),
         color=alt.Color(
             'status:N',
-            scale=alt.Scale(domain=['Full', 'Available'], range=['#FF5733', '#DAF7A6'])
+            scale=alt.Scale(domain=['Full', 'Available'], range=['#FF5733', '#DAF7A6']),
+            legend=alt.Legend(orient="top", direction="horizontal")
         ),
         tooltip=['game_name:N', 'proposed_by:N', 'max_players:Q', 'joined_count:Q', 'duration:Q'],
         stroke=alt.Stroke(
