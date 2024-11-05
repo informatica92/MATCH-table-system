@@ -5,31 +5,22 @@ from time import time as time_time
 from datetime import datetime
 import os
 
+import utils.streamlit_utils as stu
 from utils.bgg_manager import search_bgg_games, get_bgg_game_info, get_bgg_url
 from utils.altair_manager import timeline_chart
-from utils.streamlit_utils import (
-    DEFAULT_IMAGE_URL, BGG_GAME_ID_HELP, BOUNCE_SIDEBAR_ICON,
-    st_write, refresh_table_propositions, username_in_joined_players, update_table_propositions, get_title, get_logo,
-    delete_callback, leave_callback, join_callback, create_callback,
-    table_propositions_to_df, time_option_to_time, can_current_user_leave, can_current_user_delete_and_edit,
-    get_num_active_filters
-)
 
 # # FEATURES
 
 # # IMPROVEMENTS
 # TODO: use @st.fragments
-# TODO: add possibility (filter) to hide/un-hide the past tables (ended tables => current time > start + duration)
 # TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (st.link_button)
 
-st.set_page_config(page_title=get_title(), layout="wide")
+st.set_page_config(page_title=stu.get_title(), layout="wide")
 
-st.markdown(BOUNCE_SIDEBAR_ICON, unsafe_allow_html=True)
+st.markdown(stu.BOUNCE_SIDEBAR_ICON, unsafe_allow_html=True)
 
 
 cookie_manager = stx.CookieManager()
-
-
 
 
 @st.dialog("🖋️ Edit Table")
@@ -41,14 +32,14 @@ def dialog_edit_table_proposition(table_id, old_name, old_max_players, old_date,
             max_players = st.number_input("Max Players", value=old_max_players, step=1, min_value=joined_count)
             date = st.date_input("Date", value=old_date)
         with col2:
-            bgg_game_id = st.text_input("BGG Game ID", value=old_bgg_game_id, help=BGG_GAME_ID_HELP, disabled=True)
+            bgg_game_id = st.text_input("BGG Game ID", value=old_bgg_game_id, help=stu.BGG_GAME_ID_HELP, disabled=True)
             duration = st.number_input("Duration (hours)", value=old_duration, step=1)
             time = st.time_input("Time", value=old_time, step=60*30)
         notes = st.text_area("Notes", value=old_notes)
 
         submitted = st.form_submit_button("💾 Update")
         if submitted:
-            update_table_propositions(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id)
+            stu.update_table_propositions(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id)
             st.rerun()
 
 @st.dialog("⛔ Delete Proposition")
@@ -69,7 +60,7 @@ def dialog_delete_table_proposition(table_id: int, game_name: str, joined_count:
         st.write("")
         submitted = st.form_submit_button("⛔ Yes, delete table and its joined player(s)")
         if submitted:
-            delete_callback(table_id)
+            stu.delete_callback(table_id)
             st.rerun()
 
 
@@ -90,13 +81,13 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
             image_width = 300 if not compact else 150
             caption = f"{game_description[:120]}..." if not compact else None
             if not image_url:
-                image_url = DEFAULT_IMAGE_URL
+                image_url = stu.DEFAULT_IMAGE_URL
             st.image(image_url, width=image_width, caption=caption)
             if not compact:
-                st_write(f"<b>Categories:</b> {', '.join(categories)}")
-                st_write(f"<b>Mechanics:</b> {', '.join(mechanics)}")
+                stu.st_write(f"<b>Categories:</b> {', '.join(categories)}")
+                stu.st_write(f"<b>Mechanics:</b> {', '.join(mechanics)}")
         else:
-            st.image(DEFAULT_IMAGE_URL)
+            st.image(stu.DEFAULT_IMAGE_URL)
 
     with col2:
         if not compact:
@@ -124,8 +115,8 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
                     st.button(
                         "⛔ Leave",
                         key=f"leave_{table_id}_{joined_player}_{section_name}",
-                        on_click=leave_callback, args=[table_id, joined_player],
-                        disabled=not can_current_user_leave(joined_player, proposed_by),
+                        on_click=stu.leave_callback, args=[table_id, joined_player],
+                        disabled=not stu.can_current_user_leave(joined_player, proposed_by),
                         help="Only the table owner or the player himself can leave a table."
                     )
 
@@ -137,11 +128,11 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
             if st.session_state['username']:
                 st.button(
                     # JOIN
-                    f"✅ Join Table {table_id}" if not username_in_joined_players(joined_players) else "✅ *Already joined*",
+                    f"✅ Join Table {table_id}" if not stu.username_in_joined_players(joined_players) else "✅ *Already joined*",
                     key=f"join_{table_id}_{section_name}",
                     use_container_width=True,
-                    disabled=username_in_joined_players(joined_players),
-                    on_click=join_callback, args=[table_id, st.session_state['username']]
+                    disabled=stu.username_in_joined_players(joined_players),
+                    on_click=stu.join_callback, args=[table_id, st.session_state['username']]
                 )
             else:
                 st.warning("Set a username to join a table.")
@@ -154,7 +145,7 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
             "⛔ Delete proposition",
             key=f"delete_{table_id}_{section_name}",
             use_container_width=True,
-            disabled=not can_current_user_delete_and_edit(proposed_by),
+            disabled=not stu.can_current_user_delete_and_edit(proposed_by),
             help="Only the table owner can delete their tables."
         ):
             dialog_delete_table_proposition(table_id, game_name, joined_count, joined_players, proposed_by)
@@ -163,7 +154,7 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
             "🖋️ Edit",
             key=f"edit_{table_id}_{section_name}",
             use_container_width=True,
-            disabled=not can_current_user_delete_and_edit(proposed_by),
+            disabled=not stu.can_current_user_delete_and_edit(proposed_by),
             help="Only the table owner can edit their tables."
         ):
             dialog_edit_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, joined_count)
@@ -176,7 +167,7 @@ def create_table_proposition():
     st.header("➕ Create a New Table Proposition")
 
     game_name = st.text_input("Search for Game Name")
-    st_write("Write a game name in the above text box and press ENTER. The matching games from BGG will appear here:")
+    stu.st_write("Write a game name in the above text box and press ENTER. The matching games from BGG will appear here:")
     bgg_game_id = None
 
     try:
@@ -186,7 +177,7 @@ def create_table_proposition():
         matching_games = []
 
     selected_game = st.selectbox("Select the matching game", matching_games, format_func=lambda x: x[1])
-    st_write("Select the matching game from BGG for auto detecting information like the board game image")
+    stu.st_write("Select the matching game from BGG for auto detecting information like the board game image")
     if selected_game:
         bgg_game_id = selected_game[0]
 
@@ -209,15 +200,15 @@ def create_table_proposition():
             # NEW version with Morning, Afternoon, Evening and Night
             time_options = ["09:00 - Morning", "14:00 - Afternoon", "18:00 - Evening", "22:00 - Night"]
             time_option = st.selectbox("Time Slot", options=time_options, key="time_option", help="Choose a time slot, you can change it in a more granular way once created, using '🖋️Edit'")
-            time = time_option_to_time(time_option)
+            time = stu.time_option_to_time(time_option)
 
         st.text_area("Notes", key="notes")
 
         st.checkbox("Join me by default to this table once created", key="join_me_by_default", value=True)
-        st_write("By default, you'll be added to this table once created. To avoid this, disable the above option")
+        stu.st_write("By default, you'll be added to this table once created. To avoid this, disable the above option")
 
         if st.session_state['username']:
-            if st.form_submit_button("Create Proposition", on_click=create_callback, args=[selected_game[1] if selected_game else None, bgg_game_id]):
+            if st.form_submit_button("Create Proposition", on_click=stu.create_callback, args=[selected_game[1] if selected_game else None, bgg_game_id]):
                 st.success(f"Table proposition created successfully: {selected_game[1]} - {date_time} {time.strftime('%H:%M')}")
                 if st.session_state.join_me_by_default:
                     st.success(f"You have also joined this table by default as {st.session_state.username}.")
@@ -249,7 +240,7 @@ def view_table_propositions(compact=False):
 
 
 def timeline_table_propositions(compact=False):
-    df = table_propositions_to_df(add_group=True, add_status=True, add_start_and_end_date=True)
+    df = stu.table_propositions_to_df(add_group=True, add_status=True, add_start_and_end_date=True)
 
     chart = timeline_chart(df)
     selected_data = st.altair_chart(chart, use_container_width=True, on_select="rerun", theme=None)
@@ -282,7 +273,7 @@ def dataframe_table_propositions(compact=False):
     all_columns = ['table_id', 'image', 'time', 'game_name', 'duration', 'date', 'players', 'joined_players', 'proposed_by', 'joined', 'bgg']
     st.multiselect("Columns", options=all_columns, default=default_columns, key="columns_order")
 
-    df = table_propositions_to_df(add_image_url=True, add_bgg_url=True, add_players_fraction=True, add_joined=True)
+    df = stu.table_propositions_to_df(add_image_url=True, add_bgg_url=True, add_players_fraction=True, add_joined=True)
 
     column_config = {
         "table_id":  st.column_config.TextColumn("ID", width="small"),
@@ -323,7 +314,7 @@ def dataframe_table_propositions(compact=False):
             )
 
 
-st.title(f"🎴 {get_title()}")
+st.title(f"🎴 {stu.get_title()}")
 
 # Initialize username in session state
 if 'username' not in st.session_state:
@@ -331,7 +322,7 @@ if 'username' not in st.session_state:
 
 if "propositions" not in st.session_state:
     print("Initializing st.session_state.propositions")
-    refresh_table_propositions("Init")
+    stu.refresh_table_propositions("Init")
 
 if "god_mode" not in st.session_state:
     st.session_state['god_mode'] = False
@@ -340,7 +331,7 @@ st.session_state['username'] = cookie_manager.get("username")
 
 # Add a username setting in the sidebar
 with st.sidebar:
-    st.image(get_logo())
+    st.image(stu.get_logo())
 
     with st.container(border=True):
         username = st.text_input("Username", value=st.session_state['username'])
@@ -380,11 +371,11 @@ with tab1:
     with refresh_col:
         refresh_button = st.button("🔄️ Refresh", key="refresh", use_container_width=True)
         if refresh_button:
-            refresh_table_propositions("Refresh")
+            stu.refresh_table_propositions("Refresh")
     with filter_col:
-        filter_label_num_active_filters = get_num_active_filters(as_str=True)
+        filter_label_num_active_filters = stu.get_num_active_filters(as_str=True)
         with st.popover(f"🔍 {filter_label_num_active_filters}Filters:", use_container_width=True):
-            st.toggle("Joined by me", key="joined_by_me", value=False, on_change=refresh_table_propositions, kwargs={"reason": "Filtering"}, disabled=not st.session_state['username'])
+            st.toggle("Joined by me", key="joined_by_me", value=False, on_change=stu.refresh_table_propositions, kwargs={"reason": "Filtering"}, disabled=not st.session_state['username'])
     with fake_col:
         pass
 
