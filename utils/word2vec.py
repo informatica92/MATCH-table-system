@@ -50,7 +50,7 @@ class BGGWord2Vec(object):
         self.bgg_info = []
 
         for i, p in enumerate(propositions):
-            print(f"Processing {i} ({p[7]})")
+            # print(f"Processing {i} ({p[7]})")
             _, description, category, mechanics = get_bgg_game_info(p[7])  # p[7] = bgg_game_id
             bgg_info = {
                 "name": p[1],
@@ -123,13 +123,13 @@ class BGGWord2Vec(object):
         if len(category_sims) != len(mechanics_sims):
             raise AttributeError("Len of category_sims and mechanics_sims must match")
 
-        print(f"category sims:  {category_sims}")
-        print(f"mechanics sims: {mechanics_sims}")
+        # print(f"category sims:  {category_sims}")
+        # print(f"mechanics sims: {mechanics_sims}")
         mixed_sims = []
         for i in range(len(category_sims)):
             mixed_sims.append((i, category_sims[i][1]*category_score + mechanics_sims[i][1]*mechanics_score))
 
-        print(f"mixed sims: {mixed_sims}")
+        # print(f"mixed sims: {mixed_sims}")
 
         if remove_liked_ids:
             mixed_sims = self._remove_liked_ids_from_similarity(mixed_sims)

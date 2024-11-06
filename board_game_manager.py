@@ -223,7 +223,7 @@ def view_table_propositions(compact=False):
 
     word2vec = BGGWord2Vec(username=st.session_state.username, propositions=st.session_state.propositions)
     sims = word2vec.get_merged_similarities()
-    print(word2vec.liked_ids)
+    # print(word2vec.liked_ids)
 
     for proposition, sim in zip(st.session_state.propositions, sims):
         (table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, proposed_by,
