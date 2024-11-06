@@ -2,8 +2,9 @@ import numpy as np
 from collections import Counter
 from utils.bgg_manager import get_bgg_game_info
 
-def cosine(a, b):
-    return np.dot(a, b)/(np.linalg.norm(a)*np.linalg.norm(b))
+def cosine(a, b) -> float:
+    value = np.dot(a, b)/(np.linalg.norm(a)*np.linalg.norm(b))
+    return float(value) if not np.isnan(value) else None
 
 class Word2Vec(object):
     def __init__(self):
@@ -127,7 +128,10 @@ class BGGWord2Vec(object):
         # print(f"mechanics sims: {mechanics_sims}")
         mixed_sims = []
         for i in range(len(category_sims)):
-            mixed_sims.append((i, category_sims[i][1]*category_score + mechanics_sims[i][1]*mechanics_score))
+            if category_sims[i][1] is not None and mechanics_sims[i][1] is not None:
+                mixed_sims.append((i, category_sims[i][1]*category_score + mechanics_sims[i][1]*mechanics_score))
+            else:
+                mixed_sims.append((i, None))
 
         # print(f"mixed sims: {mixed_sims}")
 
