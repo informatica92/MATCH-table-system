@@ -91,7 +91,7 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
     with col2:
         if not compact:
             if similarity_score is not None:
-                st.progress(similarity_score, text=f"Similarity score: {similarity_score:.2f}")
+                st.progress(similarity_score, text=f"Affinity score: {similarity_score:.2f}")
             st.write(f"**Proposed By:**&nbsp;{proposed_by}")
             st.write(f"**Max Players:**&nbsp;&nbsp;{max_players}")
             st.write(f"**Date Time:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{date} {time.strftime('%H:%M')}")
