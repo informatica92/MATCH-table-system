@@ -6,7 +6,7 @@ from datetime import datetime
 import os
 
 import utils.streamlit_utils as stu
-from utils.bgg_manager import BGGManager
+from utils.bgg_manager import get_bgg_game_info, get_bgg_url, search_bgg_games
 from utils.altair_manager import timeline_chart
 from utils.word2vec import BGGWord2Vec
 
@@ -20,10 +20,7 @@ st.set_page_config(page_title=stu.get_title(), layout="wide")
 
 st.markdown(stu.BOUNCE_SIDEBAR_ICON, unsafe_allow_html=True)
 
-
 cookie_manager = stx.CookieManager()
-bgg_manager = BGGManager()
-
 
 @st.dialog("🖋️ Edit Table")
 def dialog_edit_table_proposition(table_id, old_name, old_max_players, old_date, old_time, old_duration, old_notes, old_bgg_game_id, joined_count):
@@ -69,7 +66,7 @@ def dialog_delete_table_proposition(table_id: int, game_name: str, joined_count:
 def display_table_proposition(section_name, compact, table_id, game_name, bgg_game_id, proposed_by, max_players, date, time, duration, notes, joined_count, joined_players, similarity_score=None):
     # Check if the BGG game ID is valid and set the BGG URL
     if bgg_game_id and int(bgg_game_id) >= 1:
-        bgg_url = bgg_manager.get_bgg_url(bgg_game_id)
+        bgg_url = get_bgg_url(bgg_game_id)
         st.subheader(f"Table {table_id}: [{game_name}]({bgg_url})", anchor=f"table-{table_id}")
     else:
         st.subheader(f"Table {table_id}: {game_name}", anchor=f"table-{table_id}")
@@ -79,7 +76,7 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
 
     with col1:
         if bgg_game_id and int(bgg_game_id) >= 1:
-            image_url, game_description, categories, mechanics = bgg_manager.get_bgg_game_info(bgg_game_id)
+            image_url, game_description, categories, mechanics = get_bgg_game_info(bgg_game_id)
             image_width = 300 if not compact else 150
             caption = f"{game_description[:120]}..." if not compact else None
             if not image_url:
@@ -94,7 +91,7 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
     with col2:
         if not compact:
             if similarity_score is not None:
-                st.write(f"**Similarity:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{similarity_score:.2f}")
+                st.progress(similarity_score, text=f"Similarity score: {similarity_score:.2f}")
             st.write(f"**Proposed By:**&nbsp;{proposed_by}")
             st.write(f"**Max Players:**&nbsp;&nbsp;{max_players}")
             st.write(f"**Date Time:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{date} {time.strftime('%H:%M')}")
@@ -175,7 +172,7 @@ def create_table_proposition():
     bgg_game_id = None
 
     try:
-        matching_games = bgg_manager.search_bgg_games(game_name)
+        matching_games = search_bgg_games(game_name)
     except AttributeError as e:
         st.error(f"Error searching for games: {e}")
         matching_games = []
@@ -224,13 +221,11 @@ def create_table_proposition():
 
 def view_table_propositions(compact=False):
 
-    # word2vec = BGGWord2Vec(username=st.session_state.username, propositions=st.session_state.propositions, bgg_manager=bgg_manager)
-    # categories_to_test = word2vec.create_category_array_from_liked()
-    # sims = word2vec.get_category_similarities(categories_to_test)
-    # print(sims)
-    # print(word2vec.liked_ids)
+    word2vec = BGGWord2Vec(username=st.session_state.username, propositions=st.session_state.propositions)
+    sims = word2vec.get_merged_similarities()
+    print(word2vec.liked_ids)
 
-    for proposition in st.session_state.propositions:
+    for proposition, sim in zip(st.session_state.propositions, sims):
         (table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, proposed_by,
          joined_count, joined_players) = proposition
         display_table_proposition(
@@ -247,7 +242,7 @@ def view_table_propositions(compact=False):
             notes=notes,
             joined_count=joined_count,
             joined_players=joined_players,
-            similarity_score=None
+            similarity_score=sim[1]
         )
 
 

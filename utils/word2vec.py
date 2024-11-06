@@ -1,6 +1,6 @@
 import numpy as np
 from collections import Counter
-from utils.bgg_manager import BGGManager
+from utils.bgg_manager import get_bgg_game_info
 
 def cosine(a, b):
     return np.dot(a, b)/(np.linalg.norm(a)*np.linalg.norm(b))
@@ -34,11 +34,11 @@ class Word2Vec(object):
         for i, v in enumerate(vectors):
             sim = cosine(vector, v)
             similarities.append((i, sim))
-        return sorted(similarities, key=lambda x: x[1], reverse=True)
+        return similarities
 
 class BGGWord2Vec(object):
 
-    def __init__(self, username: str, propositions: list[tuple], bgg_manager: BGGManager = None):
+    def __init__(self, username: str, propositions: list[tuple]):
         """
 
         """
@@ -48,14 +48,10 @@ class BGGWord2Vec(object):
         self.mechanics = []
         self.liked_ids = []
         self.bgg_info = []
-        if not bgg_manager:
-            self.bgg_manager = BGGManager()
-        else:
-            self.bgg_manager = bgg_manager
 
         for i, p in enumerate(propositions):
             print(f"Processing {i} ({p[7]})")
-            _, description, category, mechanics = self.bgg_manager.get_bgg_game_info(p[7])  # p[7] = bgg_game_id
+            _, description, category, mechanics = get_bgg_game_info(p[7])  # p[7] = bgg_game_id
             bgg_info = {
                 "name": p[1],
                 "description": description,
@@ -96,19 +92,21 @@ class BGGWord2Vec(object):
 
     # USE CATEGORY/MECHANICS ARRAYS FOR SIMILARITY CALCULATION
     # # CATEGORY
-    def get_category_similarities(self, categories_to_test):
+    def get_category_similarities(self, categories_to_test, remove_liked_ids: bool = False):
         sims = self.nlp.get_similarities(categories_to_test, self.category_vectors)
-        sims = self._remove_liked_ids_from_similarity(sims)
+        if remove_liked_ids:
+            sims = self._remove_liked_ids_from_similarity(sims)
         return sims
 
     # # MECHANICS
-    def get_mechanics_similarities(self, mechanics_to_test):
+    def get_mechanics_similarities(self, mechanics_to_test, remove_liked_ids: bool = False):
         sims = self.nlp.get_similarities(mechanics_to_test, self.mechanics_vectors)
-        sims = self._remove_liked_ids_from_similarity(sims)
+        if remove_liked_ids:
+            sims = self._remove_liked_ids_from_similarity(sims)
         return sims
 
     # # MIXED
-    def get_merged_similarities(self, categories_to_test=None, mechanics_to_test=None, category_score=0.5, mechanics_score=None):
+    def get_merged_similarities(self, categories_to_test=None, mechanics_to_test=None, category_score=0.5, mechanics_score=None, remove_liked_ids: bool = False):
         if not mechanics_score:
             mechanics_score = 1.0 - category_score
 
@@ -124,16 +122,17 @@ class BGGWord2Vec(object):
         mechanics_sims = self.get_mechanics_similarities(mechanics_to_test)
         if len(category_sims) != len(mechanics_sims):
             raise AttributeError("Len of category_sims and mechanics_sims must match")
-            
-        mixed_sims = [0]*len(category_sims)
-        for idx, score in category_sims:
-            mixed_sims[idx] += score*category_score
-    
-        for idx, score in mechanics_sims:
-            mixed_sims[idx] += score*mechanics_score
 
-        mixed_sims = sorted([(i, s) for i, s in enumerate(mixed_sims)], reverse=True, key=lambda x: x[1])
-        mixed_sims = self._remove_liked_ids_from_similarity(mixed_sims)
+        print(f"category sims:  {category_sims}")
+        print(f"mechanics sims: {mechanics_sims}")
+        mixed_sims = []
+        for i in range(len(category_sims)):
+            mixed_sims.append((i, category_sims[i][1]*category_score + mechanics_sims[i][1]*mechanics_score))
+
+        print(f"mixed sims: {mixed_sims}")
+
+        if remove_liked_ids:
+            mixed_sims = self._remove_liked_ids_from_similarity(mixed_sims)
         
         return mixed_sims
             

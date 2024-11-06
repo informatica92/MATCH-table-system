@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 
 from utils.telegram_notifications import TelegramNotifications
 from utils.sql_manager import SQLManager
-from utils.bgg_manager import BGGManager
+from utils.bgg_manager import get_bgg_url, get_bgg_game_info
 
 
 DEFAULT_IMAGE_URL = "images/no_image.jpg"
@@ -78,13 +78,10 @@ def update_table_propositions(table_id, game_name, max_players, date, time, dura
 def table_propositions_to_df(
         add_start_and_end_date=False, add_group=False, add_status=False,
         add_image_url=False, add_bgg_url=False, add_players_fraction=False, add_joined=False,
-        bgg_manager: BGGManager = None
 ):
     columns = ['table_id', 'game_name', 'max_players', 'date', 'time', 'duration', 'notes', 'bgg_game_id',
                'proposed_by', 'joined_count', 'joined_players']
     df = pd.DataFrame(st.session_state.propositions, columns=columns)
-    if not bgg_manager:
-        bgg_manager = BGGManager()
 
     if add_start_and_end_date:
         # concat date and time columns to get the start datetime
@@ -100,10 +97,10 @@ def table_propositions_to_df(
         df['status'] = df.apply(lambda x: 'Full' if x['joined_count'] == x['max_players'] else 'Available', axis=1)
 
     if add_image_url:
-        df['image'] = df['bgg_game_id'].apply(lambda x: bgg_manager.get_bgg_game_info(x)[0])  # image_url, description), categories, mechanics
+        df['image'] = df['bgg_game_id'].apply(lambda x: get_bgg_game_info(x)[0])  # image_url, description), categories, mechanics
 
     if add_bgg_url:
-        df['bgg'] = df['bgg_game_id'].apply(bgg_manager.get_bgg_url)
+        df['bgg'] = df['bgg_game_id'].apply(get_bgg_url)
 
     if add_players_fraction:
         df['players'] = df['joined_count'].astype(str) + "/" + df['max_players'].astype(str)
