@@ -2,20 +2,15 @@ import numpy as np
 from collections import Counter
 from utils.bgg_manager import get_bgg_game_info
 
-def cosine(a, b) -> float:
+def cosine(a, b) -> float|None:
+    if sum(a) == 0 or sum(b) == 0:
+        return None
     value = np.dot(a, b)/(np.linalg.norm(a)*np.linalg.norm(b))
     return float(value) if not np.isnan(value) else None
 
 class Word2Vec(object):
     def __init__(self):
         pass
-
-    # Tokenize and pad items
-    @staticmethod
-    def tokenize_and_pad(items, pad_token="<PAD>"):
-        max_len = max(len(i) for i in items)
-        padded_items = [item + [pad_token] * (max_len - len(item)) for item in items]
-        return padded_items
 
     # Build word frequency vectors
     @staticmethod
