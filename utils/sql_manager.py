@@ -111,6 +111,50 @@ class SQLManager(object):
         c.close()
         conn.close()
 
+    def get_or_create_user(self, email):
+        # try to insert into users table a new user with the given email as email, username Null and is_admin false.
+        # If, instead, the email is already there, return the user username and is_admin
+        username = None
+        is_admin = False
+
+        conn = self.get_db_connection()
+        c = conn.cursor()
+
+        # Check if the user exists
+        query = f'''SELECT username, is_admin FROM {self._schema}.users WHERE email = %s'''
+        print(query)
+        c.execute(query, (email,))
+
+        result = c.fetchone()
+        if result:
+            username, is_admin = result
+        else:
+            # If the user doesn't exist, insert a new user
+            c.execute(f'''
+                    INSERT INTO {self._schema}.users (email, username, is_admin)
+                    VALUES (%s, %s, %s)
+                ''', (email, None, False)
+            )
+
+        conn.commit()
+        c.close()
+        conn.close()
+
+        return username, is_admin
+
+    def set_username(self, email, username):
+        conn = self.get_db_connection()
+        c = conn.cursor()
+        c.execute('''
+                UPDATE users
+                SET username = %s
+                WHERE email = %s
+            ''', (username, email)
+        )
+        conn.commit()
+        c.close()
+        conn.close()
+
     def get_table_propositions(self, joined_by_me, filter_username):
 
         if joined_by_me:

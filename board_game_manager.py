@@ -8,6 +8,7 @@ import os
 import utils.streamlit_utils as stu
 from utils.bgg_manager import search_bgg_games, get_bgg_game_info, get_bgg_url
 from utils.altair_manager import timeline_chart
+from utils.streamlit_utils import sql_manager
 
 # # FEATURES
 
@@ -363,7 +364,7 @@ with st.sidebar:
         else:
             st.warning("GOD_MODE_PASSWORD environment variable not set")
 
-tab1, tab2, tab3 = st.tabs(["📜View/Join", "➕Create", "🗺️Map"])
+tab1, tab2, tab3, tab4 = st.tabs(["📜View/Join", "➕Create", "🗺️Map", "🧑🏻User"])
 with tab1:
     view_start_time = time_time()
 
@@ -399,3 +400,16 @@ with tab3:
         st.components.v1.iframe(gmap_url, height=500)
     else:
         st.warning("GMAP_MAP_URL environment variable not set")
+with tab4:
+    user_attr_name = "experimental_user"
+
+    st.subheader("User settings")
+    email = getattr(st, user_attr_name).email
+    username, is_admin = sql_manager.get_or_create_user(email=email)
+
+    st.text_input("Email", value=email, disabled=True)
+    st.text_input("Username", value=st.session_state.username, key="username_user_setting", disabled=False)
+    st.toggle("Admin", value=is_admin, disabled=True, help="Ask to the admin to change this setting for your user")
+
+    if st.button("Save", on_click=sql_manager.set_username, kwargs={"email": email, "username": st.session_state.username_user_setting}):
+        st.success(f"Username saved as {st.session_state.username_user_setting} for user {email}")
