@@ -334,16 +334,16 @@ st.session_state['username'] = cookie_manager.get("username")
 with st.sidebar:
     st.image(stu.get_logo())
 
-    with st.container(border=True):
-        username = st.text_input("Username", value=st.session_state['username'])
-        if username:
-            username = username.strip()
-            st.session_state['username'] = username
-            cookie_manager.set("username", username, max_age=30*24*60*60)  # expires in 30days
-            st.success(f"Username set to: {username}")
-        else:
-            st.session_state['username'] = None
-            st.warning("Please set a username to join a table.")
+    # with st.container(border=True):
+    #     username = st.text_input("Username", value=st.session_state['username'])
+    #     if username:
+    #         username = username.strip()
+    #         st.session_state['username'] = username
+    #         cookie_manager.set("username", username, max_age=30*24*60*60)  # expires in 30days
+    #         st.success(f"Username set to: {username}")
+    #     else:
+    #         st.session_state['username'] = None
+    #         st.warning("Please set a username to join a table.")
     with st.container(border=True):
         st.selectbox("View mode", options=["📜List", "📊Timeline", "◻️Table"], key="view_mode")
         st.toggle("Compact view", key="compact_view")
