@@ -411,5 +411,9 @@ with tab4:
     st.text_input("Username", value=st.session_state.username, key="username_user_setting", disabled=False)
     st.toggle("Admin", value=is_admin, disabled=True, help="Ask to the admin to change this setting for your user")
 
-    if st.button("Save", on_click=sql_manager.set_username, kwargs={"email": email, "username": st.session_state.username_user_setting}):
-        st.success(f"Username saved as {st.session_state.username_user_setting} for user {email}")
+    if st.button("Save"):
+        try:
+            sql_manager.set_username(email, st.session_state.username_user_setting)
+            st.success(f"Username saved as {st.session_state.username_user_setting} for user {email}")
+        except AttributeError as e:
+            st.error(e)

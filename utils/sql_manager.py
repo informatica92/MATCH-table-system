@@ -145,12 +145,15 @@ class SQLManager(object):
     def set_username(self, email, username):
         conn = self.get_db_connection()
         c = conn.cursor()
-        c.execute('''
-                UPDATE users
-                SET username = %s
-                WHERE email = %s
-            ''', (username, email)
-        )
+        try:
+            c.execute('''
+                    UPDATE users
+                    SET username = %s
+                    WHERE email = %s
+                ''', (username, email)
+            )
+        except psycopg2.errors.UniqueViolation:
+            raise AttributeError(f"Username {username} already exists. Please choose another one.")
         conn.commit()
         c.close()
         conn.close()
