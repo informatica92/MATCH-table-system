@@ -55,7 +55,7 @@ class SQLManager(object):
 
         c.execute('''CREATE TABLE IF NOT EXISTS users (
                         email TEXT PRIMARY KEY,
-                        username TEXT,
+                        username CITEXT UNIQUE,
                         is_admin BOOLEAN DEFAULT FALSE)
                     ''')
 
