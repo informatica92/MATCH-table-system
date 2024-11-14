@@ -1,5 +1,4 @@
 import streamlit as st
-import extra_streamlit_components as stx
 
 from time import time as time_time
 from datetime import datetime
@@ -8,7 +7,7 @@ import os
 import utils.streamlit_utils as stu
 from utils.bgg_manager import search_bgg_games, get_bgg_game_info, get_bgg_url
 from utils.altair_manager import timeline_chart
-from utils.streamlit_utils import sql_manager
+from utils.table_system_user import StreamlitTableSystemUser
 
 # # FEATURES
 
@@ -20,8 +19,6 @@ st.set_page_config(page_title=stu.get_title(), layout="wide")
 
 st.markdown(stu.BOUNCE_SIDEBAR_ICON, unsafe_allow_html=True)
 
-
-cookie_manager = stx.CookieManager()
 
 
 @st.dialog("🖋️ Edit Table")
@@ -317,52 +314,35 @@ def dataframe_table_propositions(compact=False):
 
 st.title(f"🎴 {stu.get_title()}")
 
-# Initialize username in session state
-if 'username' not in st.session_state:
-    st.session_state['username'] = None
-
+# Initialize propositions in session state
 if "propositions" not in st.session_state:
     print("Initializing st.session_state.propositions")
     stu.refresh_table_propositions("Init")
 
+# Initialize god_mode in session state
 if "god_mode" not in st.session_state:
     st.session_state['god_mode'] = False
 
-st.session_state['username'] = cookie_manager.get("username")
+print(f"Getting user info for {st.experimental_user.email}")
+st.session_state['user'] = StreamlitTableSystemUser(init_session_state_for_username=True)
 
 # Add a username setting in the sidebar
 with st.sidebar:
     st.image(stu.get_logo())
-
-    # with st.container(border=True):
-    #     username = st.text_input("Username", value=st.session_state['username'])
-    #     if username:
-    #         username = username.strip()
-    #         st.session_state['username'] = username
-    #         cookie_manager.set("username", username, max_age=30*24*60*60)  # expires in 30days
-    #         st.success(f"Username set to: {username}")
-    #     else:
-    #         st.session_state['username'] = None
-    #         st.warning("Please set a username to join a table.")
+    if st.session_state['username']:
+        st.info(f"Welcome back, **{st.session_state['username']}**\n\n*Use the User tab to edit your username*")
+    else:
+        st.warning("Set a username to join tables.\n\nUse the User tab to edit your username")
     with st.container(border=True):
         st.selectbox("View mode", options=["📜List", "📊Timeline", "◻️Table"], key="view_mode")
         st.toggle("Compact view", key="compact_view")
     with st.expander("🔒 God Mode"):
-        god_mode_password = st.text_input("Enter God Mode Password", type="password")
-        if os.environ.get('GOD_MODE_PASSWORD'):
-            if god_mode_password:
-                if god_mode_password == os.environ.get('GOD_MODE_PASSWORD'):
-                    st.session_state['god_mode'] = True
-                    print("God Mode ACTIVATED")
-                    st.success("God Mode activated")
-                else:
-                    st.session_state['god_mode'] = False
-                    print("God Mode DEACTIVATED")
-                    st.error("Incorrect God Mode Password")
+        god_mode_is_active = st.toggle("God Mode", key="god_mode", value=False, disabled=not st.session_state.user.is_admin)
+        if st.session_state.user.is_admin:
+            if god_mode_is_active:
+                st.warning("God Mode is **active**. You can do anything you want. Be careful!")
             else:
-                st.session_state['god_mode'] = False
-        else:
-            st.warning("GOD_MODE_PASSWORD environment variable not set")
+                st.info("God Mode is **disabled**. You can only act as a normal user now")
 
 tab1, tab2, tab3, tab4 = st.tabs(["📜View/Join", "➕Create", "🗺️Map", "🧑🏻User"])
 with tab1:
@@ -401,19 +381,16 @@ with tab3:
     else:
         st.warning("GMAP_MAP_URL environment variable not set")
 with tab4:
-    user_attr_name = "experimental_user"
-
     st.subheader("User settings")
-    email = getattr(st, user_attr_name).email
-    username, is_admin = sql_manager.get_or_create_user(email=email)
 
-    st.text_input("Email", value=email, disabled=True)
-    st.text_input("Username", value=st.session_state.username, key="username_user_setting", disabled=False)
-    st.toggle("Admin", value=is_admin, disabled=True, help="Ask to the admin to change this setting for your user")
-
-    if st.button("Save"):
-        try:
-            sql_manager.set_username(email, st.session_state.username_user_setting)
-            st.success(f"Username saved as {st.session_state.username_user_setting} for user {email}")
-        except AttributeError as e:
-            st.error(e)
+    st.text_input("User ID", value=st.session_state.user.user_id, disabled=True)
+    st.text_input("Email", value=st.session_state.user.email, disabled=True)
+    with st.form("user_setting_form", border=False):
+        st.text_input("Username", value=st.session_state.username, key="username_user_setting", disabled=False)
+        if st.form_submit_button("Update Username", on_click=st.session_state.user.update_username):
+            if not st.session_state.get("update_username_from_user_error"):
+                st.success(f"Username updated successfully to {st.session_state.username_user_setting}")
+            else:
+                st.error(f"Error updating username: {st.session_state.update_username_from_user_error}")
+            st.session_state["update_username_from_user_error"] = None
+    st.toggle("Admin", value=st.session_state.user.is_admin, disabled=True, help="Ask the admin to change this setting for your user")

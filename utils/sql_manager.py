@@ -54,7 +54,8 @@ class SQLManager(object):
                     )''')
 
         c.execute('''CREATE TABLE IF NOT EXISTS users (
-                        email TEXT PRIMARY KEY,
+                        id SERIAL PRIMARY KEY,  
+                        email CITEXT UNIQUE,
                         username CITEXT UNIQUE,
                         is_admin BOOLEAN DEFAULT FALSE)
                     ''')
@@ -121,26 +122,28 @@ class SQLManager(object):
         c = conn.cursor()
 
         # Check if the user exists
-        query = f'''SELECT username, is_admin FROM {self._schema}.users WHERE email = %s'''
+        query = f'''SELECT id, username, is_admin FROM {self._schema}.users WHERE email = %s'''
         print(query)
         c.execute(query, (email,))
 
         result = c.fetchone()
         if result:
-            username, is_admin = result
+            _id, username, is_admin = result
         else:
             # If the user doesn't exist, insert a new user
             c.execute(f'''
                     INSERT INTO {self._schema}.users (email, username, is_admin)
                     VALUES (%s, %s, %s)
+                    RETURNING id
                 ''', (email, None, False)
             )
+            _id = c.fetchone()[0]
 
         conn.commit()
         c.close()
         conn.close()
 
-        return username, is_admin
+        return _id, username, is_admin
 
     def set_username(self, email, username):
         conn = self.get_db_connection()
