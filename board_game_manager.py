@@ -14,8 +14,11 @@ from utils.table_system_user import StreamlitTableSystemUser
 # # IMPROVEMENTS
 # TODO: use @st.fragments
 # TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (st.link_button)
-# TODO: joined_players table -> change joined_player to FK to users.id
-# TODO: change the queries to keep the same structure but joining now joined_players and users
+# TODO: joined_players table -> change player_name to FK to users.id
+# TODO: change the get_table_propositions query to keep the same structure but joining now joined_players and users
+# TODO: table_propositions table -> change proposed_by to FK to users.id
+# TODO: change the leave_table to remove row using user_id instead of player_name
+# TODO: change the join_table to add row using user_id instead of player_name
 
 st.set_page_config(page_title=stu.get_title(), layout="wide")
 
