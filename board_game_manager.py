@@ -14,6 +14,8 @@ from utils.table_system_user import StreamlitTableSystemUser
 # # IMPROVEMENTS
 # TODO: use @st.fragments
 # TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (st.link_button)
+# TODO: joined_players table -> change joined_player to FK to users.id
+# TODO: change the queries to keep the same structure but joining now joined_players and users
 
 st.set_page_config(page_title=stu.get_title(), layout="wide")
 
