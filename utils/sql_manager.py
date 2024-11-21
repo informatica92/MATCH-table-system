@@ -57,7 +57,9 @@ class SQLManager(object):
                         id SERIAL PRIMARY KEY,  
                         email CITEXT UNIQUE,
                         username CITEXT UNIQUE,
-                        is_admin BOOLEAN DEFAULT FALSE)
+                        is_admin BOOLEAN DEFAULT FALSE,
+                        creation_timestamp_tz timestamptz NULL DEFAULT now()
+                    )
                     ''')
 
         c.execute('''CREATE OR REPLACE FUNCTION check_max_players()
