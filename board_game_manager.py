@@ -328,7 +328,7 @@ if "propositions" not in st.session_state:
 if "god_mode" not in st.session_state:
     st.session_state['god_mode'] = False
 
-print(f"Getting user info for {st.experimental_user.email}")
+
 st.session_state['user'] = StreamlitTableSystemUser(init_session_state_for_username=True)
 
 # Add a username setting in the sidebar

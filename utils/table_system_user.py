@@ -3,6 +3,7 @@ import streamlit as st
 
 @st.cache_data(ttl="1h")  # cache user_id, username, is_admin from email but only for 1h
 def _get_or_create_user(email):
+    print(f"Getting user info [no cache] for {st.experimental_user.email}")
     sql_manager = SQLManager()
     user_id, username, is_admin = sql_manager.get_or_create_user(email)
     return user_id, username, is_admin
