@@ -10,7 +10,10 @@ from utils.altair_manager import timeline_chart
 from utils.table_system_user import StreamlitTableSystemUser
 
 # # FEATURES
-
+# TODO: create user entity and link user id into joined_player table
+# TODO: use multi_pages -> https://docs.streamlit.io/get-started/tutorials/create-a-multipage-app
+# TODO: if no streamlit_extras => use the select_box in Create
+# TODO: use st.cache_data for bgg info
 # # IMPROVEMENTS
 # TODO: use @st.fragments
 # TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (st.link_button)
