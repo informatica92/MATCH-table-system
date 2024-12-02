@@ -391,8 +391,9 @@ with tab3:
 with tab4:
     st.subheader("User settings")
 
-    st.text_input("User ID", value=st.session_state.user.user_id, disabled=True)
-    st.text_input("Email", value=st.session_state.user.email, disabled=True)
+    col1, col2 = st.columns([1, 4])
+    col1.text_input("User ID", value=st.session_state.user.user_id, disabled=True)
+    col2.text_input("Email", value=st.session_state.user.email, disabled=True)
     with st.form("user_setting_form", border=False):
         st.text_input("Username", value=st.session_state.username, key="username_user_setting", disabled=False)
         if st.form_submit_button("Update Username", on_click=st.session_state.user.update_username):
