@@ -320,7 +320,7 @@ def dataframe_table_propositions(compact=False):
             )
 
 
-st.title(f"🎴 {stu.get_title()}")
+st.title(f"{stu.get_title()}")
 
 # Initialize propositions in session state
 if "propositions" not in st.session_state:
@@ -335,8 +335,11 @@ if "god_mode" not in st.session_state:
 st.session_state['user'] = StreamlitTableSystemUser(init_session_state_for_username=True)
 
 # Add a username setting in the sidebar
-with st.sidebar:
-    st.logo(stu.get_logo(), size="large")
+with (st.sidebar):
+    if not os.environ.get('LOGO_LARGE'):
+        st.logo(stu.get_logo(), size="large")
+    else:
+        st.logo(os.environ.get('LOGO_LARGE'),icon_image=stu.get_logo())  # can't use the 'size' here since it only works with the icon
     if st.session_state['username']:
         st.info(f"Welcome back, **{st.session_state['username']}**\n\n*Use the User tab to edit your username*")
     else:
