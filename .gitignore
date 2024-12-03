@@ -1,6 +1,7 @@
 # Project related ignores
 board_game_manager.db
 .streamlit/secrets.toml
+*_test.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

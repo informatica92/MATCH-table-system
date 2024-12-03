@@ -336,7 +336,7 @@ st.session_state['user'] = StreamlitTableSystemUser(init_session_state_for_usern
 
 # Add a username setting in the sidebar
 with st.sidebar:
-    st.image(stu.get_logo())
+    st.logo(stu.get_logo(), size="large")
     if st.session_state['username']:
         st.info(f"Welcome back, **{st.session_state['username']}**\n\n*Use the User tab to edit your username*")
     else:
