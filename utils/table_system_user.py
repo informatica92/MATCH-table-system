@@ -5,8 +5,8 @@ import streamlit as st
 def _get_or_create_user(email):
     print(f"Getting user info [no cache] for {st.experimental_user.email}")
     sql_manager = SQLManager()
-    user_id, username, is_admin = sql_manager.get_or_create_user(email)
-    return user_id, username, is_admin
+    user_id, username, name, surname, bgg_username, telegram_username, is_admin = sql_manager.get_or_create_user(email)
+    return user_id, username, name, surname, bgg_username, telegram_username, is_admin
 
 class StreamlitTableSystemUser(object):
     def __init__(self, init_session_state_for_username=True):
@@ -21,6 +21,10 @@ class StreamlitTableSystemUser(object):
             email (str): Email of the authenticated user from Streamlit from [experimental_]user
             user_id (int): Database ID of the user
             username (str): Username of the user
+            name (str): First name of the user
+            surname (str): Last name of the user
+            bgg_username (str): BGG username of the user
+            telegram_username (str): Telegram username of the user
             is_admin (bool): Admin status of the user
 
         params:
@@ -29,18 +33,25 @@ class StreamlitTableSystemUser(object):
         self.sql_manager = SQLManager()
         self.email = st.experimental_user.email
 
-        self.user_id, self.username, self.is_admin = _get_or_create_user(self.email)
+        self.user_id, self.username, self.name, self.surname, self.bgg_username, self.telegram_username, self.is_admin = _get_or_create_user(self.email)
         if init_session_state_for_username:
             st.session_state.username = self.username
 
-    def update_username(self):
+    def update_user(self):
         if len(st.session_state.username_user_setting or "") < 3:
             print(f"Error updating username: Username must be at least 3 characters long")
             st.session_state.update_username_from_user_error = "Username must be at least 3 characters long"
             return
         try:
             print(f"Updating username from {st.session_state.username} to {st.session_state.username_user_setting}")
-            self.sql_manager.set_username(self.email, st.session_state.username_user_setting)
+            self.sql_manager.set_user(
+                email=self.email,
+                username=st.session_state.username_user_setting,
+                name=st.session_state.name_user_setting,
+                surname=st.session_state.surname_user_setting,
+                bgg_username=st.session_state.bgg_username_user_setting,
+                telegram_username=st.session_state.telegram_username_user_setting
+            )
             print(f"Clearing cache for {self.email}")
             _get_or_create_user.clear(self.email)
             # st.session_state.username = st.session_state.username_user_setting

@@ -57,6 +57,10 @@ class SQLManager(object):
                         id SERIAL PRIMARY KEY,  
                         email CITEXT UNIQUE,
                         username CITEXT UNIQUE,
+                        name TEXT,
+                        surname TEXT,
+                        bgg_username TEXT,
+                        telegram_username TEXT,
                         is_admin BOOLEAN DEFAULT FALSE,
                         creation_timestamp_tz timestamptz NULL DEFAULT now()
                     )
@@ -119,18 +123,22 @@ class SQLManager(object):
         # If, instead, the email is already there, return the user username and is_admin
         username = None
         is_admin = False
+        name = None
+        surname = None
+        bgg_username = None
+        telegram_username = None
 
         conn = self.get_db_connection()
         c = conn.cursor()
 
         # Check if the user exists
-        query = f'''SELECT id, username, is_admin FROM {self._schema}.users WHERE email = %s'''
+        query = f'''SELECT id, username, name, surname, bgg_username, telegram_username, is_admin FROM {self._schema}.users WHERE email = %s'''
         print(query)
         c.execute(query, (email,))
 
         result = c.fetchone()
         if result:
-            _id, username, is_admin = result
+            _id, username, name, surname, bgg_username, telegram_username, is_admin = result
         else:
             # If the user doesn't exist, insert a new user
             c.execute(f'''
@@ -145,17 +153,34 @@ class SQLManager(object):
         c.close()
         conn.close()
 
-        return _id, username, is_admin
+        return _id, username, name, surname, bgg_username, telegram_username, is_admin
 
-    def set_username(self, email, username):
+    def set_user(self, email, username, name, surname, bgg_username, telegram_username):
         conn = self.get_db_connection()
         c = conn.cursor()
+
+        # in case the following variables are False/"" will be converted to None
+        if not username:
+            username = None
+        if not name:
+            name = None
+        if not surname:
+            surname = None
+        if not bgg_username:
+            bgg_username = None
+        if not telegram_username:
+            telegram_username = None
+
         try:
             c.execute('''
                     UPDATE users
-                    SET username = %s
+                    SET username = %s,
+                        name = %s,
+                        surname = %s,
+                        bgg_username = %s,
+                        telegram_username = %s
                     WHERE email = %s
-                ''', (username, email)
+                ''', (username, name, surname, bgg_username, telegram_username, email)
             )
         except psycopg2.errors.UniqueViolation:
             raise AttributeError(f"Username {username} already exists. Please choose another one.")
