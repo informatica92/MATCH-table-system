@@ -42,6 +42,13 @@ def get_bgg_game_info(game_id):
 def get_bgg_url(game_id):
     return f"https://boardgamegeek.com/boardgame/{game_id}"
 
+def get_bgg_profile_page_url(username, as_html_link=False):
+    url = f"https://boardgamegeek.com/user/{username}"
+    if as_html_link:
+        return f"<a href='{url}' target='_blank'>{url}</a>"
+    else:
+        return url
+
 
 def search_bgg_games(game_name):
     url = f"https://boardgamegeek.com/xmlapi2/search?query={game_name}&type=boardgame"

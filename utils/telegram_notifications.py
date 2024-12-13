@@ -18,6 +18,13 @@ TEXTS = {
 }
 
 
+def get_telegram_profile_page_url(telegram_username, as_html_link=False):
+    url = f"https://t.me/{telegram_username}"
+    if as_html_link:
+        return f"<a href='{url}'>{url}</a>"
+    else:
+        return url
+
 class TelegramNotifications(object):
     def __init__(self, bot_token=None, chat_id=None, language='IT'):
         self.channel_id = chat_id or os.environ.get('TELEGRAM_CHAT_ID')

@@ -5,7 +5,8 @@ from datetime import datetime
 import os
 
 import utils.streamlit_utils as stu
-from utils.bgg_manager import search_bgg_games, get_bgg_game_info, get_bgg_url
+from utils.telegram_notifications import get_telegram_profile_page_url
+from utils.bgg_manager import search_bgg_games, get_bgg_game_info, get_bgg_url, get_bgg_profile_page_url
 from utils.altair_manager import timeline_chart
 from utils.table_system_user import StreamlitTableSystemUser
 
@@ -405,7 +406,17 @@ with tab4:
         col_surname.text_input("Surname",  value=st.session_state.user.surname, key="surname_user_setting", disabled=False)
         col_bgg_username, col_telegram_username =  st.columns([1, 1])
         col_bgg_username.text_input("BGG username",  value=st.session_state.user.bgg_username, key="bgg_username_user_setting", disabled=False)
-        col_telegram_username.text_input("Telegram username", value=st.session_state.user.telegram_username, key="telegram_username_user_setting", disabled=False)
+        with col_bgg_username:
+            if st.session_state.user.bgg_username:
+                stu.st_write(get_bgg_profile_page_url(st.session_state.user.bgg_username, as_html_link=True))
+            else:
+                stu.st_write("No BGG username set, set it to test the link")
+        col_telegram_username.text_input("Telegram username (without the '@')", value=st.session_state.user.telegram_username, key="telegram_username_user_setting", disabled=False)
+        with col_telegram_username:
+            if st.session_state.user.telegram_username:
+                stu.st_write(get_telegram_profile_page_url(st.session_state.user.telegram_username, as_html_link=True))
+            else:
+                stu.st_write("No Telegram username set, set it to test the link")
         if st.form_submit_button("💾 Update ", on_click=st.session_state.user.update_user):
             if not st.session_state.get("update_username_from_user_error"):
                 new_user_details =\
