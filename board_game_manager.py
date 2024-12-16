@@ -433,4 +433,7 @@ with tab4:
     st.toggle("Admin", value=st.session_state.user.is_admin, disabled=True, help="Ask the admin to change this setting for your user")
 
     st.subheader("User locations")
+    stu.st_write("Use the following list to manage your locations. Having one or more registered location will allow "
+                 "you to specify where a table proposition is created. <br>"
+                 "The official MATCH location is automatically generated")
     stu.manage_user_locations(user_id=st.session_state.user.user_id)
