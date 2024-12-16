@@ -191,3 +191,35 @@ def get_num_active_filters(as_str=True):
         number_of_active_filters += 1
     filter_label_num_active_filters = "" if number_of_active_filters == 0 else f" ({number_of_active_filters}) "
     return filter_label_num_active_filters if as_str else number_of_active_filters
+
+def _on_location_df_change(entire_locations_df: pd.DataFrame):
+
+    list_of_dict_edited = st.session_state.data_editor_locations_df["edited_rows"]
+    list_of_dict_added = st.session_state.data_editor_locations_df["added_rows"]
+    list_of_dict_deleted = st.session_state.data_editor_locations_df["deleted_rows"]
+
+    # added
+    for row in list_of_dict_added:
+        if row.get("address") and row.get("city") and row.get("house_number") and row.get("country") and row.get("alias"):
+            sql_manager.add_user_location(st.session_state.user.user_id, row.get("address"), row.get("city"), row.get("house_number"), row.get("country"), row.get("alias"))
+            st.toast(f"✅ Added location {row.get('alias')}")
+
+    # updated
+    edited_locations_df = []
+    for index in list_of_dict_edited:
+        tmp = entire_locations_df.iloc[index].to_dict()
+        tmp.update(list_of_dict_edited[index])
+        edited_locations_df.append(tmp)
+    edited_locations_df = pd.DataFrame(edited_locations_df)
+    sql_manager.update_user_locations(user_id=st.session_state.user.user_id, locations_df=edited_locations_df)
+
+    # deleted
+    ids_to_delete = []
+    for row in list_of_dict_deleted:
+        ids_to_delete.append(int(entire_locations_df.loc[row]["id"]))
+    sql_manager.delete_locations(ids_to_delete)
+
+def manage_user_locations(user_id):
+    df = sql_manager.get_user_locations(user_id)
+    df = df[["id", "alias", "country", "city", "address", "house_number"]]
+    updated_locations = st.data_editor(df, hide_index=True, use_container_width=True, disabled=["id"], num_rows="dynamic", key="data_editor_locations_df", on_change=_on_location_df_change, kwargs={"entire_locations_df": df})

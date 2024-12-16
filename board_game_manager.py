@@ -431,3 +431,6 @@ with tab4:
                 st.error(f"Error updating username: {st.session_state.update_username_from_user_error}")
             st.session_state["update_username_from_user_error"] = None
     st.toggle("Admin", value=st.session_state.user.is_admin, disabled=True, help="Ask the admin to change this setting for your user")
+
+    st.subheader("User locations")
+    stu.manage_user_locations(user_id=st.session_state.user.user_id)
