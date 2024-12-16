@@ -68,11 +68,11 @@ class SQLManager(object):
                     ''')
 
         # create a location table to save both system and user locations: system ones are the one without the user id.
-        # Table includes fields are address, city, house number (if any)
+        # Table includes fields are street name, city, house number (if any)
         c.execute('''CREATE TABLE IF NOT EXISTS locations (
                         id SERIAL PRIMARY KEY,
                         user_id INTEGER REFERENCES users(id),
-                        address TEXT,
+                        street_name TEXT,
                         city TEXT,
                         house_number TEXT,
                         country TEXT,                        
@@ -133,16 +133,16 @@ class SQLManager(object):
         c.close()
         conn.close()
 
-    def add_user_location(self, user_id, address, city, house_number, country, alias):
+    def add_user_location(self, user_id, street_name, city, house_number, country, alias):
         conn = self.get_db_connection()
         c = conn.cursor()
 
         # Insert the new location
         c.execute(f'''
-                    INSERT INTO {self._schema}.locations (user_id, address, city, house_number, country, alias)
+                    INSERT INTO {self._schema}.locations (user_id, street_name, city, house_number, country, alias)
                     VALUES (%s, %s, %s, %s, %s, %s)
                     RETURNING id
-                ''', (user_id, address, city, house_number, country, alias)
+                ''', (user_id, street_name, city, house_number, country, alias)
         )
         _id = c.fetchone()[0]
 
@@ -160,13 +160,13 @@ class SQLManager(object):
         for index, row in locations_df.iterrows():
             c.execute(f'''
                         UPDATE {self._schema}.locations
-                        SET address = %s,
+                        SET street_name = %s,
                             city = %s,
                             house_number = %s,
                             country = %s,
                             alias = %s
                         WHERE user_id = %s AND id = %s
-                    ''', (row['address'], row['city'], row['house_number'], row['country'], row['alias'], user_id, row['id'])
+                    ''', (row['street_name'], row['city'], row['house_number'], row['country'], row['alias'], user_id, row['id'])
             )
 
         conn.commit()
@@ -196,7 +196,7 @@ class SQLManager(object):
         # Get the locations for the user
         if include_system_ones:
             c.execute(f'''
-                        SELECT id, address, city, house_number, country, alias
+                        SELECT id, street_name, city, house_number, country, alias
                         FROM {self._schema}.locations
                         WHERE user_id = %s OR user_id IS NULL
                         ORDER BY id
@@ -204,7 +204,7 @@ class SQLManager(object):
             )
         else:
             c.execute(f'''
-                        SELECT id, address, city, house_number, country, alias
+                        SELECT id, street_name, city, house_number, country, alias
                         FROM {self._schema}.locations
                         WHERE user_id = %s
                         ORDER BY id
@@ -216,7 +216,7 @@ class SQLManager(object):
         conn.close()
 
         if return_as__df:
-            result = pd.DataFrame(result, columns=['id', 'address', 'city', 'house_number', 'country', 'alias'])
+            result = pd.DataFrame(result, columns=['id', 'street_name', 'city', 'house_number', 'country', 'alias'])
 
         return result
 

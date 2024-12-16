@@ -200,8 +200,8 @@ def _on_location_df_change(entire_locations_df: pd.DataFrame):
 
     # added
     for row in list_of_dict_added:
-        if row.get("address") and row.get("city") and row.get("house_number") and row.get("country") and row.get("alias"):
-            sql_manager.add_user_location(st.session_state.user.user_id, row.get("address"), row.get("city"), row.get("house_number"), row.get("country"), row.get("alias"))
+        if row.get("street_name") and row.get("city") and row.get("house_number") and row.get("country") and row.get("alias"):
+            sql_manager.add_user_location(st.session_state.user.user_id, row.get("street_name"), row.get("city"), row.get("house_number"), row.get("country"), row.get("alias"))
             st.toast(f"✅ Added location {row.get('alias')}")
 
     # updated
@@ -221,5 +221,62 @@ def _on_location_df_change(entire_locations_df: pd.DataFrame):
 
 def manage_user_locations(user_id):
     df = sql_manager.get_user_locations(user_id)
-    df = df[["id", "alias", "country", "city", "address", "house_number"]]
-    updated_locations = st.data_editor(df, hide_index=True, use_container_width=True, disabled=["id"], num_rows="dynamic", key="data_editor_locations_df", on_change=_on_location_df_change, kwargs={"entire_locations_df": df})
+    df = df[["id", "alias", "country", "city", "street_name", "house_number"]]
+
+    column_config = {
+        "id": st.column_config.NumberColumn(
+            "ID",
+            help="The location ID, it's automatically generated once you fulfill all the required fields in the row",
+            width="small",
+            default=None,
+            required=True,
+            disabled=True,
+        ),
+        "alias": st.column_config.TextColumn(
+            "Alias",
+            help="The alias of the location",
+            width="medium",
+            default=None,
+            required=True,
+        ),
+        "country": st.column_config.TextColumn(
+            "Country",
+            help="The country of the location",
+            width="small",
+            default="Italia",
+            required=True,
+        ),
+        "city": st.column_config.TextColumn(
+            "City",
+            help="The city of the location",
+            width="medium",
+            default=None,
+            required=True,
+        ),
+        "street_name": st.column_config.TextColumn(
+            "Street Name",
+            help="The street name of the location",
+            width="medium",
+            default=None,
+            required=True,
+        ),
+        "house_number": st.column_config.NumberColumn(
+            "House Number",
+            help="The house number of the location",
+            width="small",
+            default=None,
+            required=True,
+        ),
+    }
+
+    st.data_editor(
+        df,
+        hide_index=True,
+        use_container_width=True,
+        disabled=["id"],
+        num_rows="dynamic",
+        key="data_editor_locations_df",
+        on_change=_on_location_df_change,
+        kwargs={"entire_locations_df": df},
+        column_config=column_config
+    )
