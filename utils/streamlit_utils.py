@@ -261,7 +261,7 @@ def manage_user_locations(user_id):
             required=True,
         ),
         "house_number": st.column_config.NumberColumn(
-            "House Number",
+            "Number",
             help="The house number of the location",
             width="small",
             default=None,
@@ -280,3 +280,7 @@ def manage_user_locations(user_id):
         kwargs={"entire_locations_df": df},
         column_config=column_config
     )
+
+def get_available_locations(user_id):
+    locations = sql_manager.get_user_locations(user_id, include_system_ones=True, return_as_df=False)
+    return locations

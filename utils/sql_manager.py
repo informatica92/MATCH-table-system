@@ -29,6 +29,7 @@ class SQLManager(object):
             options=f'-c search_path={self._schema}'
         )
 
+    # INIT
     def create_tables(self):
         # Create table propositions table if it doesn't exist
         conn = self.get_db_connection()
@@ -133,6 +134,7 @@ class SQLManager(object):
         c.close()
         conn.close()
 
+    # LOCATIONS
     def add_user_location(self, user_id, street_name, city, house_number, country, alias):
         conn = self.get_db_connection()
         c = conn.cursor()
@@ -189,14 +191,14 @@ class SQLManager(object):
         c.close()
         conn.close()
 
-    def get_user_locations(self, user_id, include_system_ones=False, return_as__df=True):
+    def get_user_locations(self, user_id, include_system_ones=False, return_as_df=True):
         conn = self.get_db_connection()
         c = conn.cursor()
 
         # Get the locations for the user
         if include_system_ones:
             c.execute(f'''
-                        SELECT id, street_name, city, house_number, country, alias
+                        SELECT id, street_name, city, house_number, country, alias, user_id
                         FROM {self._schema}.locations
                         WHERE user_id = %s OR user_id IS NULL
                         ORDER BY id
@@ -204,7 +206,7 @@ class SQLManager(object):
             )
         else:
             c.execute(f'''
-                        SELECT id, street_name, city, house_number, country, alias
+                        SELECT id, street_name, city, house_number, country, alias, user_id
                         FROM {self._schema}.locations
                         WHERE user_id = %s
                         ORDER BY id
@@ -215,12 +217,12 @@ class SQLManager(object):
         c.close()
         conn.close()
 
-        if return_as__df:
-            result = pd.DataFrame(result, columns=['id', 'street_name', 'city', 'house_number', 'country', 'alias'])
+        if return_as_df:
+            result = pd.DataFrame(result, columns=['id', 'street_name', 'city', 'house_number', 'country', 'alias', 'user_id'])
 
         return result
 
-
+    # USERS
     def get_or_create_user(self, email):
         # try to insert into users table a new user with the given email as email, username Null and is_admin false.
         # If, instead, the email is already there, return the user username and is_admin
@@ -291,6 +293,7 @@ class SQLManager(object):
         c.close()
         conn.close()
 
+    # TABLES
     def get_table_propositions(self, joined_by_me, filter_username):
 
         if joined_by_me:

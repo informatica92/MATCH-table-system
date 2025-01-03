@@ -1,10 +1,11 @@
 import requests
 import html
 import xml.etree.ElementTree as et
-from cachetools import cached, LRUCache
+
+from streamlit import cache_data
 
 
-@cached(cache=LRUCache(maxsize=128))
+@cache_data(ttl=None, max_entries=1000, persist="disk")
 def get_bgg_game_info(game_id):
     print(f"\tquerying BGG for {game_id}")
     # BGG API URL for game details
