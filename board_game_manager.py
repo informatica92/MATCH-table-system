@@ -6,7 +6,9 @@ from utils.table_system_user import StreamlitTableSystemUser
 
 # # FEATURES
 # TODO: use <link type="boardgameexpansion" id="123" value="Exp Name"/> for selecting expansions
-#   TODO: add list of expansions to table_propositions
+#   TODO: add list of expansions to table_propositions as list of values
+#   TODO: the Edit should allow to add or remove expansions
+#   TODO: add expansions into list and dataframe view
 # # IMPROVEMENTS
 # TODO: add "location_id" to table_propositions, location id FK to locations.id on delete set null
 # TODO: use @st.fragments
