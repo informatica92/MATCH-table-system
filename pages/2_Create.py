@@ -3,7 +3,7 @@ from datetime import datetime
 import os
 
 import utils.streamlit_utils as stu
-from utils.bgg_manager import search_bgg_games
+from utils.bgg_manager import search_bgg_games, get_bgg_game_info
 
 st.title(f"{stu.get_title()}")
 st.header("➕ Create a New Table Proposition")
@@ -23,9 +23,16 @@ stu.st_write("Select the matching game from BGG for auto detecting information l
 if selected_game:
     bgg_game_id = selected_game[0]
 
+image_url, game_description, categories, mechanics, available_expansions = None, None, [], [], []
 if bgg_game_id:
     st.write(f"Selected BGG Game ID: {bgg_game_id}")
+    image_url, game_description, categories, mechanics, available_expansions = get_bgg_game_info(bgg_game_id)
+
 with st.form(key="create_new_proposition_form", border=False):
+
+    # # expansions selector
+    # expansions_to_adopt = st.multiselect("Select expansions", available_expansions, key="expansions")
+
     # number of players and duration
     col1, col2 = st.columns([1, 1])
     with col1:
@@ -60,11 +67,14 @@ with st.form(key="create_new_proposition_form", border=False):
     stu.st_write("By default, you'll be added to this table once created. To avoid this, disable the above option")
 
     if st.session_state['username']:
-        if st.form_submit_button("Create Proposition", on_click=stu.create_callback, args=[selected_game[1] if selected_game else None, bgg_game_id]):
-            st.success(f"Table proposition created successfully: {selected_game[1]} - {date_time} {time.strftime('%H:%M')}")
-            if st.session_state.join_me_by_default:
-                st.success(f"You have also joined this table by default as {st.session_state.username}.")
-
+        if bgg_game_id:
+            if st.form_submit_button("Create Proposition", on_click=stu.create_callback, args=[selected_game[1] if selected_game else None, bgg_game_id]):
+                st.success(f"Table proposition created successfully: {selected_game[1]} - {date_time} {time.strftime('%H:%M')}")
+                if st.session_state.join_me_by_default:
+                    st.success(f"You have also joined this table by default as {st.session_state.username}.")
+        else:
+            st.form_submit_button("Create Proposition", disabled=True)
+            st.warning("Select a game from the list to create a proposition.")
     else:
         st.form_submit_button("Create Proposition", disabled=True)
         st.warning("Set a username to create a proposition.")

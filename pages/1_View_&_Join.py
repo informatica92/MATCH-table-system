@@ -77,7 +77,7 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
 
     with col1:
         if bgg_game_id and int(bgg_game_id) >= 1:
-            image_url, game_description, categories, mechanics = get_bgg_game_info(bgg_game_id)
+            image_url, game_description, categories, mechanics, _ = get_bgg_game_info(bgg_game_id)
             image_width = 300 if not compact else 150
             caption = f"{game_description[:120]}..." if not compact else None
             if not image_url:
