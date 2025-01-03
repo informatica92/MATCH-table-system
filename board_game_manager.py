@@ -5,10 +5,10 @@ import utils.streamlit_utils as stu
 from utils.table_system_user import StreamlitTableSystemUser
 
 # # FEATURES
-# TODO: use multi_pages -> https://docs.streamlit.io/get-started/tutorials/create-a-multipage-app
-# TODO: use st.cache_data for bgg info
-# TODO: add "location" (system or user) into the Create (system locations => no user id)
+# TODO: use <link type="boardgameexpansion" id="123" value="Exp Name"/> for selecting expansions
+#   TODO: add list of expansions to table_propositions
 # # IMPROVEMENTS
+# TODO: add "location_id" to table_propositions, location id FK to locations.id on delete set null
 # TODO: use @st.fragments
 # TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (st.link_button) (requires no streamlit_extras => no cookies)
 # TODO: link user table to joined_players and table_propositions
