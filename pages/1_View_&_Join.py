@@ -210,7 +210,8 @@ def timeline_table_propositions(compact=False):
                 duration=selected_row['duration'],
                 notes=selected_row['notes'],
                 joined_count=selected_row['joined_count'],
-                joined_players=selected_row['joined_players']
+                joined_players=selected_row['joined_players'],
+                joined_players_ids=selected_row['joined_players_ids']
             )
 
 def dataframe_table_propositions(compact=False):
@@ -256,7 +257,8 @@ def dataframe_table_propositions(compact=False):
                 duration=selected_row['duration'],
                 notes=selected_row['notes'],
                 joined_count=selected_row['joined_count'],
-                joined_players=selected_row['joined_players']
+                joined_players=selected_row['joined_players'],
+                joined_players_ids=selected_row['joined_players_ids']
             )
 
 

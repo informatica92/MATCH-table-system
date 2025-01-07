@@ -80,7 +80,7 @@ def table_propositions_to_df(
         add_image_url=False, add_bgg_url=False, add_players_fraction=False, add_joined=False,
 ):
     columns = ['table_id', 'game_name', 'max_players', 'date', 'time', 'duration', 'notes', 'bgg_game_id',
-               'proposed_by', 'joined_count', 'joined_players']
+               'proposed_by_id', 'proposed_by', 'joined_count', 'joined_players', 'joined_players_ids']
     df = pd.DataFrame(st.session_state.propositions, columns=columns)
 
     if add_start_and_end_date:
