@@ -33,14 +33,14 @@ In caso si voglia invece eseguire l'applicazione in locale è necessario seguire
  ```
 ## Funzionalità
 
-### Le Tabs sono ora Pages
+### 🎉 Novità: Le Tabs sono ora Pages
 Quelle che precedentemente erano tabs ora sono state trasformate in pagine, per una navigazione più fluida e intuitiva
 
 Seleziona una pagina dal menu a sinistra per accedere alle funzionalità desiderate
 
-### Login(?)
+### 🎉 Novità: Login(?)
 
-### Nuova pagina "User"
+### 🎉 Novità: Nuova pagina "User"
 E' ora possibile accedere ad una pagina interamente dedicata all'utente in cui è possibile impostare campi come:
  - nome
  - cognome
@@ -48,8 +48,8 @@ E' ora possibile accedere ad una pagina interamente dedicata all'utente in cui �
  - Telegram username
  - BGG username
 
-### Funzionalità "Locations"
-A pare la location ufficiale, ogni utente può ora aggiungere una o più location in cui è disponibile a giocare.
+### 🎉 Novità: Funzionalità "Locations"
+A parte le location di sistema, ogni utente può ora aggiungere una o più location in cui è disponibile a giocare.
 
 L'utilizzo delle location sarà introdotto successivamente, per ora è possibile solo aggiungerle e visualizzarle 
 
