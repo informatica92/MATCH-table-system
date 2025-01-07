@@ -71,8 +71,8 @@ def refresh_table_propositions(reason):
     print(f"Table propositions QUERY [{reason}] refreshed in {(time_time() - query_start_time):2f}s "
           f"({len(st.session_state.propositions)} rows)")
 
-def update_table_propositions(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id):
-    sql_manager.update_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id)
+def update_table_propositions(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, location_id):
+    sql_manager.update_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, location_id)
     refresh_table_propositions("Table Update")
 
 def table_propositions_to_df(
@@ -80,7 +80,8 @@ def table_propositions_to_df(
         add_image_url=False, add_bgg_url=False, add_players_fraction=False, add_joined=False,
 ):
     columns = ['table_id', 'game_name', 'max_players', 'date', 'time', 'duration', 'notes', 'bgg_game_id',
-               'proposed_by_id', 'proposed_by', 'joined_count', 'joined_players', 'joined_players_ids']
+               'proposed_by_id', 'proposed_by', 'joined_count', 'joined_players', 'joined_players_ids',
+               'location_alias', 'location_address', 'location_is_system']
     df = pd.DataFrame(st.session_state.propositions, columns=columns)
 
     if add_start_and_end_date:
@@ -167,7 +168,8 @@ def create_callback(game_name, bgg_game_id):
             st.session_state.notes,
             bgg_game_id,
             st.session_state.user.user_id,
-            st.session_state.join_me_by_default
+            st.session_state.join_me_by_default,
+            st.session_state.location[0] if st.session_state.location else None
         )
 
         telegram_bot.send_new_table_message(
@@ -218,6 +220,8 @@ def _on_location_df_change(entire_locations_df: pd.DataFrame):
     for row in list_of_dict_deleted:
         ids_to_delete.append(int(entire_locations_df.loc[row]["id"]))
     sql_manager.delete_locations(ids_to_delete)
+
+    refresh_table_propositions("Location Update")
 
 def manage_user_locations(user_id):
     df = sql_manager.get_user_locations(user_id)

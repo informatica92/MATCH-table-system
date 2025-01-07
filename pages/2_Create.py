@@ -57,7 +57,7 @@ with st.form(key="create_new_proposition_form", border=False):
     # locations
     locations = stu.get_available_locations(st.session_state.user.user_id)
     # 'id', 'street_name', 'city', 'house_number', 'country', 'alias', 'user_id'
-    locations = [(loc[0], f"{loc[5]} (id: {loc[0]})") for loc in locations]  # id, alias (id)
+    locations = [(loc[0], loc[5]) for loc in locations]  # id, alias (id)
     st.selectbox("Location", options=locations, key="location", format_func=lambda x: x[1])
 
     # notes

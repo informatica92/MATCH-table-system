@@ -320,12 +320,18 @@ class SQLManager(object):
                     proposing_user.username as proposed_by,
                     count(jp.id) as joined_count,
                     json_agg(joined_user.username) as joined_users,
-                    json_agg(jp.user_id) as joined_users_id
+                    json_agg(jp.user_id) as joined_users_id,
+                    loc.alias as location_alias,
+                    -- concat loc country, city, street_name, house_number into a single string:
+                    concat_ws(' ', loc.country, loc.city, loc.street_name, loc.house_number) as location_full_address,   
+                    -- create a new field if loc.user_id is null => True, else False
+                    CASE WHEN loc.user_id IS NULL THEN TRUE ELSE FALSE END as is_system_location                                     
                 FROM 
                     table_propositions tp
                     join users proposing_user on proposing_user.id = tp.proposed_by_user_id
                     left join joined_players jp on jp.table_id = tp.id                    
                     left join users joined_user on joined_user.id = jp.user_id
+                    left join locations loc on loc.id = tp.location_id
                 WHERE
                     TRUE
                     {joined_by_me_clause}
@@ -340,7 +346,10 @@ class SQLManager(object):
                     tp.notes,
                     tp.bgg_game_id,
                     tp.proposed_by_user_id,
-                    proposing_user.username
+                    proposing_user.username,
+                    loc.alias,
+                    loc.country, loc.city, loc.street_name, loc.house_number,
+                    loc.user_id
                 order by tp.date, tp.time
             ''', (filter_username,)
         )
@@ -350,7 +359,7 @@ class SQLManager(object):
 
         return propositions
 
-    def create_proposition(self, selected_game, max_players, date_time, time, duration, notes, bgg_game_id, user_id, join_me_by_default):
+    def create_proposition(self, selected_game, max_players, date_time, time, duration, notes, bgg_game_id, user_id, join_me_by_default, location_id):
         conn = self.get_db_connection()
         c = conn.cursor()
         c.execute('''
@@ -362,8 +371,9 @@ class SQLManager(object):
                     duration, 
                     notes, 
                     bgg_game_id, 
-                    proposed_by_user_id
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
+                    proposed_by_user_id,
+                    location_id
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
             ''', (
                 selected_game,
                 max_players,
@@ -372,7 +382,8 @@ class SQLManager(object):
                 duration,
                 notes,
                 bgg_game_id,
-                user_id
+                user_id,
+                location_id
             )
         )
 
@@ -429,7 +440,7 @@ class SQLManager(object):
         c.close()
         conn.close()
 
-    def update_table_proposition(self, table_id, game_name, max_players, date, time, duration, notes, bgg_game_id):
+    def update_table_proposition(self, table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, location_id):
         conn = self.get_db_connection()
         c = conn.cursor()
         c.execute(
@@ -441,10 +452,11 @@ class SQLManager(object):
                     time = %s,
                     duration = %s,
                     notes = %s,
-                    bgg_game_id = %s
+                    bgg_game_id = %s,
+                    location_id = %s
                 WHERE id = %s
             ''',
-            (game_name, max_players, date, time, duration, notes, bgg_game_id, table_id)
+            (game_name, max_players, date, time, duration, notes, bgg_game_id, location_id, table_id)
         )
         conn.commit()
         c.close()
