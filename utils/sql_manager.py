@@ -34,26 +34,8 @@ class SQLManager(object):
         # Create table propositions table if it doesn't exist
         conn = self.get_db_connection()
         c = conn.cursor()
-        c.execute('''CREATE TABLE IF NOT EXISTS table_propositions (
-                        id SERIAL PRIMARY KEY,
-                        game_name TEXT,
-                        max_players INTEGER,
-                        date DATE,
-                        time TIME,
-                        duration INTEGER,
-                        notes TEXT,
-                        bgg_game_id INTEGER, 
-                        proposed_by TEXT,
-                        creation_timestamp_tz timestamptz NULL DEFAULT now()
-                    )''')
 
-        c.execute('''CREATE TABLE IF NOT EXISTS joined_players (
-                        id SERIAL PRIMARY KEY,
-                        table_id INTEGER REFERENCES table_propositions(id) ON DELETE CASCADE,
-                        player_name TEXT,
-                        creation_timestamp_tz timestamptz NULL DEFAULT now(),
-                        UNIQUE(table_id, player_name)
-                    )''')
+        c.execute(f'''CREATE EXTENSION IF NOT EXISTS citext;''')
 
         c.execute('''CREATE TABLE IF NOT EXISTS users (
                         id SERIAL PRIMARY KEY,  
@@ -72,7 +54,7 @@ class SQLManager(object):
         # Table includes fields are street name, city, house number (if any)
         c.execute('''CREATE TABLE IF NOT EXISTS locations (
                         id SERIAL PRIMARY KEY,
-                        user_id INTEGER REFERENCES users(id),
+                        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
                         street_name TEXT,
                         city TEXT,
                         house_number TEXT,
@@ -81,6 +63,28 @@ class SQLManager(object):
                         creation_timestamp_tz timestamptz NULL DEFAULT now()
                     )
                     ''')
+
+        c.execute('''CREATE TABLE IF NOT EXISTS table_propositions (
+                        id SERIAL PRIMARY KEY,
+                        game_name TEXT,
+                        max_players INTEGER,
+                        date DATE,
+                        time TIME,
+                        duration INTEGER,
+                        notes TEXT,
+                        bgg_game_id INTEGER, 
+                        proposed_by_user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                        location_id INTEGER REFERENCES locations(id) ON DELETE SET NULL,
+                        creation_timestamp_tz timestamptz NULL DEFAULT now()
+                    )''')
+
+        c.execute('''CREATE TABLE IF NOT EXISTS joined_players (
+                        id SERIAL PRIMARY KEY,
+                        table_id INTEGER REFERENCES table_propositions(id) ON DELETE CASCADE,
+                        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                        creation_timestamp_tz timestamptz NULL DEFAULT now(),
+                        UNIQUE(table_id, user_id)
+                    )''')
 
         c.execute('''CREATE OR REPLACE FUNCTION check_max_players()
                      RETURNS trigger
@@ -238,7 +242,7 @@ class SQLManager(object):
 
         # Check if the user exists
         query = f'''SELECT id, username, name, surname, bgg_username, telegram_username, is_admin FROM {self._schema}.users WHERE email = %s'''
-        print(query)
+        # print(query)
         c.execute(query, (email,))
 
         result = c.fetchone()
@@ -312,12 +316,16 @@ class SQLManager(object):
                     tp.duration,
                     tp.notes,
                     tp.bgg_game_id,
-                    tp.proposed_by,
+                    tp.proposed_by_user_id,
+                    proposing_user.username as proposed_by,
                     count(jp.id) as joined_count,
-                    array_agg(jp.player_name) 
+                    json_agg(joined_user.username) as joined_users,
+                    json_agg(jp.user_id) as joined_users_id
                 FROM 
                     table_propositions tp
-                    left join joined_players jp on jp.table_id = tp.id
+                    join users proposing_user on proposing_user.id = tp.proposed_by_user_id
+                    left join joined_players jp on jp.table_id = tp.id                    
+                    left join users joined_user on joined_user.id = jp.user_id
                 WHERE
                     TRUE
                     {joined_by_me_clause}
@@ -331,7 +339,8 @@ class SQLManager(object):
                     tp.duration,
                     tp.notes,
                     tp.bgg_game_id,
-                    tp.proposed_by
+                    tp.proposed_by_user_id,
+                    proposing_user.username
                 order by tp.date, tp.time
             ''', (filter_username,)
         )
@@ -341,7 +350,7 @@ class SQLManager(object):
 
         return propositions
 
-    def create_proposition(self, selected_game, max_players, date_time, time, duration, notes, bgg_game_id, username, join_me_by_default):
+    def create_proposition(self, selected_game, max_players, date_time, time, duration, notes, bgg_game_id, user_id, join_me_by_default):
         conn = self.get_db_connection()
         c = conn.cursor()
         c.execute('''
@@ -353,7 +362,7 @@ class SQLManager(object):
                     duration, 
                     notes, 
                     bgg_game_id, 
-                    proposed_by
+                    proposed_by_user_id
                 ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
             ''', (
                 selected_game,
@@ -363,7 +372,7 @@ class SQLManager(object):
                 duration,
                 notes,
                 bgg_game_id,
-                username
+                user_id
             )
         )
 
@@ -371,31 +380,31 @@ class SQLManager(object):
         last_row_id = c.fetchone()[0]
 
         if join_me_by_default:
-            self.join_table(last_row_id, username)
+            self.join_table(last_row_id, user_id)
 
         c.close()
         conn.close()
 
         return last_row_id
 
-    def leave_table(self, table_id, joined_player):
+    def leave_table(self, table_id, joined_player_id):
         conn = self.get_db_connection()
         c = conn.cursor()
         c.execute(
-            '''DELETE FROM joined_players WHERE table_id = %s AND player_name = %s''',
-            (table_id, joined_player)
+            '''DELETE FROM joined_players WHERE table_id = %s AND user_id = %s''',
+            (table_id, joined_player_id)
         )
         conn.commit()
         c.close()
         conn.close()
 
-    def join_table(self, table_id, username):
+    def join_table(self, table_id, user_id):
         conn = self.get_db_connection()
         c = conn.cursor()
         try:
             c.execute(
-                '''INSERT INTO joined_players (table_id, player_name) VALUES (%s, %s)''',
-                (table_id, username)
+                '''INSERT INTO joined_players (table_id, user_id) VALUES (%s, %s)''',
+                (table_id, user_id)
             )
             conn.commit()
         except psycopg2.IntegrityError as e:

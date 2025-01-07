@@ -64,7 +64,7 @@ def dialog_delete_table_proposition(table_id: int, game_name: str, joined_count:
             stu.delete_callback(table_id)
             st.rerun()
 
-def display_table_proposition(section_name, compact, table_id, game_name, bgg_game_id, proposed_by, max_players, date, time, duration, notes, joined_count, joined_players):
+def display_table_proposition(section_name, compact, table_id, game_name, bgg_game_id, proposed_by, max_players, date, time, duration, notes, joined_count, joined_players, joined_players_ids):
     # Check if the BGG game ID is valid and set the BGG URL
     if bgg_game_id and int(bgg_game_id) >= 1:
         bgg_url = get_bgg_url(bgg_game_id)
@@ -107,7 +107,7 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
     with col3:
         is_full = joined_count >= max_players
         st.write(f":{'red' if is_full else 'green'}[**Joined Players ({joined_count}/{max_players}):**]")
-        for joined_player in joined_players or []:
+        for joined_player, joined_player_id in zip(joined_players, joined_players_ids) or []:
             if joined_player is not None:
                 player_col1, player_col2 = st.columns([1, 1])
                 with player_col1:
@@ -117,7 +117,7 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
                     st.button(
                         "⛔ Leave",
                         key=f"leave_{table_id}_{joined_player}_{section_name}",
-                        on_click=stu.leave_callback, args=[table_id, joined_player],
+                        on_click=stu.leave_callback, args=[table_id, joined_player, joined_player_id],
                         disabled=not stu.can_current_user_leave(joined_player, proposed_by),
                         help="Only the table owner or the player himself can leave a table."
                     )
@@ -134,7 +134,7 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
                     key=f"join_{table_id}_{section_name}",
                     use_container_width=True,
                     disabled=stu.username_in_joined_players(joined_players),
-                    on_click=stu.join_callback, args=[table_id, st.session_state['username']]
+                    on_click=stu.join_callback, args=[table_id, st.session_state['username'], st.session_state.user.user_id]
                 )
             else:
                 st.warning("Set a username to join a table.")
@@ -166,8 +166,8 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
 
 def view_table_propositions(compact=False):
     for proposition in st.session_state.propositions:
-        (table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, proposed_by,
-         joined_count, joined_players) = proposition
+        (table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, proposed_by_user_id, proposed_by,
+         joined_count, joined_players, joined_players_ids) = proposition
         display_table_proposition(
             section_name="list",
             compact=compact,
@@ -181,7 +181,8 @@ def view_table_propositions(compact=False):
             duration=duration,
             notes=notes,
             joined_count=joined_count,
-            joined_players=joined_players
+            joined_players=joined_players,
+            joined_players_ids=joined_players_ids
         )
 
 def timeline_table_propositions(compact=False):

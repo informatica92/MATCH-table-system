@@ -40,6 +40,7 @@ with st.form("user_setting_form", border=False):
                 f"\t- Telegram username: {st.session_state.telegram_username_user_setting}\n"
 
             st.success(f"User updated successfully:\n\n{new_user_details}")
+            stu.refresh_table_propositions("User update")
         else:
             st.error(f"Error updating username: {st.session_state.update_username_from_user_error}")
         st.session_state["update_username_from_user_error"] = None

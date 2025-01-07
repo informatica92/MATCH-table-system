@@ -137,17 +137,17 @@ def time_option_to_time(time_option):
     time = datetime.strptime(time_option.split(" - ")[0], "%H:%M").time()
     return time
 
-def join_callback(table_id, joining_username):
+def join_callback(table_id, joining_username, joining_user_id):
     try:
-        sql_manager.join_table(table_id, joining_username)
+        sql_manager.join_table(table_id, joining_user_id)
         refresh_table_propositions("Join")
         st.toast(f"✅ Joined Table {table_id} as {joining_username}!")
     except AttributeError:
         st.toast("🚫 You have already joined this table.")
 
 
-def leave_callback(table_id, leaving_username):
-    sql_manager.leave_table(table_id, leaving_username)
+def leave_callback(table_id, leaving_username, leaving_user_id):
+    sql_manager.leave_table(table_id, leaving_user_id)
     refresh_table_propositions("Leave")
     st.toast(f"⛔ {leaving_username} left Table {table_id}")
 
@@ -166,7 +166,7 @@ def create_callback(game_name, bgg_game_id):
             st.session_state.duration,
             st.session_state.notes,
             bgg_game_id,
-            st.session_state.username,
+            st.session_state.user.user_id,
             st.session_state.join_me_by_default
         )
 
