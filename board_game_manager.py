@@ -10,7 +10,6 @@ from utils.table_system_user import StreamlitTableSystemUser
 #   TODO: the Edit should allow to add or remove expansions
 #   TODO: add expansions into list and dataframe view
 # # IMPROVEMENTS
-# TODO: add "location_id" to table_propositions, location id FK to locations.id on delete set null
 # TODO: use @st.fragments
 # TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (st.link_button) (requires no streamlit_extras => no cookies)
 
