@@ -7,21 +7,6 @@ from utils.bgg_manager import get_bgg_game_info, get_bgg_url
 from utils.altair_manager import timeline_chart
 
 
-# # FEATURES
-# TODO: use multi_pages -> https://docs.streamlit.io/get-started/tutorials/create-a-multipage-app
-# TODO: use st.cache_data for bgg info
-# TODO: add "location" (system or user) into the Create (system locations => no user id)
-# # IMPROVEMENTS
-# TODO: use @st.fragments
-# TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (st.link_button) (requires no streamlit_extras => no cookies)
-# TODO: link user table to joined_players and table_propositions
-#   TODO: joined_players table -> change player_name to FK to users.id
-#   TODO: change the get_table_propositions query to keep the same structure but joining now joined_players and users
-#   TODO: table_propositions table -> change proposed_by to FK to users.id
-#   TODO: change the leave_table to remove row using user_id instead of player_name
-#   TODO: change the join_table to add row using user_id instead of player_name
-
-
 @st.dialog("🖋️ Edit Table")
 def dialog_edit_table_proposition(table_id, old_name, old_max_players, old_date, old_time, old_duration, old_notes, old_bgg_game_id, joined_count, old_location_alias):
     with st.form(key=f"form-edit-{table_id}"):
