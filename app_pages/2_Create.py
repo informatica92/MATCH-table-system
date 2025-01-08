@@ -30,8 +30,8 @@ if bgg_game_id:
 
 with st.form(key="create_new_proposition_form", border=False):
 
-    # # expansions selector
-    # expansions_to_adopt = st.multiselect("Select expansions", available_expansions, key="expansions")
+    # expansions selector
+    expansions_to_adopt = st.multiselect("Select expansions", available_expansions, key="expansions", format_func=lambda x: x['value'])
 
     # number of players and duration
     col1, col2 = st.columns([1, 1])

@@ -1,4 +1,5 @@
 import psycopg2
+import json
 import os
 import pandas as pd
 
@@ -75,6 +76,7 @@ class SQLManager(object):
                         bgg_game_id INTEGER, 
                         proposed_by_user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
                         location_id INTEGER REFERENCES locations(id) ON DELETE SET NULL,
+                        expansions JSONB DEFAULT '[]',
                         creation_timestamp_tz timestamptz NULL DEFAULT now()
                     )''')
 
@@ -325,7 +327,8 @@ class SQLManager(object):
                     -- concat loc country, city, street_name, house_number into a single string:
                     concat_ws(' ', loc.country, loc.city, loc.street_name, loc.house_number) as location_full_address,   
                     -- create a new field if loc.user_id is null => True, else False
-                    CASE WHEN loc.user_id IS NULL THEN TRUE ELSE FALSE END as is_system_location                                     
+                    CASE WHEN loc.user_id IS NULL THEN TRUE ELSE FALSE END as is_system_location,
+                    expansions                                     
                 FROM 
                     table_propositions tp
                     join users proposing_user on proposing_user.id = tp.proposed_by_user_id
@@ -359,7 +362,7 @@ class SQLManager(object):
 
         return propositions
 
-    def create_proposition(self, selected_game, max_players, date_time, time, duration, notes, bgg_game_id, user_id, join_me_by_default, location_id):
+    def create_proposition(self, selected_game, max_players, date_time, time, duration, notes, bgg_game_id, user_id, join_me_by_default, location_id, expansions):
         conn = self.get_db_connection()
         c = conn.cursor()
         c.execute('''
@@ -372,8 +375,9 @@ class SQLManager(object):
                     notes, 
                     bgg_game_id, 
                     proposed_by_user_id,
-                    location_id
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
+                    location_id,
+                    expansions
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
             ''', (
                 selected_game,
                 max_players,
@@ -383,7 +387,8 @@ class SQLManager(object):
                 notes,
                 bgg_game_id,
                 user_id,
-                location_id
+                location_id,
+                json.dumps(expansions)
             )
         )
 
@@ -440,7 +445,7 @@ class SQLManager(object):
         c.close()
         conn.close()
 
-    def update_table_proposition(self, table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, location_id):
+    def update_table_proposition(self, table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, location_id, expansions):
         conn = self.get_db_connection()
         c = conn.cursor()
         c.execute(
@@ -453,10 +458,11 @@ class SQLManager(object):
                     duration = %s,
                     notes = %s,
                     bgg_game_id = %s,
-                    location_id = %s
+                    location_id = %s,
+                    expansions = %s
                 WHERE id = %s
             ''',
-            (game_name, max_players, date, time, duration, notes, bgg_game_id, location_id, table_id)
+            (game_name, max_players, date, time, duration, notes, bgg_game_id, location_id, json.dumps(expansions), table_id)
         )
         conn.commit()
         c.close()

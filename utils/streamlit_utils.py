@@ -71,8 +71,8 @@ def refresh_table_propositions(reason):
     print(f"Table propositions QUERY [{reason}] refreshed in {(time_time() - query_start_time):.4f}s "
           f"({len(st.session_state.propositions)} rows)")
 
-def update_table_propositions(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, location_id):
-    sql_manager.update_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, location_id)
+def update_table_propositions(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, location_id, expansions):
+    sql_manager.update_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, location_id, expansions)
     refresh_table_propositions("Table Update")
 
 def table_propositions_to_df(
@@ -81,7 +81,7 @@ def table_propositions_to_df(
 ):
     columns = ['table_id', 'game_name', 'max_players', 'date', 'time', 'duration', 'notes', 'bgg_game_id',
                'proposed_by_id', 'proposed_by', 'joined_count', 'joined_players', 'joined_players_ids',
-               'location_alias', 'location_address', 'location_is_system']
+               'location_alias', 'location_address', 'location_is_system', 'expansions']
     df = pd.DataFrame(st.session_state.propositions, columns=columns)
 
     if add_start_and_end_date:
@@ -169,7 +169,8 @@ def create_callback(game_name, bgg_game_id):
             bgg_game_id,
             st.session_state.user.user_id,
             st.session_state.join_me_by_default,
-            st.session_state.location[0] if st.session_state.location else None
+            st.session_state.location[0] if st.session_state.location else None,
+            st.session_state.expansions
         )
 
         telegram_bot.send_new_table_message(

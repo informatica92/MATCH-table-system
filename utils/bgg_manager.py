@@ -36,7 +36,7 @@ def get_bgg_game_info(game_id):
 
         expansions = []
         for expansion in root.findall('item/link[@type="boardgameexpansion"]'):
-            expansions.append(expansion.get('value'))
+            expansions.append({'id': expansion.get('id'), 'value': expansion.get('value')})
 
         return image_url, html.unescape(game_description), categories, mechanics, expansions
     except Exception as e:

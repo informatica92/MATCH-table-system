@@ -8,7 +8,7 @@ from utils.altair_manager import timeline_chart
 
 
 @st.dialog("🖋️ Edit Table")
-def dialog_edit_table_proposition(table_id, old_name, old_max_players, old_date, old_time, old_duration, old_notes, old_bgg_game_id, joined_count, old_location_alias):
+def dialog_edit_table_proposition(table_id, old_name, old_max_players, old_date, old_time, old_duration, old_notes, old_bgg_game_id, joined_count, old_location_alias, old_expansions):
     with st.form(key=f"form-edit-{table_id}"):
         col1, col2 = st.columns([1, 1])
         with col1:
@@ -29,11 +29,17 @@ def dialog_edit_table_proposition(table_id, old_name, old_max_players, old_date,
                 location_old_index = i
         st.selectbox("Location", options=locations, index=location_old_index, key="location_edit", format_func=lambda x: x[1])
 
+        # expansions
+        expansions_options = get_bgg_game_info(bgg_game_id)[4]
+        expansions_default = old_expansions
+        st.multiselect("Expansions", options=expansions_options, default=expansions_default, format_func=lambda x: x['value'], key="expansions_edit")
+
+        # notes
         notes = st.text_area("Notes", value=old_notes)
 
         submitted = st.form_submit_button("💾 Update")
         if submitted:
-            stu.update_table_propositions(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, st.session_state.location_edit[0] if st.session_state.location_edit else None)
+            stu.update_table_propositions(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, st.session_state.location_edit[0] if st.session_state.location_edit else None, st.session_state.expansions_edit)
             st.rerun()
 
 @st.dialog("⛔ Delete Proposition")
@@ -57,7 +63,9 @@ def dialog_delete_table_proposition(table_id: int, game_name: str, joined_count:
             stu.delete_callback(table_id)
             st.rerun()
 
-def display_table_proposition(section_name, compact, table_id, game_name, bgg_game_id, proposed_by, max_players, date, time, duration, notes, joined_count, joined_players, joined_players_ids, location_alias, location_address, location_is_system):
+def display_table_proposition(section_name, compact, table_id, game_name, bgg_game_id, proposed_by, max_players, date,
+                              time, duration, notes, joined_count, joined_players, joined_players_ids, location_alias,
+                              location_address, location_is_system, expansions):
     # Check if the BGG game ID is valid and set the BGG URL
     if bgg_game_id and int(bgg_game_id) >= 1:
         bgg_url = get_bgg_url(bgg_game_id)
@@ -91,7 +99,9 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
             st.write(f"**Date Time:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{date} {time.strftime('%H:%M')}")
             st.write(f"**Duration:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{duration} hours")
             if location_alias:
-                st.write(f"**Location:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{location_alias}](https://google.it/maps/place/{location_address.replace(' ', '+')})")
+                location_md = f"🗺️[{location_alias}](https://google.it/maps/place/{location_address.replace(' ', '+')})"
+                st.write(f"**Location:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{location_md}")
+            st.write(f"**Expansions:**" + ''.join([f"\n- [{expansion['value']}]({get_bgg_url(expansion['id'])})" for expansion in expansions]))
             st.write(f"**Notes:**")
             st.write(notes)
         else:
@@ -154,7 +164,7 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
             disabled=not stu.can_current_user_delete_and_edit(proposed_by),
             help="Only the table owner can edit their tables."
         ):
-            dialog_edit_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, joined_count, location_alias)
+            dialog_edit_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, joined_count, location_alias, expansions)
 
     with col4:
         pass
@@ -162,7 +172,7 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
 def view_table_propositions(compact=False):
     for proposition in st.session_state.propositions:
         (table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, proposed_by_user_id, proposed_by,
-         joined_count, joined_players, joined_players_ids, loc_alias, loc_address, loc_is_system) = proposition
+         joined_count, joined_players, joined_players_ids, loc_alias, loc_address, loc_is_system, expansions) = proposition
         display_table_proposition(
             section_name="list",
             compact=compact,
@@ -180,7 +190,8 @@ def view_table_propositions(compact=False):
             joined_players_ids=joined_players_ids,
             location_alias=loc_alias,
             location_address=loc_address,
-            location_is_system=loc_is_system
+            location_is_system=loc_is_system,
+            expansions=expansions
         )
 
 def timeline_table_propositions(compact=False):
@@ -212,7 +223,8 @@ def timeline_table_propositions(compact=False):
                 joined_players_ids=selected_row['joined_players_ids'],
                 location_alias=selected_row['location_alias'],
                 location_address=selected_row['location_address'],
-                location_is_system=selected_row['location_is_system']
+                location_is_system=selected_row['location_is_system'],
+                expansions=selected_row['expansions']
             )
 
 def dataframe_table_propositions(compact=False):
@@ -262,7 +274,8 @@ def dataframe_table_propositions(compact=False):
                 joined_players_ids=selected_row['joined_players_ids'],
                 location_alias=selected_row['location_alias'],
                 location_address=selected_row['location_address'],
-                location_is_system=selected_row['location_is_system']
+                location_is_system=selected_row['location_is_system'],
+                expansions=selected_row['expansions']
             )
 
 
