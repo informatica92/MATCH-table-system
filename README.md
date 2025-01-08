@@ -33,6 +33,10 @@ In caso si voglia invece eseguire l'applicazione in locale è necessario seguire
  ```
 ## Funzionalità
 
+### 🎉 Novità: Gestione delle Espansioni
+E' ora possibile aggiungere espansioni ai giochi, in modo da poter specificare quali espansioni saranno utilizzate durante la partita.
+E' anche possibile modificare le espansioni in seguito utilizzando il tasto "Edit" disponibile sotto ogni proposta.
+
 ### 🎉 Novità: Le Tabs sono ora Pages
 Quelle che precedentemente erano tabs ora sono state trasformate in pagine, per una navigazione più fluida e intuitiva
 
