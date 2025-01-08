@@ -16,10 +16,10 @@ from utils.table_system_user import StreamlitTableSystemUser
 
 pg = st.navigation(
     [
-        st.Page("pages/1_View_&_Join.py", icon="📜", default=True),
-        st.Page("pages/2_Create.py", icon="➕"),
-        st.Page("pages/3_Map.py", icon="🗺️"),
-        st.Page("pages/4_User.py", icon="👦🏻")
+        st.Page("app_pages/1_View_&_Join.py", icon="📜", default=True),
+        st.Page("app_pages/2_Create.py", icon="➕"),
+        st.Page("app_pages/3_Map.py", icon="🗺️"),
+        st.Page("app_pages/4_User.py", icon="👦🏻")
     ]
 )
 
