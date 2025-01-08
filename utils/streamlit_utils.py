@@ -68,7 +68,7 @@ def refresh_table_propositions(reason):
     else:
         filter_username = None
     st.session_state.propositions = sql_manager.get_table_propositions(joined_by_me, filter_username)
-    print(f"Table propositions QUERY [{reason}] refreshed in {(time_time() - query_start_time):2f}s "
+    print(f"Table propositions QUERY [{reason}] refreshed in {(time_time() - query_start_time):.4f}s "
           f"({len(st.session_state.propositions)} rows)")
 
 def update_table_propositions(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, location_id):

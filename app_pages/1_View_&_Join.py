@@ -296,4 +296,4 @@ else:
     else:
         dataframe_table_propositions(st.session_state['compact_view'])
 
-print(f"Table propositions VIEW refreshed in {(time_time() - view_start_time):2f}s")
+print(f"Table propositions VIEW refreshed in {(time_time() - view_start_time):.4f}s")
