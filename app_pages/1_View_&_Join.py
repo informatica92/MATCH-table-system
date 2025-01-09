@@ -278,8 +278,9 @@ def dataframe_table_propositions(compact=False):
                 expansions=selected_row['expansions']
             )
 
-
-st.title(f"{stu.get_title()}")
+col_title, col_help = st.columns([9, 1])
+stu.add_title_text(col_title, frmt="{title}")
+stu.add_help_button(col_help)
 
 with st.sidebar:
     with st.container(border=True):

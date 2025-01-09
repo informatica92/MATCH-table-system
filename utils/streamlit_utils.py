@@ -43,6 +43,22 @@ telegram_bot = TelegramNotifications()
 def get_title():
     return os.environ.get("TITLE") or "Board Game Proposals"
 
+def add_title_text(col, frmt="{title}"):
+    col.title(frmt.format(title=get_title()))
+
+def add_help_button(col):
+    col.write("")
+    with col.popover("", icon="ℹ️", use_container_width=True):
+        st.write(f"Expanding the sidebar on the left ◀️ you can navigate among pages:\n\n"
+         f"- **📜 View & Join**: view the table propositions, join, leave or edit them\n"
+         f"   - **List**: view the table propositions as a list\n"
+         f"   - **Timeline**: view the table propositions as a timeline\n"
+         f"   - **Table**: view the table propositions as a table\n"
+         f" - **➕ Create**: create a new table proposition\n"
+         f" - **🗺️ Map**: view where the main location is and what is around there for food and drinks\n"
+         f" - **👦🏻 User**: view the user profile (name, surname, username...) and manage locations\n\n"
+         f"NB: *you have to set a **username** into the **\"User\"** page to join, create or edit tables*")
+
 def get_logo():
     return os.environ.get("LOGO") or "images/logo.jpg"
 

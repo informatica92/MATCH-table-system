@@ -4,7 +4,10 @@ import os
 
 import utils.streamlit_utils as stu
 
-st.title(f"{stu.get_title()}")
+col_title, col_help = st.columns([9, 1])
+stu.add_title_text(col_title, frmt="{title}")
+stu.add_help_button(col_help)
+
 st.header("🗺️ Map")
 
 gmap_url = os.environ.get('GMAP_MAP_URL')

@@ -5,7 +5,9 @@ from utils.telegram_notifications import get_telegram_profile_page_url
 from utils.bgg_manager import get_bgg_profile_page_url
 
 
-st.title(f"{stu.get_title()}")
+col_title, col_help = st.columns([9, 1])
+stu.add_title_text(col_title, frmt="{title}")
+stu.add_help_button(col_help)
 
 st.subheader("User settings")
 

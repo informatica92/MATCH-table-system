@@ -5,7 +5,10 @@ import os
 import utils.streamlit_utils as stu
 from utils.bgg_manager import search_bgg_games, get_bgg_game_info
 
-st.title(f"{stu.get_title()}")
+col_title, col_help = st.columns([9, 1])
+stu.add_title_text(col_title, frmt="{title}")
+stu.add_help_button(col_help)
+
 st.header("➕ Create a New Table Proposition")
 
 game_name = st.text_input("Search for Game Name")
