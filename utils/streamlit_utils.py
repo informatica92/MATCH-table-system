@@ -20,7 +20,7 @@ CUSTOM_TEXT_WITH_LABEL_AND_SIZE = "<p style='font-size:{size}px;'>{label}</p>"
 
 BOUNCE_SIDEBAR_ICON = r"""
     <style>
-    .st-emotion-cache-1f3w014 {
+    .st-emotion-cache-qsoh6x {
             animation: bounce 2s ease infinite;
         }
     @keyframes bounce {
