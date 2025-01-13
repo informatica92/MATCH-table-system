@@ -46,7 +46,7 @@ def get_title():
 def add_title_text(col, frmt="{title}"):
     col.title(frmt.format(title=get_title()))
 
-def add_help_button(col):
+def add_help_button(col: st.delta_generator.DeltaGenerator):
     col.write("")
     with col.popover("", icon="ℹ️", use_container_width=True):
         st.write(f"Expanding the sidebar on the left ◀️ you can navigate among pages:\n\n"
