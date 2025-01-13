@@ -160,7 +160,7 @@ class SQLManager(object):
 
         return _id
 
-    def update_user_locations(self, user_id, locations_df):
+    def update_user_locations(self, locations_df):
         conn = self.get_db_connection()
         c = conn.cursor()
 
@@ -173,8 +173,8 @@ class SQLManager(object):
                             house_number = %s,
                             country = %s,
                             alias = %s
-                        WHERE user_id = %s AND id = %s
-                    ''', (row['street_name'], row['city'], row['house_number'], row['country'], row['alias'], user_id, row['id'])
+                        WHERE id = %s
+                    ''', (row['street_name'], row['city'], row['house_number'], row['country'], row['alias'], row['id'])
             )
 
         conn.commit()

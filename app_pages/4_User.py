@@ -46,7 +46,12 @@ with st.form("user_setting_form", border=False):
         else:
             st.error(f"Error updating username: {st.session_state.update_username_from_user_error}")
         st.session_state["update_username_from_user_error"] = None
+
+st.subheader("User Admin")
 st.toggle("Admin", value=st.session_state.user.is_admin, disabled=True, help="Ask the admin to change this setting for your user")
+if st.session_state.user.is_admin:
+    stu.manage_user_locations(user_id=None)
+    pass
 
 st.subheader("User locations")
 stu.st_write("Use the following list to manage your locations. Having one or more registered location will allow "

@@ -211,16 +211,16 @@ def get_num_active_filters(as_str=True):
     filter_label_num_active_filters = "" if number_of_active_filters == 0 else f" ({number_of_active_filters}) "
     return filter_label_num_active_filters if as_str else number_of_active_filters
 
-def _on_location_df_change(entire_locations_df: pd.DataFrame):
+def _on_location_df_change(entire_locations_df: pd.DataFrame, user_id: int|None):
 
-    list_of_dict_edited = st.session_state.data_editor_locations_df["edited_rows"]
-    list_of_dict_added = st.session_state.data_editor_locations_df["added_rows"]
-    list_of_dict_deleted = st.session_state.data_editor_locations_df["deleted_rows"]
+    list_of_dict_edited = st.session_state[f"data_editor_locations_df_{user_id}"]["edited_rows"]
+    list_of_dict_added = st.session_state[f"data_editor_locations_df_{user_id}"]["added_rows"]
+    list_of_dict_deleted = st.session_state[f"data_editor_locations_df_{user_id}"]["deleted_rows"]
 
     # added
     for row in list_of_dict_added:
         if row.get("street_name") and row.get("city") and row.get("house_number") and row.get("country") and row.get("alias"):
-            sql_manager.add_user_location(st.session_state.user.user_id, row.get("street_name"), row.get("city"), row.get("house_number"), row.get("country"), row.get("alias"))
+            sql_manager.add_user_location(user_id, row.get("street_name"), row.get("city"), row.get("house_number"), row.get("country"), row.get("alias"))
             st.toast(f"✅ Added location {row.get('alias')}")
 
     # updated
@@ -230,7 +230,7 @@ def _on_location_df_change(entire_locations_df: pd.DataFrame):
         tmp.update(list_of_dict_edited[index])
         edited_locations_df.append(tmp)
     edited_locations_df = pd.DataFrame(edited_locations_df)
-    sql_manager.update_user_locations(user_id=st.session_state.user.user_id, locations_df=edited_locations_df)
+    sql_manager.update_user_locations(locations_df=edited_locations_df)
 
     # deleted
     ids_to_delete = []
@@ -240,8 +240,8 @@ def _on_location_df_change(entire_locations_df: pd.DataFrame):
 
     refresh_table_propositions("Location Update")
 
-def manage_user_locations(user_id):
-    df = sql_manager.get_user_locations(user_id)
+def manage_user_locations(user_id: int|None):
+    df = sql_manager.get_user_locations(user_id, include_system_ones=True if not user_id else False)
     df = df[["id", "alias", "country", "city", "street_name", "house_number"]]
 
     column_config = {
@@ -296,9 +296,9 @@ def manage_user_locations(user_id):
         use_container_width=True,
         disabled=["id"],
         num_rows="dynamic",
-        key="data_editor_locations_df",
+        key=f"data_editor_locations_df_{user_id}",
         on_change=_on_location_df_change,
-        kwargs={"entire_locations_df": df},
+        kwargs={"entire_locations_df": df, "user_id": user_id},
         column_config=column_config
     )
 
