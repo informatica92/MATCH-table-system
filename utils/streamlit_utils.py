@@ -4,7 +4,7 @@ import streamlit as st
 
 import pandas as pd
 from time import time as time_time
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from utils.telegram_notifications import TelegramNotifications
 from utils.sql_manager import SQLManager
