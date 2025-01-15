@@ -77,9 +77,11 @@ Le espansioni selezionate in fase di "Create" vengono poi mostrate nella pagine 
 E' anche possibile modificare le espansioni in seguito utilizzando il tasto "Edit" disponibile sotto ogni proposta.
 
 ### 🎉 Novità: Le Tabs sono ora Pages
-Quelle che precedentemente erano tabs ora sono state trasformate in pagine, per una navigazione più fluida e intuitiva
+<p><img src="https://github.com/user-attachments/assets/6394b19d-08e8-4ede-8227-ca28c6739ab4" alt="tabs vs pages" height="180" width="800"/></p>
 
-Seleziona una pagina dal menu a sinistra per accedere alle funzionalità desiderate
+Quelle che precedentemente erano tabs (destra nell'immagine) ora sono state trasformate in pagine (sinistra nell'immagine), per una navigazione più fluida e intuitiva
+
+Seleziona una pagina dal menu a sinistra, all'interno della sidebar, per accedere alle funzionalità desiderate
 
 ### 🎉 Novità: Login(?)
 
