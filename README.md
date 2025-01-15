@@ -96,9 +96,17 @@ E' ora possibile accedere ad una pagina interamente dedicata all'utente in cui �
  - BGG username
 
 ### 🎉 Novità: Funzionalità "Locations"
+<p><img src="https://github.com/user-attachments/assets/c0755854-42f3-41c4-a87d-0f7f53413ea5" alt="user page" height="400"/></p>
+
 A parte le location di sistema, ogni utente può ora aggiungere una o più location in cui è disponibile a giocare.
 
-L'utilizzo delle location sarà introdotto successivamente, per ora è possibile solo aggiungerle e visualizzarle 
+Le Location di Sistema (Admin Locations) sono gestibili solo dagli utenti Admin. Si tratta di una impostazione a livello DB.
+
+In fase di creazione di un tavolo, nella pagina "Create", è possibile selezionare la location nella quale si terrà il tavolo: 
+ - in occasione degli eventi MATCH, usare quindi la location (di sistema) "MATCH"
+ - se lo si desidera, sarà quindi possibile aprire tavoli anche durante tutto l'anno con le location delle varie altre associazioni (es "Masseria Andriani", "Biblioteca di Putignano", "Officina dei Saperi"...)
+
+ATTENZIONE: le location di sistema appariranno sempre a tutti gli utenti e sono quindi trasversali, le location utente, invece, possono essere usate come location solo dall'utente che l'ha creata.
 
 ### Delete ora con finestra di conferma e permette eliminazione di tavoli con 1+ giocatori
 <p><img src="https://github.com/user-attachments/assets/b3589ef2-7869-43fa-9f53-94d2d6562e5a" alt="join toast" height="400"/></p>
