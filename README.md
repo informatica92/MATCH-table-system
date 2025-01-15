@@ -86,10 +86,12 @@ Seleziona una pagina dal menu a sinistra, all'interno della sidebar, per acceder
 ### 🎉 Novità: Login(?)
 
 ### 🎉 Novità: Nuova pagina "User"
+<p><img src="https://github.com/user-attachments/assets/be58f0b5-8f3c-42c5-b9fd-340c60d39b27" alt="user page" height="400"/></p>
+
 E' ora possibile accedere ad una pagina interamente dedicata all'utente in cui è possibile impostare campi come:
- - nome
- - cognome
- - username
+ - Nome
+ - Cognome
+ - Username
  - Telegram username
  - BGG username
 
