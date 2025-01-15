@@ -46,9 +46,9 @@ with st.form(key="create_new_proposition_form", border=False):
     # date and time
     col1, col2 = st.columns([1, 1])
     with col1:
-        default_date_str = os.environ.get('DEFAULT_DATE')
-        default_date = datetime.strptime(default_date_str, '%Y-%m-%d') if default_date_str else datetime.now()
-        date_time = st.date_input("Date", value=default_date, key="date")
+        # get the optional default date from the environment variable, otherwise it will be set to the current date
+        default_date = datetime.strptime(os.environ.get('DEFAULT_DATE', datetime.now().strftime("%Y-%m-%d")), "%Y-%m-%d")
+        date_time = st.date_input("Date", value=default_date if default_date>datetime.now() else datetime.now(), key="date")
     with col2:
         # OLD version with granular time selection:
         # time = st.time_input("Time", step=60*30, key="time")
