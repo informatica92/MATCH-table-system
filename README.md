@@ -56,6 +56,7 @@ In caso si voglia invece eseguire l'applicazione in locale è necessario seguire
 |                       | client_id            | Client ID di Auth0                                                                                                                                     |                      | Sì           |
 |                       | client_secret        | Client Secret di Auth0                                                                                                                                 |                      | Sì           |
 |                       | server_metadata_url  | URL del server metadata di Auth0, nella forma https://`dominio auth0`.com/.well-known/openid-configuration                                             |                      | Sì           |
+
 NB: Alcune "Section" iniziando con `#` sono commenti e non vengono considerate, servo solo a scopo di organizzazione del file.
 
 Le "Section" che invece hanno forma `[nome]` sono obbligatorie e devono essere rispettate.
