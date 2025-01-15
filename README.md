@@ -68,7 +68,12 @@ Le "Section" che invece hanno forma `[nome]` sono obbligatorie e devono essere r
 ## Funzionalità
 
 ### 🎉 Novità: Gestione delle Espansioni
+<p><img src="https://github.com/user-attachments/assets/9d14ad22-6b10-47af-8a12-b86aa870bf9e" alt="expansions" height="400"/></p>
+
 E' ora possibile aggiungere espansioni ai giochi, in modo da poter specificare quali espansioni saranno utilizzate durante la partita.
+
+Le espansioni selezionate in fase di "Create" vengono poi mostrate nella pagine "View & Join"
+
 E' anche possibile modificare le espansioni in seguito utilizzando il tasto "Edit" disponibile sotto ogni proposta.
 
 ### 🎉 Novità: Le Tabs sono ora Pages
