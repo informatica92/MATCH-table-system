@@ -1,12 +1,23 @@
 from utils.sql_manager import SQLManager
 import streamlit as st
 
+def login_button():
+    if st.button("🔐 Login", use_container_width=True):
+        st.experimental_user.login(provider="auth0")
+
+def logout_button():
+    if st.button("❌ Logout", use_container_width=True):
+        st.experimental_user.logout()
+
 @st.cache_data(ttl="1h")  # cache user_id, username, is_admin from email but only for 1h
 def _get_or_create_user(email):
-    print(f"Getting user info [no cache] for {st.experimental_user.email}")
-    sql_manager = SQLManager()
-    user_id, username, name, surname, bgg_username, telegram_username, is_admin = sql_manager.get_or_create_user(email)
-    return user_id, username, name, surname, bgg_username, telegram_username, is_admin
+    if email:
+        print(f"Getting user info [no cache] for {st.experimental_user.email}")
+        sql_manager = SQLManager()
+        user_id, username, name, surname, bgg_username, telegram_username, is_admin = sql_manager.get_or_create_user(email)
+        return user_id, username, name, surname, bgg_username, telegram_username, is_admin
+    else:
+        return None, None, None, None, None, None, None
 
 class StreamlitTableSystemUser(object):
     def __init__(self, init_session_state_for_username=True):
@@ -58,3 +69,6 @@ class StreamlitTableSystemUser(object):
         except AttributeError as e:
             print(f"Error updating username: {e}")
             st.session_state.update_username_from_user_error = e
+
+    def is_logged_in(self):
+        return self.email is not None
