@@ -11,6 +11,8 @@ from utils.table_system_user import StreamlitTableSystemUser, login_button, logo
 # TODO: use @st.fragments
 # TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (st.link_button) (requires no streamlit_extras => no cookies)
 
+st.set_page_config(page_title=stu.get_title(), layout="wide", page_icon="🎴")
+
 st.session_state['user'] = StreamlitTableSystemUser(init_session_state_for_username=True)
 
 if st.session_state.user.is_logged_in():
@@ -28,8 +30,6 @@ else:
             st.Page("app_pages/99_Login.py", icon="🔐", default=True)
         ]
     )
-
-st.set_page_config(page_title=stu.get_title(), layout="wide", page_icon="🎴")
 
 st.markdown(stu.BOUNCE_SIDEBAR_ICON, unsafe_allow_html=True)
 
