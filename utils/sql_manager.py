@@ -353,7 +353,7 @@ class SQLManager(object):
                     loc.alias,
                     loc.country, loc.city, loc.street_name, loc.house_number,
                     loc.user_id
-                order by tp.date, tp.time
+                order by tp.date, tp.time, tp.id
             ''', (filter_username,)
         )
         propositions = c.fetchall()
