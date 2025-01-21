@@ -7,9 +7,10 @@ from utils.table_system_user import StreamlitTableSystemUser, login_button, logo
 # # FEATURES
 
 # # IMPROVEMENTS
-# TODO: add expansions into list and dataframe view
 # TODO: use @st.fragments
 # TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (st.link_button) (requires no streamlit_extras => no cookies)
+# TODO: optimize return data in BGG info (from tuple to dataclass)
+# TODO: optimize return data in proposition (from tuple to dataclass)
 
 st.set_page_config(page_title=stu.get_title(), layout="wide", page_icon="🎴")
 
