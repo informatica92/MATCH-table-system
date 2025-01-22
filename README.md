@@ -109,46 +109,46 @@ In fase di creazione di un tavolo, nella pagina "Create", è possibile seleziona
 ATTENZIONE: le location di sistema appariranno sempre a tutti gli utenti e sono quindi trasversali, le location utente, invece, possono essere usate come location solo dall'utente che l'ha creata.
 
 ### Delete ora con finestra di conferma e permette eliminazione di tavoli con 1+ giocatori
-<p><img src="https://github.com/user-attachments/assets/b3589ef2-7869-43fa-9f53-94d2d6562e5a" alt="join toast" height="400"/></p>
+<p><img src="https://github.com/user-attachments/assets/b3589ef2-7869-43fa-9f53-94d2d6562e5a" alt="join toast" max-height="400"/></p>
 
 Delete ha ora una finestra di conferma e permette anche l'eliminazione di tavoli con 1+ giocatori
 
 ### Leave/Delete/Edit possibili solo per sè stessi e per i propri tavoli
-<p><img src="https://github.com/user-attachments/assets/53569a54-15a5-4961-b48d-a4fef435f709" alt="join toast" height="400"/></p>
+<p><img src="https://github.com/user-attachments/assets/53569a54-15a5-4961-b48d-a4fef435f709" alt="join toast" max-height="400"/></p>
 
 Leave/Delete/Edit possibili solo per sè stessi e per i propri tavoli: 
  - Leave è quindi abilitata solo per sè stessi e per i giocatori ai propri tavoli
  - Delete/Edit è quindi possibile solo per i propri tavoli 
 
 ### GOD MODE introdotta per rendere Leave/Delete/Edit possibili sempre
-<p><img src="https://github.com/user-attachments/assets/2c133444-8b32-46a0-bc41-ae115bf36d71" alt="join toast" height="400"/></p>
+<p><img src="https://github.com/user-attachments/assets/2c133444-8b32-46a0-bc41-ae115bf36d71" alt="join toast" max-height="400" /></p>
 
 La GOD MODE permette, in caso si disponga di una password, di superare il vincolo per cui Leave/Delete/Edit è possibile solo per sè stessi e per i propri tavoli 
 
 ### Vista a Tabella
-<p><img src="https://github.com/user-attachments/assets/9d5dd314-2af6-4d2d-9114-5d3464e9d993" alt="join toast" height="400"/></p>
+<p><img src="https://github.com/user-attachments/assets/9d5dd314-2af6-4d2d-9114-5d3464e9d993" alt="join toast" max-height="400"/></p>
 
 E' stata aggiunta una visualizzazione a tabella oltre a quella standard a lista e a timeline. 
 
 Ancora una volta, selezionando una riga, in basso si aprirà la scheda del gioco e potrete fare Join/Leave/Delete
 
 ### Aggiungi proponente al tavolo di default
-<p><img src="https://github.com/user-attachments/assets/a8044443-9632-4ced-8030-69c01fa6f5be" alt="join toast" height="400"/></p>
+<p><img src="https://github.com/user-attachments/assets/a8044443-9632-4ced-8030-69c01fa6f5be" alt="join toast" max-height="400"/></p>
 
 E' ora presente un flag che permette, di default, di aggiungere il proponente al tavolo da lui creato.
 
 Se deselezionata, il tavolo verrà creato comunque ma senza aggiungere l'utente allo stesso.
 
 ### Inserimento Time Slot (Mattina, Pomeriggio, Sera, Notte) in Creation
-<p><img src="https://github.com/user-attachments/assets/2fe06532-bc69-417f-84c0-0f8ee4ab6af4" alt="join toast" height="400"/></p>
+<p><img src="https://github.com/user-attachments/assets/2fe06532-bc69-417f-84c0-0f8ee4ab6af4" alt="join toast" max-height="400"/></p>
 
 Per semplificare la parte di crezione e velocizzarla, l'orario è stato sostituito con dei Time Slot (mattina, pomeriggio, sera, notte).
 
 In fase di Edit è comunque ancora possibile selezionare l'orario desiderato con la consueta precisione di mezz'ora (08:30, 09:00, 09:30...) 
 
 ### Utilizzo toast/notifiche per creazione/join/rimozione/delete
-<p><img src="https://github.com/user-attachments/assets/16183656-9053-49be-af19-8b18458ad6db" alt="leave toast" width="300"/></p>
-<p><img src="https://github.com/user-attachments/assets/d549927b-021f-4323-a9b8-eb2ddc864217" alt="join toast" width="300"/></p>
+<p><img src="https://github.com/user-attachments/assets/16183656-9053-49be-af19-8b18458ad6db" alt="leave toast" max-width="300"/></p>
+<p><img src="https://github.com/user-attachments/assets/d549927b-021f-4323-a9b8-eb2ddc864217" alt="join toast" max-width="300"/></p>
 
 I messaggi di successo e conseguente aggiornamento sono stati sostituiti con delle notifiche per maggiore reattività della pagina.
 
