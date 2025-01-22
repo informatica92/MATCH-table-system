@@ -47,7 +47,8 @@ class SQLManager(object):
                         bgg_username TEXT,
                         telegram_username TEXT,
                         is_admin BOOLEAN DEFAULT FALSE,
-                        creation_timestamp_tz timestamptz NULL DEFAULT now()
+                        creation_timestamp_tz timestamptz NULL DEFAULT now(),
+                        is_banned BOOLEAN DEFAULT FALSE
                     )
                     ''')
 
@@ -238,18 +239,31 @@ class SQLManager(object):
         surname = None
         bgg_username = None
         telegram_username = None
+        is_banned = False
 
         conn = self.get_db_connection()
         c = conn.cursor()
 
         # Check if the user exists
-        query = f'''SELECT id, username, name, surname, bgg_username, telegram_username, is_admin FROM {self._schema}.users WHERE email = %s'''
+        query = f'''
+            SELECT 
+                id, 
+                username, 
+                name, 
+                surname, 
+                bgg_username, 
+                telegram_username, 
+                is_admin,
+                is_banned 
+            FROM {self._schema}.users 
+            WHERE
+                email = %s'''
         # print(query)
         c.execute(query, (email,))
 
         result = c.fetchone()
         if result:
-            _id, username, name, surname, bgg_username, telegram_username, is_admin = result
+            _id, username, name, surname, bgg_username, telegram_username, is_admin, is_banned = result
         else:
             # If the user doesn't exist, insert a new user
             c.execute(f'''
@@ -264,7 +278,7 @@ class SQLManager(object):
         c.close()
         conn.close()
 
-        return _id, username, name, surname, bgg_username, telegram_username, is_admin
+        return _id, username, name, surname, bgg_username, telegram_username, is_admin, is_banned
 
     def set_user(self, email, username, name, surname, bgg_username, telegram_username):
         conn = self.get_db_connection()

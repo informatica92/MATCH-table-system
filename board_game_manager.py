@@ -5,7 +5,9 @@ import utils.streamlit_utils as stu
 from utils.table_system_user import StreamlitTableSystemUser, login_button, logout_button
 
 # # FEATURES
-
+# TODO: add a field into the user table to ban/lock users: is_banned. Use it to prevent banned users from logging in
+#   TODO: add a filter during log in to check if the user is banned
+#   TODO: add a page to inform the user that they are banned
 # # IMPROVEMENTS
 # TODO: use @st.fragments
 # TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (st.link_button) (requires no streamlit_extras => no cookies)
@@ -17,15 +19,25 @@ st.set_page_config(page_title=stu.get_title(), layout="wide", page_icon="🎴")
 st.session_state['user'] = StreamlitTableSystemUser(init_session_state_for_username=True)
 
 if st.session_state.user.is_logged_in():
-    pg = st.navigation(
-        [
-            st.Page("app_pages/1_View_&_Join.py", icon="📜", default=True),
-            st.Page("app_pages/2_Create.py", icon="➕"),
-            st.Page("app_pages/3_Map.py", icon="🗺️"),
-            st.Page("app_pages/4_User.py", icon="👦🏻")
-        ]
-    )
+    if st.session_state['user'].is_banned:
+        # If the user is banned, show the banned page
+        pg = st.navigation(
+            [
+                st.Page("app_pages/98_Banned_User.py", icon="❌", default=True)
+            ]
+        )
+    else:
+        # ...alternatively, show the normal pages
+        pg = st.navigation(
+            [
+                st.Page("app_pages/1_View_&_Join.py", icon="📜", default=True),
+                st.Page("app_pages/2_Create.py", icon="➕"),
+                st.Page("app_pages/3_Map.py", icon="🗺️"),
+                st.Page("app_pages/4_User.py", icon="👦🏻")
+            ]
+        )
 else:
+    # instead, if the user is not logged in, show the login page
     pg = st.navigation(
         [
             st.Page("app_pages/99_Login.py", icon="🔐", default=True)
