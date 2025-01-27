@@ -241,7 +241,7 @@ class SQLManager(object):
         # Get the locations for the user
         if include_system_ones:
             c.execute(f'''
-                        SELECT id, street_name, city, house_number, country, alias, user_id
+                        SELECT id, street_name, city, house_number, country, alias, user_id, is_default
                         FROM {self._schema}.locations
                         WHERE user_id = %s OR user_id IS NULL
                         ORDER BY id
@@ -249,7 +249,7 @@ class SQLManager(object):
             )
         else:
             c.execute(f'''
-                        SELECT id, street_name, city, house_number, country, alias, user_id
+                        SELECT id, street_name, city, house_number, country, alias, user_id, is_default
                         FROM {self._schema}.locations
                         WHERE user_id = %s
                         ORDER BY id
@@ -261,7 +261,8 @@ class SQLManager(object):
         conn.close()
 
         if return_as_df:
-            result = pd.DataFrame(result, columns=['id', 'street_name', 'city', 'house_number', 'country', 'alias', 'user_id'])
+            columns = ['id', 'street_name', 'city', 'house_number', 'country', 'alias', 'user_id', 'is_default']
+            result = pd.DataFrame(result, columns=columns)
 
         return result
 

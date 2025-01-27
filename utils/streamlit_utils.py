@@ -242,6 +242,12 @@ def _on_location_df_change(entire_locations_df: pd.DataFrame, user_id: int|None)
 
 def manage_user_locations(user_id: int|None):
     df = sql_manager.get_user_locations(user_id, include_system_ones=True if not user_id else False)
+
+    default_location = {}
+    if user_id is None:
+        # create a default_location var with the single row in the dataframe with the 'is_default' column set to True
+        default_location: dict = df[df["is_default"] == True].to_dict(orient="records")[0]
+
     df = df[["id", "alias", "country", "city", "street_name", "house_number"]]
 
     column_config = {
@@ -301,6 +307,9 @@ def manage_user_locations(user_id: int|None):
         kwargs={"entire_locations_df": df, "user_id": user_id},
         column_config=column_config
     )
+
+    if default_location:
+        st.write(f"Default location: {default_location['alias']} (ID: {default_location['id']})")
 
 def get_available_locations(user_id):
     locations = sql_manager.get_user_locations(user_id, include_system_ones=True, return_as_df=False)
