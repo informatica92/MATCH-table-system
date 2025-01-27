@@ -62,9 +62,45 @@ class SQLManager(object):
                         house_number TEXT,
                         country TEXT,                        
                         alias TEXT NOT NULL,
-                        creation_timestamp_tz timestamptz NULL DEFAULT now()
+                        creation_timestamp_tz timestamptz NULL DEFAULT now(),
+                        is_default BOOLEAN DEFAULT FALSE
                     )
                     ''')
+
+        # check if in the "location" table exists a row with is_default = True, if not, create a default location
+        c.execute('''SELECT count(*) FROM locations WHERE is_default = TRUE''')
+        if c.fetchone()[0] == 0:
+            """
+            DEFAULT_LOCATION_ALIAS="MATCH"
+            DEFAULT_LOCATION_COUNTRY="Italia"
+            DEFAULT_LOCATION_CITY="Polignano a Mare"
+            DEFAULT_LOCATION_STREEN_NAME="Via Don Luigi Sturzo"
+            DEFAULT_LOCATION_STREEN_NUMBER="18"
+            """
+            try:
+                default_location_alias = os.environ['DEFAULT_LOCATION_ALIAS']
+                default_location_country = os.environ['DEFAULT_LOCATION_COUNTRY']
+                default_location_city = os.environ['DEFAULT_LOCATION_CITY']
+                default_location_street_name = os.environ['DEFAULT_LOCATION_STREEN_NAME']
+                default_location_street_number = os.environ['DEFAULT_LOCATION_STREEN_NUMBER']
+                c.execute(f'''
+                            INSERT INTO locations (street_name, city, house_number, country, alias, is_default)
+                            VALUES (%s, %s, %s, %s, %s, TRUE)
+                        ''',
+                    (
+                        default_location_street_name,
+                        default_location_city,
+                        default_location_street_number,
+                        default_location_country,
+                        default_location_alias
+                    )
+                )
+            except KeyError:
+                raise AttributeError("Please set the environment variables for the default location: "
+                                     "DEFAULT_LOCATION_ALIAS, DEFAULT_LOCATION_COUNTRY, DEFAULT_LOCATION_CITY, "
+                                     "DEFAULT_LOCATION_STREEN_NAME, DEFAULT_LOCATION_STREEN_NUMBER")
+
+
 
         c.execute('''CREATE TABLE IF NOT EXISTS table_propositions (
                         id SERIAL PRIMARY KEY,
