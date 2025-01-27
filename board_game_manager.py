@@ -29,12 +29,17 @@ if st.session_state.user.is_logged_in():
     else:
         # ...alternatively, show the normal pages
         pg = st.navigation(
-            [
-                st.Page("app_pages/1_View_&_Join.py", icon="📜", default=True),
-                st.Page("app_pages/2_Create.py", icon="➕"),
-                st.Page("app_pages/3_Map.py", icon="🗺️"),
-                st.Page("app_pages/4_User.py", icon="👦🏻")
-            ]
+            {
+                "View & Join": [
+                    st.Page("app_pages/1_Default_view_page.py", icon="📜", default=True, title=os.getenv("DEFAULT_LOCATION_ALIAS")),
+                    st.Page("app_pages/1_RoW_view_page.py", icon="🌍", title="Rest of the World")
+                ],
+                "Other": [
+                    st.Page("app_pages/2_Create.py", icon="➕"),
+                    st.Page("app_pages/3_Map.py", icon="🗺️"),
+                    st.Page("app_pages/4_User.py", icon="👦🏻")
+                ]
+            }
         )
 else:
     # instead, if the user is not logged in, show the login page
@@ -46,6 +51,9 @@ else:
 
 st.markdown(stu.BOUNCE_SIDEBAR_ICON, unsafe_allow_html=True)
 
+# Initialize location_mode in session state
+if "location_mode" not in st.session_state:
+    st.session_state['location_mode'] = "default"
 
 # Initialize propositions in session state
 if "propositions" not in st.session_state:

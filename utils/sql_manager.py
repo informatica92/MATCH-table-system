@@ -351,12 +351,13 @@ class SQLManager(object):
         conn.close()
 
     # TABLES
-    def get_table_propositions(self, joined_by_me, filter_username):
+    def get_table_propositions(self, joined_by_me: bool, filter_username: str, filter_default_location: bool):
 
         if joined_by_me:
             joined_by_me_clause = "and tp.id in (SELECT table_id FROM joined_players jp WHERE LOWER(joined_user.username) = LOWER(%s))"
         else:
             joined_by_me_clause = "and TRUE"
+
         conn = self.get_db_connection()
         c = conn.cursor()
         c.execute(
@@ -391,6 +392,7 @@ class SQLManager(object):
                     {joined_by_me_clause}
                     -- check if date is in the future with 1 day of margin
                     and tp.date >= current_date - INTERVAL '1 day'
+                    and loc.is_default = {filter_default_location}
                 group by 
                     tp.id,
                     tp.game_name,

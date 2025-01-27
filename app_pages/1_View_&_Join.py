@@ -278,36 +278,40 @@ def dataframe_table_propositions(compact=False):
                 expansions=selected_row['expansions']
             )
 
-col_title, col_help = st.columns([9, 1])
-stu.add_title_text(col_title, frmt="{title}")
-stu.add_help_button(col_help)
+def create_view_and_join_page():
 
-with st.sidebar:
-    with st.container(border=True):
-        st.selectbox("View mode", options=["📜List", "📊Timeline", "◻️Table"], key="view_mode")
-        st.toggle("Compact view", key="compact_view")
+    col_title, col_help = st.columns([9, 1])
+    stu.add_title_text(col_title, frmt="{title}")
+    stu.add_help_button(col_help)
 
-view_start_time = time_time()
+    print(f"Location mode [View Page]: {st.session_state.location_mode}")
 
-refresh_col, filter_col, fake_col = st.columns([1, 1, 4])
-with refresh_col:
-    refresh_button = st.button("🔄️ Refresh", key="refresh", use_container_width=True)
-    if refresh_button:
-        stu.refresh_table_propositions("Refresh")
-with filter_col:
-    filter_label_num_active_filters = stu.get_num_active_filters(as_str=True)
-    with st.popover(f"🔍 {filter_label_num_active_filters}Filters:", use_container_width=True):
-        st.toggle("Joined by me", key="joined_by_me", value=False, on_change=stu.refresh_table_propositions, kwargs={"reason": "Filtering"}, disabled=not st.session_state['username'])
+    with st.sidebar:
+        with st.container(border=True):
+            st.selectbox("View mode", options=["📜List", "📊Timeline", "◻️Table"], key="view_mode")
+            st.toggle("Compact view", key="compact_view")
 
-if len(st.session_state.propositions) == 0:
-    st.info("No table propositions available, use the \"**➕Create**\" page to create a new one."
-            "\n\n*NB: tables are automatically hidden after 1 day*")
-else:
-    if st.session_state['view_mode'] == "📜List":
-        view_table_propositions(st.session_state['compact_view'])
-    elif st.session_state['view_mode'] == "📊Timeline":
-        timeline_table_propositions(st.session_state['compact_view'])
+    view_start_time = time_time()
+
+    refresh_col, filter_col, fake_col = st.columns([1, 1, 4])
+    with refresh_col:
+        refresh_button = st.button("🔄️ Refresh", key="refresh", use_container_width=True)
+        if refresh_button:
+            stu.refresh_table_propositions("Refresh")
+    with filter_col:
+        filter_label_num_active_filters = stu.get_num_active_filters(as_str=True)
+        with st.popover(f"🔍 {filter_label_num_active_filters}Filters:", use_container_width=True):
+            st.toggle("Joined by me", key="joined_by_me", value=False, on_change=stu.refresh_table_propositions, kwargs={"reason": "Filtering"}, disabled=not st.session_state['username'])
+
+    if len(st.session_state.propositions) == 0:
+        st.info("No table propositions available, use the \"**➕Create**\" page to create a new one."
+                "\n\n*NB: tables are automatically hidden after 1 day*")
     else:
-        dataframe_table_propositions(st.session_state['compact_view'])
+        if st.session_state['view_mode'] == "📜List":
+            view_table_propositions(st.session_state['compact_view'])
+        elif st.session_state['view_mode'] == "📊Timeline":
+            timeline_table_propositions(st.session_state['compact_view'])
+        else:
+            dataframe_table_propositions(st.session_state['compact_view'])
 
-print(f"Table propositions VIEW refreshed in {(time_time() - view_start_time):.4f}s")
+    print(f"Table propositions VIEW refreshed in {(time_time() - view_start_time):.4f}s")

@@ -75,6 +75,7 @@ def st_write(label, size=12):
 
 def refresh_table_propositions(reason):
     query_start_time = time_time()
+
     if "joined_by_me" in st.session_state:
         joined_by_me = st.session_state.joined_by_me
     else:
@@ -83,7 +84,15 @@ def refresh_table_propositions(reason):
         filter_username = st.session_state.username
     else:
         filter_username = None
-    st.session_state.propositions = sql_manager.get_table_propositions(joined_by_me, filter_username)
+
+    mode = str(st.session_state.get("location_mode", "default")).lower()
+    match mode:
+        case "default": filter_default_location = True  # only default location
+        case "none": filter_default_location = True  # only default location
+        case "row": filter_default_location = False  # Rest of the World
+        case _: raise ValueError(f"Invalid mode: {mode}")
+
+    st.session_state.propositions = sql_manager.get_table_propositions(joined_by_me, filter_username, filter_default_location)
     print(f"Table propositions QUERY [{reason}] refreshed in {(time_time() - query_start_time):.4f}s "
           f"({len(st.session_state.propositions)} rows)")
 
