@@ -205,7 +205,8 @@ def create_callback(game_name, bgg_game_id):
             time_option_to_time(st.session_state.time_option).strftime('%H:%M'),
             st.session_state.duration,
             st.session_state.username,
-            last_row_id
+            last_row_id,
+            is_default_location(st.session_state.location[0]) if st.session_state.location else True
         )
 
         refresh_table_propositions("Created")
@@ -323,3 +324,6 @@ def manage_user_locations(user_id: int|None):
 def get_available_locations(user_id):
     locations = sql_manager.get_user_locations(user_id, include_system_ones=True, return_as_df=False)
     return locations
+
+def is_default_location(location_id):
+    return sql_manager.is_default_location(location_id)

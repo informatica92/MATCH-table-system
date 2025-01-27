@@ -234,6 +234,23 @@ class SQLManager(object):
         c.close()
         conn.close()
 
+    def is_default_location(self, location_id) -> bool:
+        conn = self.get_db_connection()
+        c = conn.cursor()
+
+        c.execute(f'''
+                    SELECT count(*)
+                    FROM {self._schema}.locations
+                    WHERE id = %s and is_default = TRUE
+                ''', (location_id,)
+        )
+        result = c.fetchone()[0]
+
+        if result == 0:
+            return False
+        else:
+            return True
+
     def get_user_locations(self, user_id, include_system_ones=False, return_as_df=True):
         conn = self.get_db_connection()
         c = conn.cursor()

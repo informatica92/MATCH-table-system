@@ -13,7 +13,7 @@ TEXTS = {
                      "\n - 👤 {max_players} giocatori "
                      "\n - 📅 {date} alle *{time}* "
                      "\n - ⌛ {duration} ore."
-                     "\n\n🔗 Dai un'occhiata qui:\nhttps://match-table-system.streamlit.app/#table-{table_id}"
+                     "\n\n🔗 Dai un'occhiata qui:\nhttps://match-table-system.streamlit.app/{row_page}#table-{table_id}"
     }
 }
 
@@ -40,7 +40,7 @@ class TelegramNotifications(object):
             self._bot = telegram.Bot(token=_bot_token)
             self.loop = asyncio.new_event_loop()
 
-    def send_new_table_message(self, game_name, max_players, date, time, duration, proposed_by, table_id):
+    def send_new_table_message(self, game_name, max_players, date, time, duration, proposed_by, table_id, is_default_location):
 
         text = TEXTS[self.language]['new_table'].format(
             game_name=game_name,
@@ -49,7 +49,8 @@ class TelegramNotifications(object):
             time=time,
             duration=duration,
             proposed_by=proposed_by,
-            table_id=table_id
+            table_id=table_id,
+            row_page="" if is_default_location else "restoftheworld/"
         )
 
         if self._bot:
