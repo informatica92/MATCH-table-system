@@ -70,13 +70,6 @@ class SQLManager(object):
         # check if in the "location" table exists a row with is_default = True, if not, create a default location
         c.execute('''SELECT count(*) FROM locations WHERE is_default = TRUE''')
         if c.fetchone()[0] == 0:
-            """
-            DEFAULT_LOCATION_ALIAS="MATCH"
-            DEFAULT_LOCATION_COUNTRY="Italia"
-            DEFAULT_LOCATION_CITY="Polignano a Mare"
-            DEFAULT_LOCATION_STREEN_NAME="Via Don Luigi Sturzo"
-            DEFAULT_LOCATION_STREEN_NUMBER="18"
-            """
             try:
                 default_location_alias = os.environ['DEFAULT_LOCATION_ALIAS']
                 default_location_country = os.environ['DEFAULT_LOCATION_COUNTRY']
@@ -245,6 +238,10 @@ class SQLManager(object):
                 ''', (location_id,)
         )
         result = c.fetchone()[0]
+
+        conn.commit()
+        c.close()
+        conn.close()
 
         if result == 0:
             return False
