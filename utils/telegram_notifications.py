@@ -13,7 +13,7 @@ TEXTS = {
                      "\n - 👤 {max_players} giocatori "
                      "\n - 📅 {date} alle *{time}* "
                      "\n - ⌛ {duration} ore."
-                     "\n\n🔗 Dai un'occhiata qui:\nhttps://match-table-system.streamlit.app/{row_page}#table-{table_id}"
+                     "\n\n🔗 Dai un'occhiata qui:\n{base_url}/{row_page}#table-{table_id}"
     }
 }
 
@@ -50,7 +50,8 @@ class TelegramNotifications(object):
             duration=duration,
             proposed_by=proposed_by,
             table_id=table_id,
-            row_page="" if is_default_location else "restoftheworld/"
+            row_page="" if is_default_location else "restoftheworld/",
+            base_url=os.environ.get('BASE_URL', 'http://localhost:8501')
         )
 
         if self._bot:
