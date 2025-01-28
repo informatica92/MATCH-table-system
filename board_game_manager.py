@@ -5,9 +5,7 @@ import utils.streamlit_utils as stu
 from utils.table_system_user import StreamlitTableSystemUser, login_button, logout_button
 
 # # FEATURES
-# TODO: add a field into the user table to ban/lock users: is_banned. Use it to prevent banned users from logging in
-#   TODO: add a filter during log in to check if the user is banned
-#   TODO: add a page to inform the user that they are banned
+
 # # IMPROVEMENTS
 # TODO: use @st.fragments
 # TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (st.link_button) (requires no streamlit_extras => no cookies)
