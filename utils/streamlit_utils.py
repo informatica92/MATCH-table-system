@@ -327,3 +327,6 @@ def get_available_locations(user_id):
 
 def is_default_location(location_id):
     return sql_manager.is_default_location(location_id)
+
+def get_default_location() -> dict:
+    return sql_manager.get_default_location()

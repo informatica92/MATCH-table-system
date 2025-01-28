@@ -28,10 +28,12 @@ if st.session_state.user.is_logged_in():
         )
     else:
         # ...alternatively, show the normal pages
+        def_loc = stu.get_default_location()
+        def_loc_alias = def_loc['alias']
         pg = st.navigation(
             {
                 "View & Join": [
-                    st.Page("app_pages/1_Default_view_page.py", icon="📜", default=True, title=os.getenv("DEFAULT_LOCATION_ALIAS")),
+                    st.Page("app_pages/1_Default_view_page.py", icon="📜", default=True, title=def_loc_alias),
                     st.Page("app_pages/1_RoW_view_page.py", icon="🌍", title="Rest of the World", url_path="restoftheworld"),
                 ],
                 "Other": [

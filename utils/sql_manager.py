@@ -248,6 +248,25 @@ class SQLManager(object):
         else:
             return True
 
+    def get_default_location(self) -> dict:
+        conn = self.get_db_connection()
+        c = conn.cursor()
+
+        fields = ['id', 'street_name', 'city', 'house_number', 'country', 'alias', 'user_id', 'is_default']
+
+        c.execute(f'''
+                    SELECT {', '.join(fields)}
+                    FROM {self._schema}.locations
+                    WHERE is_default = TRUE
+                '''
+        )
+        result = c.fetchone()
+
+        c.close()
+        conn.close()
+
+        return dict(zip(fields, result))
+
     def get_user_locations(self, user_id, include_system_ones=False, return_as_df=True):
         conn = self.get_db_connection()
         c = conn.cursor()
