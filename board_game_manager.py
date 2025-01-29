@@ -5,10 +5,10 @@ import utils.streamlit_utils as stu
 from utils.table_system_user import StreamlitTableSystemUser, login_button, logout_button
 
 # # FEATURES
-
+# TODO: into "View & Join" page add a tertiary button on usernames to shoe the user profile with a dialog
+# TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (st.link_button) (requires no streamlit_extras => no cookies)
 # # IMPROVEMENTS
 # TODO: use @st.fragments
-# TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (st.link_button) (requires no streamlit_extras => no cookies)
 # TODO: optimize return data in BGG info (from tuple to dataclass)
 # TODO: optimize return data in proposition (from tuple to dataclass)
 
