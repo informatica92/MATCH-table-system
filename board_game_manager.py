@@ -6,7 +6,8 @@ from utils.table_system_user import StreamlitTableSystemUser, login_button, logo
 
 # # FEATURES
 # TODO: into "View & Join" page add a tertiary button on usernames to shoe the user profile with a dialog
-# TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (st.link_button) (requires no streamlit_extras => no cookies)
+# TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (requires no streamlit_extras => no cookies)
+# TODO: add board game image during creation (for check)
 # # IMPROVEMENTS
 # TODO: use @st.fragments
 # TODO: optimize return data in BGG info (from tuple to dataclass)
