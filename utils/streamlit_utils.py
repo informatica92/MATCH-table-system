@@ -72,6 +72,14 @@ def username_in_joined_players(joined_players: list[str]):
 def st_write(label, size=12):
     st.write(CUSTOM_TEXT_WITH_LABEL_AND_SIZE.format(label=label, size=size), unsafe_allow_html=True)
 
+def str_to_bool(s: str) -> bool:
+    """
+    Convert a string to a boolean
+    :param s: the string to convert
+    :return:
+    """
+    return str(s).lower() == 'true'
+
 
 def refresh_table_propositions(reason):
     query_start_time = time_time()

@@ -58,10 +58,16 @@ with st.form(key="create_new_proposition_form", border=False):
         time = stu.time_option_to_time(time_option)
 
     # locations
-    locations = stu.get_available_locations(st.session_state.user.user_id)
+    can_users_set_location = stu.str_to_bool(os.getenv('CAN_USERS_SET_LOCATION', 'False'))
+    if can_users_set_location:
+        locations = stu.get_available_locations(st.session_state.user.user_id)
+    else:
+        locations = [list(stu.get_default_location().values())]
     # 'id', 'street_name', 'city', 'house_number', 'country', 'alias', 'user_id'
-    locations = [(loc[0], loc[5]) for loc in locations]  # id, alias (id)
+    locations = [(loc[0], loc[5]) for loc in locations]  # id, alias
     st.selectbox("Location", options=locations, key="location", format_func=lambda x: x[1])
+    if not can_users_set_location:
+        stu.st_write("ℹ️ User locations are not displayed at the moment. <i>(CAN_USERS_SET_LOCATION set to False)</i>")
 
     # notes
     st.text_area("Notes", key="notes")
