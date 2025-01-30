@@ -31,8 +31,8 @@ if st.session_state.user.is_logged_in():
         pg = st.navigation(
             {
                 "View & Join": [
-                    st.Page("app_pages/1_Default_view_page.py", icon="📜", default=True, title=def_loc_alias),
-                    st.Page("app_pages/1_RoW_view_page.py", icon="🌍", title="Rest of the World", url_path="restoftheworld"),
+                    st.Page("app_pages/1_View_&_Join_Default.py", icon="📜", default=True, title=def_loc_alias),
+                    st.Page("app_pages/1_View_&_Join_RoW.py", icon="🌍", title="Rest of the World", url_path="restoftheworld"),
                 ],
                 "Other": [
                     st.Page("app_pages/2_Create.py", icon="➕"),
