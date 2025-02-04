@@ -405,7 +405,7 @@ class SQLManager(object):
                     tp.bgg_game_id,
                     tp.proposed_by_user_id,
                     proposing_user.username as proposed_by,
-                    count(jp.id) as joined_count,
+                    -- count(jp.id) as joined_count,
                     json_agg(joined_user.username) as joined_users,
                     json_agg(jp.user_id) as joined_users_id,
                     loc.alias as location_alias,

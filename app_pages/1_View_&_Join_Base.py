@@ -64,7 +64,7 @@ def dialog_delete_table_proposition(table_id: int, game_name: str, joined_count:
             st.rerun()
 
 def display_table_proposition(section_name, compact, table_id, game_name, bgg_game_id, proposed_by, max_players, date,
-                              time, duration, notes, joined_count, joined_players, joined_players_ids, location_alias,
+                              time, duration, notes, joined_players, joined_players_ids, location_alias,
                               location_address, location_is_system, expansions):
     # Check if the BGG game ID is valid and set the BGG URL
     if bgg_game_id and int(bgg_game_id) >= 1:
@@ -72,6 +72,8 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
         st.subheader(f"Table {table_id}: [{game_name}]({bgg_url})", anchor=f"table-{table_id}")
     else:
         st.subheader(f"Table {table_id}: {game_name}", anchor=f"table-{table_id}")
+
+    joined_count = len(joined_players)
 
     # Create three columns
     col1, col2, col3 = st.columns([1, 1, 1])
@@ -172,7 +174,7 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
 def view_table_propositions(compact=False):
     for proposition in st.session_state.propositions:
         (table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, proposed_by_user_id, proposed_by,
-         joined_count, joined_players, joined_players_ids, loc_alias, loc_address, loc_is_system, expansions) = proposition
+         joined_players, joined_players_ids, loc_alias, loc_address, loc_is_system, expansions) = proposition
         display_table_proposition(
             section_name="list",
             compact=compact,
@@ -185,7 +187,6 @@ def view_table_propositions(compact=False):
             time=time,
             duration=duration,
             notes=notes,
-            joined_count=joined_count,
             joined_players=joined_players,
             joined_players_ids=joined_players_ids,
             location_alias=loc_alias,
@@ -218,7 +219,6 @@ def timeline_table_propositions(compact=False):
                 time=selected_row['start_datetime'].time(),
                 duration=selected_row['duration'],
                 notes=selected_row['notes'],
-                joined_count=selected_row['joined_count'],
                 joined_players=selected_row['joined_players'],
                 joined_players_ids=selected_row['joined_players_ids'],
                 location_alias=selected_row['location_alias'],
@@ -269,7 +269,6 @@ def dataframe_table_propositions(compact=False):
                 time=selected_row['time'],
                 duration=selected_row['duration'],
                 notes=selected_row['notes'],
-                joined_count=selected_row['joined_count'],
                 joined_players=selected_row['joined_players'],
                 joined_players_ids=selected_row['joined_players_ids'],
                 location_alias=selected_row['location_alias'],

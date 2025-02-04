@@ -113,9 +113,12 @@ def table_propositions_to_df(
         add_image_url=False, add_bgg_url=False, add_players_fraction=False, add_joined=False,
 ):
     columns = ['table_id', 'game_name', 'max_players', 'date', 'time', 'duration', 'notes', 'bgg_game_id',
-               'proposed_by_id', 'proposed_by', 'joined_count', 'joined_players', 'joined_players_ids',
+               'proposed_by_id', 'proposed_by', 'joined_players', 'joined_players_ids',
                'location_alias', 'location_address', 'location_is_system', 'expansions']
     df = pd.DataFrame(st.session_state.propositions, columns=columns)
+
+    # add 'joined_count' column as the length of 'joined_players'
+    df['joined_count'] = df['joined_players'].apply(lambda x: len(x))
 
     if add_start_and_end_date:
         # concat date and time columns to get the start datetime
