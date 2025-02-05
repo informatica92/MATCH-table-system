@@ -54,8 +54,10 @@ if st.session_state.user.is_admin:
 
 st.subheader("User locations")
 stu.st_write("Use the following list to manage your locations. Having one or more registered location will allow "
-             "you to specify where a table proposition is created. <br>"
-             "The DEFAULT location is automatically generated")
+             "you to specify where a table proposition will take place, apart from the DEFAULT location <br>"
+             "The DEFAULT location is automatically generated. <br>"
+             "Also, removing a location will set the location of all tables at that location to <i>'Unknown'</i> and "
+             "the corresponding tables will be available into the 'Rest of the World' page. <br>")
 stu.manage_user_locations(user_id=st.session_state.user.user_id)
 stu.st_write("Using <b>'Locations'</b> you automatically accept the "
              "<a href='https://github.com/informatica92/MATCH-table-system/tree/main/static/gdpr'>GDPR policy</a> "
