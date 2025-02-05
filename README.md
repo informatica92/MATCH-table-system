@@ -29,33 +29,39 @@ In caso si voglia invece eseguire l'applicazione in locale è necessario seguire
  ```
 6. Creazione di un file `secrets.toml` con le seguenti variabili d'ambiente (oppure valorizza i secrets durante il deploy su Streamlit Cloud):
 
-| Section               | Variabile d'ambiente | Descrizione                                                                                                                                            | Default              | Obbligatorio |
-|-----------------------|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------|--------------|  
-| # POSTGRESQL DATABASE |                      |                                                                                                                                                        |                      |              |
-|                       | DB_HOST              | Hostname del database                                                                                                                                  | localhost            | No           |
-|                       | DB_NAME              | Nome del database                                                                                                                                      |                      | Sì           |
-|                       | DB_USER              | Username del database                                                                                                                                  |                      | Sì           | 
-|                       | DB_PASSWORD          | Password del database                                                                                                                                  |                      | Sì           |
-|                       | DB_PORT              | Porta del database                                                                                                                                     | 5432                 | No           |
-|                       | DB_SCHEMA            | Schema del database (pre esistente)                                                                                                                    | public               | No           |
-| # TELEGRAM            |                      |                                                                                                                                                        |                      |              |
-|                       | TELEGRAM_CHAT_ID     | Chat ID di Telegram a cui inviare messaggi                                                                                                             |                      | No           |
-|                       | TELEGRAM_BOT_TOKEN   | Token del bot di Telegram, se mancante, non viene effettuato alcun invio                                                                               |                      | No           |
-| # MAP                 |                      |                                                                                                                                                        |                      |              |
-|                       | GMAP_MAP_URL         | URL della mappa di Google Maps, se mancante non viene mostrata alcuna mappa                                                                            |                      | No           |
-| # GENERAL SETTINGS    |                      |                                                                                                                                                        |                      |              |
-|                       | TITLE                | Titolo dell'applicazione                                                                                                                               | Board Game Proposals | No           |
-|                       | LOGO                 | URL del logo dell'applicazione                                                                                                                         |                      | Sì           |
-|                       | LOGO_LARGE           | URL del logo grande dell'applicazione, se mancante viene usato come logo della sidebar il logo in LOGO                                                 |                      | No           |
-|                       | DEFAULT_DATE         | Data predefinita per la creazione di un tavolo nel formato `YYYY-MM-DD`, se mancante o nel passato, viene usata la data odierna                        | *data odierna*       | No           |
-|                       | GOD_MODE_PASSWORD    | Password per attivare la GOD MODE, se mancante, la GOD MODE non è attivabile                                                                           |                      | Sì           |
-| [auth]                |                      |                                                                                                                                                        |                      |              |
-|                       | redirect_uri         | URI di reindirizzamento per l'autenticazione, può essere: <br/> - http://localhost:8501/oauth2callback <br/> - https://`dominio deploy`/oauth2callback |                      | Sì           |
-|                       | cookie_secret        | Nome del cookie in cui inserire il token di autenticazione                                                                                             |                      | Sì           |
-| [auth.auth0]          |                      |                                                                                                                                                        |                      |              |
-|                       | client_id            | Client ID di Auth0                                                                                                                                     |                      | Sì           |
-|                       | client_secret        | Client Secret di Auth0                                                                                                                                 |                      | Sì           |
-|                       | server_metadata_url  | URL del server metadata di Auth0, nella forma https://`dominio auth0`.com/.well-known/openid-configuration                                             |                      | Sì           |
+| Section               | Variabile d'ambiente           | Descrizione                                                                                                                                            | Default              | Obbligatorio |
+|-----------------------|--------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------|--------------|  
+| # POSTGRESQL DATABASE | ---                            | ---                                                                                                                                                    | ---                  | ---          |
+|                       | DB_HOST                        | Hostname del database                                                                                                                                  | localhost            | No           |
+|                       | DB_NAME                        | Nome del database                                                                                                                                      |                      | Sì           |
+|                       | DB_USER                        | Username del database                                                                                                                                  |                      | Sì           | 
+|                       | DB_PASSWORD                    | Password del database                                                                                                                                  |                      | Sì           |
+|                       | DB_PORT                        | Porta del database                                                                                                                                     | 5432                 | No           |
+|                       | DB_SCHEMA                      | Schema del database (pre esistente)                                                                                                                    | public               | No           |
+| # TELEGRAM            | ---                            | ---                                                                                                                                                    | ---                  | ---          |
+|                       | TELEGRAM_CHAT_ID               | Chat ID di Telegram a cui inviare messaggi                                                                                                             |                      | No           |
+|                       | TELEGRAM_BOT_TOKEN             | Token del bot di Telegram, se mancante, non viene effettuato alcun invio                                                                               |                      | No           |
+| # MAP                 | ---                            | ---                                                                                                                                                    | ---                  | ---          |
+|                       | GMAP_MAP_URL                   | URL della mappa di Google Maps, se mancante non viene mostrata alcuna mappa                                                                            |                      | No           |
+| # GENERAL SETTINGS    | ---                            | ---                                                                                                                                                    | ---                  | ---          |
+|                       | TITLE                          | Titolo dell'applicazione                                                                                                                               | Board Game Proposals | No           |
+|                       | LOGO                           | URL del logo dell'applicazione                                                                                                                         |                      | Sì           |
+|                       | LOGO_LARGE                     | URL del logo grande dell'applicazione, se mancante viene usato come logo della sidebar il logo in LOGO                                                 |                      | No           |
+|                       | DEFAULT_DATE                   | Data predefinita per la creazione di un tavolo nel formato `YYYY-MM-DD`, se mancante o nel passato, viene usata la data odierna                        | *data odierna*       | No           |
+| # DEFAULT LOCATION    | ---                            | ---                                                                                                                                                    | ---                  | ---          |
+|                       | DEFAULT_LOCATION_ALIAS         | L'alias (nome breve e parlante) della location principale del sistema (es "MATCH")                                                                     |                      |              |
+|                       | DEFAULT_LOCATION_COUNTRY       | Il Paese in cui è presente la location principale del sistema (es: "Italia")                                                                           |                      |              |
+|                       | DEFAULT_LOCATION_CITY          | La città in cui è presente la location principale del sistema (es: "Bari")                                                                             |                      |              |
+|                       | DEFAULT_LOCATION_STREEN_NAME   | L'indirizzo in cui è presente la location principale del sistema (es: "via XX Settembre")                                                              |                      |              |
+|                       | DEFAULT_LOCATION_STREEN_NUMBER | Il numero civico in cui è presente la location principale del sistema (es: "18")                                                                       |                      |              |
+|                       | CAN_USERS_SET_LOCATION         | Se gli utenti possono scegliere una location diversa da quella principale in fase di Creazione ("true"/"false")                                        | false                | No           |
+| [auth]                | ---                            | ---                                                                                                                                                    | ---                  | ---          |
+|                       | redirect_uri                   | URI di reindirizzamento per l'autenticazione, può essere: <br/> - http://localhost:8501/oauth2callback <br/> - https://`dominio deploy`/oauth2callback |                      | Sì           |
+|                       | cookie_secret                  | Nome del cookie in cui inserire il token di autenticazione                                                                                             |                      | Sì           |
+| [auth.auth0]          | ---                            | ---                                                                                                                                                    | ---                  | ---          |
+|                       | client_id                      | Client ID di Auth0                                                                                                                                     |                      | Sì           |
+|                       | client_secret                  | Client Secret di Auth0                                                                                                                                 |                      | Sì           |
+|                       | server_metadata_url            | URL del server metadata di Auth0, nella forma https://`dominio auth0`.com/.well-known/openid-configuration                                             |                      | Sì           |
 
 NB: Alcune "Section" iniziando con `#` sono commenti e non vengono considerate, servo solo a scopo di organizzazione del file.
 
@@ -83,7 +89,16 @@ Quelle che precedentemente erano tabs (destra nell'immagine) ora sono state tras
 
 Seleziona una pagina dal menu a sinistra, all'interno della sidebar, per accedere alle funzionalità desiderate
 
-### 🎉 Novità: Login(?)
+### 🎉 Novità: Login
+<p><img src="https://github.com/user-attachments/assets/111d3ec2-7f21-45fa-b3f7-979ec0fe80b0" alt="login" height="400"/></p>
+D'ora in avanti agli utenti sarà richiesto di effettuare un "Login" al sistema. Questo renderà più robusta l'intera piattaforma garantendo maggiore controllo.
+
+Al primo accesso verrà creato un utente che non avrà alcun username. Per impostare un username (e quindi abilitare la creazione e l'unione ai tavoli) è necessario recarsi alla page "User" (vedi "Nuova pagina "User"") ed inserire l'username.
+
+ATTENZIONE: L'username è univoco! Non vi sarà quindi possibile selezionare un nome utente già in uso da un altro user.
+
+Il provider principale di autenticazione è Auth0 ma sono offerti anche i seguenti social providers:
+ - Google
 
 ### 🎉 Novità: Nuova pagina "User"
 <p><img src="https://github.com/user-attachments/assets/be58f0b5-8f3c-42c5-b9fd-340c60d39b27" alt="user page" height="400"/></p>
@@ -94,6 +109,9 @@ E' ora possibile accedere ad una pagina interamente dedicata all'utente in cui �
  - Username
  - Telegram username
  - BGG username
+
+ATTENZIONE: L'username è univoco! Non vi sarà quindi possibile selezionare un nome utente già in uso da un altro user.
+ATTENZIONE: L'username è inoltre necessario per abilitare creazione e unione ai tavoli.
 
 ### 🎉 Novità: Funzionalità "Locations"
 <p><img src="https://github.com/user-attachments/assets/c0755854-42f3-41c4-a87d-0f7f53413ea5" alt="user page" height="400"/></p>
