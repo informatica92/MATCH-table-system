@@ -1,10 +1,11 @@
 import requests
 import html
 import xml.etree.ElementTree as et
-from cachetools import cached, LRUCache
+
+from streamlit import cache_data
 
 
-@cached(cache=LRUCache(maxsize=128))
+@cache_data(ttl=None, max_entries=1000, persist="disk")
 def get_bgg_game_info(game_id):
     print(f"\tquerying BGG for {game_id}")
     # BGG API URL for game details
@@ -33,7 +34,11 @@ def get_bgg_game_info(game_id):
         for mechanic in root.findall('item/link[@type="boardgamemechanic"]'):
             mechanics.append(mechanic.get('value'))
 
-        return image_url, html.unescape(game_description), categories, mechanics
+        expansions = []
+        for expansion in root.findall('item/link[@type="boardgameexpansion"]'):
+            expansions.append({'id': expansion.get('id'), 'value': expansion.get('value')})
+
+        return image_url, html.unescape(game_description), categories, mechanics, expansions
     except Exception as e:
         print(f"Error fetching game image: {e}")
         return None
@@ -41,6 +46,13 @@ def get_bgg_game_info(game_id):
 
 def get_bgg_url(game_id):
     return f"https://boardgamegeek.com/boardgame/{game_id}"
+
+def get_bgg_profile_page_url(username, as_html_link=False):
+    url = f"https://boardgamegeek.com/user/{username}"
+    if as_html_link:
+        return f"<a href='{url}' target='_blank'>{url}</a>"
+    else:
+        return url
 
 
 def search_bgg_games(game_name):

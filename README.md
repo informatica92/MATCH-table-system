@@ -27,50 +27,126 @@ In caso si voglia invece eseguire l'applicazione in locale è necessario seguire
  ```
  pip install -r requirements.txt
  ```
+6. Creazione di un file `secrets.toml` con le seguenti variabili d'ambiente (oppure valorizza i secrets durante il deploy su Streamlit Cloud):
+
+| Section               | Variabile d'ambiente | Descrizione                                                                                                                                            | Default              | Obbligatorio |
+|-----------------------|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------|--------------|  
+| # POSTGRESQL DATABASE |                      |                                                                                                                                                        |                      |              |
+|                       | DB_HOST              | Hostname del database                                                                                                                                  | localhost            | No           |
+|                       | DB_NAME              | Nome del database                                                                                                                                      |                      | Sì           |
+|                       | DB_USER              | Username del database                                                                                                                                  |                      | Sì           | 
+|                       | DB_PASSWORD          | Password del database                                                                                                                                  |                      | Sì           |
+|                       | DB_PORT              | Porta del database                                                                                                                                     | 5432                 | No           |
+|                       | DB_SCHEMA            | Schema del database (pre esistente)                                                                                                                    | public               | No           |
+| # TELEGRAM            |                      |                                                                                                                                                        |                      |              |
+|                       | TELEGRAM_CHAT_ID     | Chat ID di Telegram a cui inviare messaggi                                                                                                             |                      | No           |
+|                       | TELEGRAM_BOT_TOKEN   | Token del bot di Telegram, se mancante, non viene effettuato alcun invio                                                                               |                      | No           |
+| # MAP                 |                      |                                                                                                                                                        |                      |              |
+|                       | GMAP_MAP_URL         | URL della mappa di Google Maps, se mancante non viene mostrata alcuna mappa                                                                            |                      | No           |
+| # GENERAL SETTINGS    |                      |                                                                                                                                                        |                      |              |
+|                       | TITLE                | Titolo dell'applicazione                                                                                                                               | Board Game Proposals | No           |
+|                       | LOGO                 | URL del logo dell'applicazione                                                                                                                         |                      | Sì           |
+|                       | LOGO_LARGE           | URL del logo grande dell'applicazione, se mancante viene usato come logo della sidebar il logo in LOGO                                                 |                      | No           |
+|                       | DEFAULT_DATE         | Data predefinita per la creazione di un tavolo nel formato `YYYY-MM-DD`, se mancante o nel passato, viene usata la data odierna                        | *data odierna*       | No           |
+|                       | GOD_MODE_PASSWORD    | Password per attivare la GOD MODE, se mancante, la GOD MODE non è attivabile                                                                           |                      | Sì           |
+| [auth]                |                      |                                                                                                                                                        |                      |              |
+|                       | redirect_uri         | URI di reindirizzamento per l'autenticazione, può essere: <br/> - http://localhost:8501/oauth2callback <br/> - https://`dominio deploy`/oauth2callback |                      | Sì           |
+|                       | cookie_secret        | Nome del cookie in cui inserire il token di autenticazione                                                                                             |                      | Sì           |
+| [auth.auth0]          |                      |                                                                                                                                                        |                      |              |
+|                       | client_id            | Client ID di Auth0                                                                                                                                     |                      | Sì           |
+|                       | client_secret        | Client Secret di Auth0                                                                                                                                 |                      | Sì           |
+|                       | server_metadata_url  | URL del server metadata di Auth0, nella forma https://`dominio auth0`.com/.well-known/openid-configuration                                             |                      | Sì           |
+
+NB: Alcune "Section" iniziando con `#` sono commenti e non vengono considerate, servo solo a scopo di organizzazione del file.
+
+Le "Section" che invece hanno forma `[nome]` sono obbligatorie e devono essere rispettate.
+
 7. Eseguire
  ```
  streamlit run board_game_manager.py
  ```
 ## Funzionalità
-### 🎉 Novità: Delete ora con finestra di conferma e permette eliminazione di tavoli con 1+ giocatori
+
+### 🎉 Novità: Gestione delle Espansioni
+<p><img src="https://github.com/user-attachments/assets/9d14ad22-6b10-47af-8a12-b86aa870bf9e" alt="expansions" height="400"/></p>
+
+E' ora possibile aggiungere espansioni ai giochi, in modo da poter specificare quali espansioni saranno utilizzate durante la partita.
+
+Le espansioni selezionate in fase di "Create" vengono poi mostrate nella pagine "View & Join"
+
+E' anche possibile modificare le espansioni in seguito utilizzando il tasto "Edit" disponibile sotto ogni proposta.
+
+### 🎉 Novità: Le Tabs sono ora Pages
+<p><img src="https://github.com/user-attachments/assets/6394b19d-08e8-4ede-8227-ca28c6739ab4" alt="tabs vs pages" height="180" width="800"/></p>
+
+Quelle che precedentemente erano tabs (destra nell'immagine) ora sono state trasformate in pagine (sinistra nell'immagine), per una navigazione più fluida e intuitiva
+
+Seleziona una pagina dal menu a sinistra, all'interno della sidebar, per accedere alle funzionalità desiderate
+
+### 🎉 Novità: Login(?)
+
+### 🎉 Novità: Nuova pagina "User"
+<p><img src="https://github.com/user-attachments/assets/be58f0b5-8f3c-42c5-b9fd-340c60d39b27" alt="user page" height="400"/></p>
+
+E' ora possibile accedere ad una pagina interamente dedicata all'utente in cui è possibile impostare campi come:
+ - Nome
+ - Cognome
+ - Username
+ - Telegram username
+ - BGG username
+
+### 🎉 Novità: Funzionalità "Locations"
+<p><img src="https://github.com/user-attachments/assets/c0755854-42f3-41c4-a87d-0f7f53413ea5" alt="user page" height="400"/></p>
+
+A parte le location di sistema, ogni utente può ora aggiungere una o più location in cui è disponibile a giocare.
+
+Le Location di Sistema (Admin Locations) sono gestibili solo dagli utenti Admin. Si tratta di una impostazione a livello DB.
+
+In fase di creazione di un tavolo, nella pagina "Create", è possibile selezionare la location nella quale si terrà il tavolo: 
+ - in occasione degli eventi MATCH, usare quindi la location (di sistema) "MATCH"
+ - se lo si desidera, sarà quindi possibile aprire tavoli anche durante tutto l'anno con le location delle varie altre associazioni (es "Masseria Andriani", "Biblioteca di Putignano", "Officina dei Saperi"...)
+
+ATTENZIONE: le location di sistema appariranno sempre a tutti gli utenti e sono quindi trasversali, le location utente, invece, possono essere usate come location solo dall'utente che l'ha creata.
+
+### Delete ora con finestra di conferma e permette eliminazione di tavoli con 1+ giocatori
 <p><img src="https://github.com/user-attachments/assets/b3589ef2-7869-43fa-9f53-94d2d6562e5a" alt="join toast" max-height="400"/></p>
 
 Delete ha ora una finestra di conferma e permette anche l'eliminazione di tavoli con 1+ giocatori
 
-### 🎉 Novità: Leave/Delete/Edit possibili solo per sè stessi e per i propri tavoli
+### Leave/Delete/Edit possibili solo per sè stessi e per i propri tavoli
 <p><img src="https://github.com/user-attachments/assets/53569a54-15a5-4961-b48d-a4fef435f709" alt="join toast" max-height="400"/></p>
 
 Leave/Delete/Edit possibili solo per sè stessi e per i propri tavoli: 
  - Leave è quindi abilitata solo per sè stessi e per i giocatori ai propri tavoli
  - Delete/Edit è quindi possibile solo per i propri tavoli 
 
-### 🎉 Novità: GOD MODE introdotta per rendere Leave/Delete/Edit possibili sempre
+### GOD MODE introdotta per rendere Leave/Delete/Edit possibili sempre
 <p><img src="https://github.com/user-attachments/assets/2c133444-8b32-46a0-bc41-ae115bf36d71" alt="join toast" max-height="400" /></p>
 
 La GOD MODE permette, in caso si disponga di una password, di superare il vincolo per cui Leave/Delete/Edit è possibile solo per sè stessi e per i propri tavoli 
 
-### 🎉 Novità: Vista a Tabella
+### Vista a Tabella
 <p><img src="https://github.com/user-attachments/assets/9d5dd314-2af6-4d2d-9114-5d3464e9d993" alt="join toast" max-height="400"/></p>
 
 E' stata aggiunta una visualizzazione a tabella oltre a quella standard a lista e a timeline. 
 
 Ancora una volta, selezionando una riga, in basso si aprirà la scheda del gioco e potrete fare Join/Leave/Delete
 
-### 🎉 Novità: Aggiungi proponente al tavolo di default
+### Aggiungi proponente al tavolo di default
 <p><img src="https://github.com/user-attachments/assets/a8044443-9632-4ced-8030-69c01fa6f5be" alt="join toast" max-height="400"/></p>
 
 E' ora presente un flag che permette, di default, di aggiungere il proponente al tavolo da lui creato.
 
 Se deselezionata, il tavolo verrà creato comunque ma senza aggiungere l'utente allo stesso.
 
-### 🎉 Novità: Inserimento Time Slot (Mattina, Pomeriggio, Sera, Notte) in Creation
+### Inserimento Time Slot (Mattina, Pomeriggio, Sera, Notte) in Creation
 <p><img src="https://github.com/user-attachments/assets/2fe06532-bc69-417f-84c0-0f8ee4ab6af4" alt="join toast" max-height="400"/></p>
 
 Per semplificare la parte di crezione e velocizzarla, l'orario è stato sostituito con dei Time Slot (mattina, pomeriggio, sera, notte).
 
 In fase di Edit è comunque ancora possibile selezionare l'orario desiderato con la consueta precisione di mezz'ora (08:30, 09:00, 09:30...) 
 
-### 🎉 Novità: Utilizzo toast/notifiche per creazione/join/rimozione/delete
+### Utilizzo toast/notifiche per creazione/join/rimozione/delete
 <p><img src="https://github.com/user-attachments/assets/16183656-9053-49be-af19-8b18458ad6db" alt="leave toast" max-width="300"/></p>
 <p><img src="https://github.com/user-attachments/assets/d549927b-021f-4323-a9b8-eb2ddc864217" alt="join toast" max-width="300"/></p>
 
