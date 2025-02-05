@@ -111,6 +111,7 @@ E' ora possibile accedere ad una pagina interamente dedicata all'utente in cui �
  - BGG username
 
 ATTENZIONE: L'username è univoco! Non vi sarà quindi possibile selezionare un nome utente già in uso da un altro user.
+
 ATTENZIONE: L'username è inoltre necessario per abilitare creazione e unione ai tavoli.
 
 ### 🎉 Novità: Funzionalità "Locations"
