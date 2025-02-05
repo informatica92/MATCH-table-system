@@ -425,7 +425,7 @@ class SQLManager(object):
                     {joined_by_me_clause}
                     -- check if date is in the future with 1 day of margin
                     and tp.date >= current_date - INTERVAL '1 day'
-                    and loc.is_default = {filter_default_location}
+                    and coalesce(loc.is_default, FALSE) = {filter_default_location}  --if is_default is NULL (original location has been removed) assume it is a non default location
                 group by 
                     tp.id,
                     tp.game_name,
