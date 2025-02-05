@@ -3,11 +3,11 @@ import streamlit as st
 
 def login_button():
     if st.button("🔐 Login", use_container_width=True):
-        st.experimental_user.login(provider="auth0")
+        st.login(provider="auth0")
 
 def logout_button():
     if st.button("❌ Logout", use_container_width=True):
-        st.experimental_user.logout()
+        st.logout()
 
 @st.cache_data(ttl="1h")  # cache user_id, username, is_admin from email but only for 1h
 def _get_or_create_user(email):
@@ -42,7 +42,7 @@ class StreamlitTableSystemUser(object):
             init_session_state_for_username (bool): Whether to initialize the session state for username
         """
         self.sql_manager = SQLManager()
-        self.email = st.experimental_user.email
+        self.email = st.experimental_user.get("email")
 
         (
             self.user_id,
