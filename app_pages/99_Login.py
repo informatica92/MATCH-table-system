@@ -6,7 +6,7 @@ from utils.table_system_user import login_button
 
 col_title, col_help = st.columns([9, 1])
 stu.add_title_text(col_title, frmt="{title}")
-stu.add_help_button(col_help)
+# stu.add_help_button(col_help)
 
 col_fake1, col_login, col_fake2 = st.columns([2, 4, 2])
 with col_login:
