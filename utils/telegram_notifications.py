@@ -50,7 +50,7 @@ class TelegramNotifications(object):
             duration=duration,
             proposed_by=proposed_by,
             table_id=table_id,
-            row_page="" if is_default_location else "restoftheworld/",
+            row_page="" if is_default_location else "restoftheworld",  # no '/' at the end of the page name
             base_url=os.environ.get('BASE_URL', 'http://localhost:8501')
         )
 
