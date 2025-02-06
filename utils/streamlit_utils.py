@@ -309,7 +309,7 @@ def manage_user_locations(user_id: int|None):
             required=True,
         ),
         "house_number": st.column_config.NumberColumn(
-            "Number",
+            "Street Number",
             help="The house number of the location",
             width="small",
             default=None,
