@@ -15,10 +15,15 @@ col1, col2 = st.columns([1, 4])
 col1.text_input("User ID", value=st.session_state.user.user_id, disabled=True)
 col2.text_input("Email", value=st.session_state.user.email, disabled=True)
 with st.form("user_setting_form", border=False):
+    # if username is none, warn the user to set the username
+    if not st.session_state.username:
+        st.warning("You need to **set a Username** below to **join** and **create** tables. ⤵️")
     st.text_input("Username", value=st.session_state.username, key="username_user_setting", disabled=False, placeholder="[Mandatory] Set a username")
+
     col_name, col_surname =  st.columns([1, 1])
     col_name.text_input("Name", value=st.session_state.user.name, key="name_user_setting", disabled=False, placeholder="[Optional] Set your name")
     col_surname.text_input("Surname",  value=st.session_state.user.surname, key="surname_user_setting", disabled=False, placeholder="[Optional] Set your surname")
+
     col_bgg_username, col_telegram_username =  st.columns([1, 1])
     col_bgg_username.text_input("BGG username",  value=st.session_state.user.bgg_username, key="bgg_username_user_setting", disabled=False, placeholder="[Optional] Set your BGG username")
     with col_bgg_username:
@@ -32,6 +37,7 @@ with st.form("user_setting_form", border=False):
             stu.st_write(get_telegram_profile_page_url(st.session_state.user.telegram_username, as_html_link=True))
         else:
             stu.st_write("No Telegram username set, set it to test the link")
+
     if st.form_submit_button("💾 Update ", on_click=st.session_state.user.update_user):
         if not st.session_state.get("update_username_from_user_error"):
             new_user_details =\
