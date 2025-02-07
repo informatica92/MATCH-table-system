@@ -101,7 +101,7 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
             st.write(f"**Date Time:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{date} {time.strftime('%H:%M')}")
             st.write(f"**Duration:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{duration} hours")
             if location_alias:
-                location_md = f"🗺️[{location_alias}](https://google.it/maps/place/{location_address.replace(' ', '+')})"
+                location_md = f"🗺️[{location_alias}](https://google.it/maps/?q={location_address.replace(' ', '+')})"
             else:
                 location_md = "*Unknown*"
             st.write(f"**Location:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{location_md}")

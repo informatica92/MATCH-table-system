@@ -16,6 +16,6 @@ with col_login:
         st.write("You can login with your **Auth0** account or with your **Google** account. \n\n"
                  "If you don't have an account, you can create one by clicking on the **'Sign up'** link. \n\n"
                  "Once you are logged in, you will be able to access the app pages. \n\n"
-                 "Anyway, **in order to also Create**, **Join**, **Edit** and **Delete** tables, **you also need to set"
-                 "an Username** (the app will guide you in doing this)")
+                 "Anyway, **in order to also Create**, **Join**, **Edit** and **Delete** tables, **you also need to "
+                 "set an Username** (the app will guide you in doing this)")
         login_button()

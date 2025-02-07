@@ -8,6 +8,7 @@ from utils.table_system_user import StreamlitTableSystemUser, login_button, logo
 # TODO: into "View & Join" page add a tertiary button on usernames to shoe the user profile with a dialog
 # TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (requires no streamlit_extras => no cookies)
 # TODO: add board game image during creation (for check)
+# TODO: simplify username settings: 1) leave as it is, 2) add "go to User page" buttons (sidebar + View page) 3) force User page if username is not set 4) set username as default (email or email username + random string)
 # # IMPROVEMENTS
 # TODO: remove "joined_count" from proposition (use len(...) instead)
 # TODO: replace propositions with table_propositions.TableProposition (after joined_count removal)
