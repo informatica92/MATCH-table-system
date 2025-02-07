@@ -273,6 +273,14 @@ def _on_location_df_change(entire_locations_df: pd.DataFrame, user_id: int|None)
 
     refresh_table_propositions("Location Update")
 
+    if user_id:
+        # clear user cache
+        get_available_locations.clear(user_id)
+    else:
+        # clear all caches
+        get_available_locations.clear()
+        get_default_location.clear()
+
 def manage_user_locations(user_id: int|None):
     df = sql_manager.get_user_locations(user_id, include_system_ones=True if not user_id else False)
 
@@ -344,12 +352,14 @@ def manage_user_locations(user_id: int|None):
     if default_location:
         st.write(f"Default location: {default_location['alias']} (ID: {default_location['id']})")
 
+@st.cache_data
 def get_available_locations(user_id):
     locations = sql_manager.get_user_locations(user_id, include_system_ones=True, return_as_df=False)
     return locations
 
-def is_default_location(location_id):
-    return sql_manager.is_default_location(location_id)
-
+@st.cache_data
 def get_default_location() -> dict:
     return sql_manager.get_default_location()
+
+def is_default_location(location_id):
+    return int(location_id) == int(get_default_location()["id"])
