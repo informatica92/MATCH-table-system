@@ -62,6 +62,18 @@ def add_help_button(col: st.delta_generator.DeltaGenerator):
 def get_logo():
     return os.environ.get("LOGO") or "images/logo.jpg"
 
+def redirect_to_user_page_if_username_not_set():
+    if not st.session_state['username']:
+        st.switch_page("app_pages/4_User.py")
+
+def get_go_to_user_page_link_button(use_container_width: bool = True):
+    st.page_link(
+        "app_pages/4_User.py",
+        label="Go to \"**User**\" page",
+        icon="🔗",
+        use_container_width=use_container_width
+    )
+
 def username_in_joined_players(joined_players: list[str]):
     if st.session_state.username:
         return st.session_state.username.lower() in [player.lower() for player in joined_players if player]
