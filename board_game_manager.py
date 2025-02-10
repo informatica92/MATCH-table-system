@@ -82,6 +82,8 @@ with (st.sidebar):
                 st.info(f"Welcome back, **{st.session_state['username']}**\n\n*Use the User page to edit your username*")
             else:
                 st.warning("Set a username to join tables.\n\nUse the User page to edit your username")
+        else:
+            st.warning("Log in to join and create tables.")
 
     if st.session_state.user.is_logged_in():
         # GOD MODE section
