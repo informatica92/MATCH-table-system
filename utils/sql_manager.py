@@ -3,6 +3,10 @@ import json
 import os
 import pandas as pd
 
+# import uuid
+# def generate_random_string(length=8):
+#     return str(uuid.uuid4()).replace('-', '')[:length]
+
 
 class SQLManager(object):
 
