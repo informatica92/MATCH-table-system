@@ -364,8 +364,8 @@ def get_default_location() -> dict:
 def is_default_location(location_id):
     return int(location_id) == int(get_default_location()["id"])
 
-def get_location_markdown_text(location_alias, location_address):
-    if st.session_state.user.is_logged_in():
+def get_location_markdown_text(location_alias, location_address, location_is_system):
+    if st.session_state.user.is_logged_in() or location_is_system:
         if location_alias:
             location_md = f"🗺️[{location_alias}](https://maps.google.com/?q={location_address.replace(' ', '+')})"
         else:
