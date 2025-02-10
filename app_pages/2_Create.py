@@ -89,5 +89,8 @@ with st.form(key="create_new_proposition_form", border=False):
             st.warning("Select a game from the list to create a proposition.")
     else:
         st.form_submit_button("Create Proposition", disabled=True)
-        st.warning("Set a username to create a proposition.")
+        if st.session_state.user.is_logged_in():
+            st.warning("Set a username to create a proposition.")
+        else:
+            st.warning("**Log in** to create a proposition.")
 

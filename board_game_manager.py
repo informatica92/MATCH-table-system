@@ -83,7 +83,7 @@ with (st.sidebar):
             else:
                 st.warning("Set a username to join tables.\n\nUse the User page to edit your username")
         else:
-            st.warning("Log in to join and create tables.")
+            st.warning("**Log in** to **join** and **create** tables.")
 
     if st.session_state.user.is_logged_in():
         # GOD MODE section

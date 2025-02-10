@@ -144,7 +144,10 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
                     on_click=stu.join_callback, args=[table_id, st.session_state['username'], st.session_state.user.user_id]
                 )
             else:
-                st.warning("Set a username to join a table.")
+                if st.session_state.user.is_logged_in():
+                    st.warning("Set a username to join a table.")
+                else:
+                    st.warning("**Log in** to join a table.")
         else:
             st.warning(f"Table {table_id} is full.", )
 
