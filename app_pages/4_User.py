@@ -33,7 +33,8 @@ with st.form("user_setting_form", border=False):
     # if username is none, warn the user to set the username
     if not st.session_state.username:
         st.warning("You need to **set a Username** below to **join** and **create** tables. ⤵️")
-    st.text_input("Username", value=st.session_state.username, key="username_user_setting", disabled=False, placeholder="[Mandatory] Set a username")
+    username_markdown = "Username" if st.session_state.username else ":red[Username]"
+    st.text_input(username_markdown, value=st.session_state.username, key="username_user_setting", disabled=False, placeholder="[Mandatory] Set a username")
 
     col_name, col_surname =  st.columns([1, 1])
     col_name.text_input("Name", value=st.session_state.user.name, key="name_user_setting", disabled=False, placeholder="[Optional] Set your name")
