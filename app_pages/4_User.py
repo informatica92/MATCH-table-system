@@ -3,11 +3,26 @@ import streamlit as st
 import utils.streamlit_utils as stu
 from utils.telegram_notifications import get_telegram_profile_page_url
 from utils.bgg_manager import get_bgg_profile_page_url
+from utils.table_system_user import login_button
 
 
 col_title, col_help = st.columns([9, 1])
 stu.add_title_text(col_title, frmt="{title}")
 stu.add_help_button(col_help)
+
+if not st.session_state.user.is_logged_in():
+    col_fake1, col_login, col_fake2 = st.columns([2, 4, 2])
+    with col_login:
+        with st.container(border=True, key="login_container"):
+            st.subheader("🛡️ Login")
+            st.write("Please login to access the app")
+            st.write("You can login with your **Auth0** account or with your **Google** account. \n\n"
+                     "If you don't have an account, you can create one by clicking on the **'Sign up'** link. \n\n"
+                     "Once you are logged in, you will be able to access the app pages. \n\n"
+                     "Anyway, **in order to also Create**, **Join**, **Edit** and **Delete** tables, **you also need to "
+                     "set an Username** (the app will guide you in doing this)")
+            login_button()
+    st.stop()
 
 st.subheader("User settings")
 

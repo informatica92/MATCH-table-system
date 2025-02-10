@@ -20,37 +20,29 @@ st.set_page_config(page_title=stu.get_title(), layout="wide", page_icon="🎴")
 
 st.session_state['user'] = StreamlitTableSystemUser(init_session_state_for_username=True)
 
-if st.session_state.user.is_logged_in():
-    if st.session_state['user'].is_banned:
-        # If the user is banned, show the banned page
-        pg = st.navigation(
-            [
-                st.Page("app_pages/98_Banned_User.py", icon="❌", default=True)
-            ]
-        )
-    else:
-        # ...alternatively, show the normal pages
-        def_loc = stu.get_default_location()
-        def_loc_alias = def_loc['alias']
-        pg = st.navigation(
-            {
-                "View & Join": [
-                    st.Page("app_pages/1_View_&_Join_Default.py", icon="📜", default=True, title=def_loc_alias),
-                    st.Page("app_pages/1_View_&_Join_RoW.py", icon="🌍", title="Rest of the World", url_path="restoftheworld"),
-                ],
-                "Other": [
-                    st.Page("app_pages/2_Create.py", icon="➕"),
-                    st.Page("app_pages/3_Map.py", icon="🗺️"),
-                    st.Page("app_pages/4_User.py", icon="👦🏻")
-                ]
-            }
-        )
-else:
-    # instead, if the user is not logged in, show the login page
+if st.session_state['user'].is_banned:
+    # If the user is banned, show the banned page
     pg = st.navigation(
         [
-            st.Page("app_pages/99_Login.py", icon="🔐", default=True)
+            st.Page("app_pages/98_Banned_User.py", icon="❌", default=True)
         ]
+    )
+else:
+    # ...alternatively, show the normal pages
+    def_loc = stu.get_default_location()
+    def_loc_alias = def_loc['alias']
+    pg = st.navigation(
+        {
+            "View & Join": [
+                st.Page("app_pages/1_View_&_Join_Default.py", icon="📜", default=True, title=def_loc_alias),
+                st.Page("app_pages/1_View_&_Join_RoW.py", icon="🌍", title="Rest of the World", url_path="restoftheworld"),
+            ],
+            "Other": [
+                st.Page("app_pages/2_Create.py", icon="➕"),
+                st.Page("app_pages/3_Map.py", icon="🗺️"),
+                st.Page("app_pages/4_User.py", icon="👦🏻")
+            ]
+        }
     )
 
 st.markdown(stu.BOUNCE_SIDEBAR_ICON, unsafe_allow_html=True)
