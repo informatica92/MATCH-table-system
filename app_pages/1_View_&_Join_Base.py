@@ -281,6 +281,9 @@ def dataframe_table_propositions(compact=False):
 
 def create_view_and_join_page():
 
+    # redirect to "User" page if username is not set
+    stu.redirect_to_user_page_if_username_not_set()
+
     col_title, col_help = st.columns([9, 1])
     stu.add_title_text(col_title, frmt="{title}")
     stu.add_help_button(col_help)

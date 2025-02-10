@@ -5,6 +5,9 @@ import os
 import utils.streamlit_utils as stu
 from utils.bgg_manager import search_bgg_games, get_bgg_game_info
 
+# redirect to "User" page if username is not set
+stu.redirect_to_user_page_if_username_not_set()
+
 col_title, col_help = st.columns([9, 1])
 stu.add_title_text(col_title, frmt="{title}")
 stu.add_help_button(col_help)
