@@ -100,8 +100,10 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
             st.write(f"**Max Players:**&nbsp;&nbsp;{max_players}")
             st.write(f"**Date Time:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{date} {time.strftime('%H:%M')}")
             st.write(f"**Duration:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{duration} hours")
-            st.write(f"**Location:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{stu.get_location_markdown_text(location_alias, location_address)}")
-            st.write(f"**Expansions:**" + ''.join([f"\n- [{expansion['value']}]({get_bgg_url(expansion['id'])})" for expansion in expansions]))
+            location_markdown = stu.get_location_markdown_text(location_alias, location_address, location_is_system)
+            st.write(f"**Location:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{location_markdown}")
+            expansions_markdown = ''.join([f"\n- [{expansion['value']}]({get_bgg_url(expansion['id'])})" for expansion in expansions])
+            st.write(f"**Expansions:** {expansions_markdown}")
             st.write(f"**Notes:**")
             st.write(notes)
         else:
