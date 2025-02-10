@@ -63,7 +63,7 @@ def get_logo():
     return os.environ.get("LOGO") or "images/logo.jpg"
 
 def redirect_to_user_page_if_username_not_set():
-    if not st.session_state['username']:
+    if st.session_state.user.is_logged_in() and not st.session_state['username']:
         st.switch_page("app_pages/4_User.py")
 
 def get_go_to_user_page_link_button(use_container_width: bool = True):
@@ -363,3 +363,13 @@ def get_default_location() -> dict:
 
 def is_default_location(location_id):
     return int(location_id) == int(get_default_location()["id"])
+
+def get_location_markdown_text(location_alias, location_address):
+    if st.session_state.user.is_logged_in():
+        if location_alias:
+            location_md = f"🗺️[{location_alias}](https://maps.google.com/?q={location_address.replace(' ', '+')})"
+        else:
+            location_md = "*Unknown*"
+    else:
+        location_md = "*Login to see the location*"
+    return location_md
