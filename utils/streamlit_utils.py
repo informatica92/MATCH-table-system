@@ -32,6 +32,11 @@ BOUNCE_SIDEBAR_ICON = r"""
         99% { transform:translateY(-3%); }
         100% { transform:translateY(0); }
     }
+    
+    .stAlert div {
+        padding: 2px;
+    }
+    
     </style>
 """
 
