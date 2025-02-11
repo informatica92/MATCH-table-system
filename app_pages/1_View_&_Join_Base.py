@@ -285,12 +285,14 @@ def create_view_and_join_page():
     # redirect to "User" page if username is not set
     stu.redirect_to_user_page_if_username_not_set()
 
+    # title and help button
     col_title, col_help = st.columns([9, 1])
     stu.add_title_text(col_title, frmt="{title}")
     stu.add_help_button(col_help)
 
     print(f"Location mode [View Page]: {st.session_state.location_mode}")
 
+    # additional sidebar widgets
     with st.sidebar:
         with st.container(border=True):
             st.selectbox("View mode", options=["📜List", "📊Timeline", "◻️Table"], key="view_mode")
@@ -298,6 +300,7 @@ def create_view_and_join_page():
 
     view_start_time = time_time()
 
+    # refresh and filter buttons
     refresh_col, filter_col, fake_col = st.columns([1, 1, 4])
     with refresh_col:
         refresh_button = st.button("🔄️ Refresh", key="refresh", use_container_width=True)
@@ -308,6 +311,7 @@ def create_view_and_join_page():
         with st.popover(f"🔍 {filter_label_num_active_filters}Filters:", use_container_width=True):
             st.toggle("Joined by me", key="joined_by_me", value=False, on_change=stu.refresh_table_propositions, kwargs={"reason": "Filtering"}, disabled=not st.session_state['username'])
 
+    # show propositions
     if len(st.session_state.propositions) == 0:
         st.info("No table propositions available, use the \"**➕Create**\" page to create a new one."
                 "\n\n*NB: tables are automatically hidden after 1 day*")
