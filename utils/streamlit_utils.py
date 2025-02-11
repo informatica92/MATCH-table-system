@@ -210,7 +210,7 @@ def delete_callback(table_id):
     refresh_table_propositions("Delete")
     st.toast(f"⛔ Deleted Table {table_id}")
 
-def create_callback(game_name, bgg_game_id):
+def create_callback(game_name, bgg_game_id, image_url):
     if game_name:
         last_row_id = sql_manager.create_proposition(
             game_name,
@@ -222,7 +222,7 @@ def create_callback(game_name, bgg_game_id):
             bgg_game_id,
             st.session_state.user.user_id,
             st.session_state.join_me_by_default,
-            st.session_state.location[0] if st.session_state.location else None,
+            st.session_state.location[0] if st.session_state.location else None,  # location id,
             st.session_state.expansions
         )
 
@@ -234,7 +234,9 @@ def create_callback(game_name, bgg_game_id):
             st.session_state.duration,
             st.session_state.username,
             last_row_id,
-            is_default_location(st.session_state.location[0]) if st.session_state.location else True
+            is_default_location(st.session_state.location[0]) if st.session_state.location else True,
+            st.session_state.location[1] if st.session_state.location else None,  # location alias
+            image_url
         )
 
         refresh_table_propositions("Created")
