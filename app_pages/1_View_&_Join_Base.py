@@ -5,6 +5,7 @@ from time import time as time_time
 import utils.streamlit_utils as stu
 from utils.bgg_manager import get_bgg_game_info, get_bgg_url
 from utils.altair_manager import timeline_chart
+from utils.table_system_proposition import TableProposition, TablePropositionExpansion
 
 
 @st.dialog("🖋️ Edit Table")
@@ -31,7 +32,7 @@ def dialog_edit_table_proposition(table_id, old_name, old_max_players, old_date,
 
         # expansions
         expansions_options = get_bgg_game_info(bgg_game_id)[4]
-        expansions_default = old_expansions
+        expansions_default = TablePropositionExpansion.to_list_of_dicts(old_expansions)
         st.multiselect("Expansions", options=expansions_options, default=expansions_default, format_func=lambda x: x['value'], key="expansions_edit")
 
         # notes
@@ -63,24 +64,20 @@ def dialog_delete_table_proposition(table_id: int, game_name: str, joined_count:
             stu.delete_callback(table_id)
             st.rerun()
 
-def display_table_proposition(section_name, compact, table_id, game_name, bgg_game_id, proposed_by, max_players, date,
-                              time, duration, notes, joined_players, joined_players_ids, location_alias,
-                              location_address, location_is_system, expansions):
+def display_table_proposition(section_name, compact, table_proposition: TableProposition):
     # Check if the BGG game ID is valid and set the BGG URL
-    if bgg_game_id and int(bgg_game_id) >= 1:
-        bgg_url = get_bgg_url(bgg_game_id)
-        st.subheader(f"Table {table_id}: [{game_name}]({bgg_url})", anchor=f"table-{table_id}")
+    if table_proposition.bgg_game_id and int(table_proposition.bgg_game_id) >= 1:
+        bgg_url = get_bgg_url(table_proposition.bgg_game_id)
+        st.subheader(f"Table {table_proposition.table_id}: [{table_proposition.game_name}]({bgg_url})", anchor=f"table-{table_proposition.table_id}")
     else:
-        st.subheader(f"Table {table_id}: {game_name}", anchor=f"table-{table_id}")
-
-    joined_count = len(joined_players)
+        st.subheader(f"Table {table_proposition.table_id}: {table_proposition.game_name}", anchor=f"table-{table_proposition.table_id}")
 
     # Create three columns
     col1, col2, col3 = st.columns([1, 1, 1])
 
     with col1:
-        if bgg_game_id and int(bgg_game_id) >= 1:
-            image_url, game_description, categories, mechanics, _ = get_bgg_game_info(bgg_game_id)
+        if table_proposition.bgg_game_id and int(table_proposition.bgg_game_id) >= 1:
+            image_url, game_description, categories, mechanics, _ = get_bgg_game_info(table_proposition.bgg_game_id)
             image_width = 300 if not compact else 150
             caption = f"{game_description[:120]}..." if not compact else None
             if not image_url:
@@ -96,36 +93,36 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
 
     with col2:
         if not compact:
-            st.write(f"**Proposed By:**&nbsp;{proposed_by}")
-            st.write(f"**Max Players:**&nbsp;&nbsp;{max_players}")
-            st.write(f"**Date Time:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{date} {time.strftime('%H:%M')}")
-            st.write(f"**Duration:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{duration} hours")
-            location_markdown = stu.get_location_markdown_text(location_alias, location_address, location_is_system)
+            st.write(f"**Proposed By:**&nbsp;{table_proposition.proposed_by.username}")
+            st.write(f"**Max Players:**&nbsp;&nbsp;{table_proposition.max_players}")
+            st.write(f"**Date Time:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{table_proposition.date} {table_proposition.time.strftime('%H:%M')}")
+            st.write(f"**Duration:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{table_proposition.duration} hours")
+            location_markdown = stu.get_location_markdown_text(table_proposition.location)
             st.write(f"**Location:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{location_markdown}")
-            expansions_markdown = ''.join([f"\n- [{expansion['value']}]({get_bgg_url(expansion['id'])})" for expansion in expansions])
+            expansions_markdown = ''.join([f"\n- [{expansion.expansion_name}]({get_bgg_url(expansion.expansion_id)})" for expansion in table_proposition.expansions])
             st.write(f"**Expansions:** {expansions_markdown}")
             st.write(f"**Notes:**")
-            st.write(notes)
+            st.write(table_proposition.notes)
         else:
-            st.write(f"**Proposed By:**&nbsp;{proposed_by}")
-            st.write(f"**Date Time:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{date} {time}")
-            st.write(f"**Duration:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{duration} hours")
+            st.write(f"**Proposed By:**&nbsp;{table_proposition.proposed_by}")
+            st.write(f"**Date Time:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{table_proposition.date} {table_proposition.time}")
+            st.write(f"**Duration:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{table_proposition.duration} hours")
 
     with col3:
-        is_full = joined_count >= max_players
-        st.write(f":{'red' if is_full else 'green'}[**Joined Players ({joined_count}/{max_players}):**]")
-        for joined_player, joined_player_id in zip(joined_players, joined_players_ids) or []:
-            if joined_player is not None:
+        is_full = table_proposition.joined_count >= table_proposition.max_players
+        st.write(f":{'red' if is_full else 'green'}[**Joined Players ({table_proposition.joined_count}/{table_proposition.max_players}):**]")
+        for joined_player_obj in table_proposition.joined_players or []:
+            if joined_player_obj.username is not None:
                 player_col1, player_col2 = st.columns([1, 1])
                 with player_col1:
-                    st.write(f"- {joined_player}")
+                    st.write(f"- {joined_player_obj.username}")
                 with player_col2:
                     # LEAVE
                     st.button(
                         "⛔ Leave",
-                        key=f"leave_{table_id}_{joined_player}_{section_name}",
-                        on_click=stu.leave_callback, args=[table_id, joined_player, joined_player_id],
-                        disabled=not stu.can_current_user_leave(joined_player, proposed_by),
+                        key=f"leave_{table_proposition.table_id}_{joined_player_obj.username}_{section_name}",
+                        on_click=stu.leave_callback, args=[table_proposition.table_id, joined_player_obj.username, joined_player_obj.user_id],
+                        disabled=not stu.can_current_user_leave(joined_player_obj.username, table_proposition.proposed_by.username),
                         help="Only the table owner or the player himself can leave a table."
                     )
 
@@ -137,11 +134,11 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
             if st.session_state['username']:
                 st.button(
                     # JOIN
-                    f"✅ Join Table {table_id}" if not stu.username_in_joined_players(joined_players) else "✅ *Already joined*",
-                    key=f"join_{table_id}_{section_name}",
+                    f"✅ Join Table {table_proposition.table_id}" if not stu.username_in_joined_players(table_proposition.joined_players) else "✅ *Already joined*",
+                    key=f"join_{table_proposition.table_id}_{section_name}",
                     use_container_width=True,
-                    disabled=stu.username_in_joined_players(joined_players),
-                    on_click=stu.join_callback, args=[table_id, st.session_state['username'], st.session_state.user.user_id]
+                    disabled=stu.username_in_joined_players(table_proposition.joined_players),
+                    on_click=stu.join_callback, args=[table_proposition.table_id, st.session_state['username'], st.session_state.user.user_id]
                 )
             else:
                 if st.session_state.user.is_logged_in():
@@ -149,54 +146,53 @@ def display_table_proposition(section_name, compact, table_id, game_name, bgg_ga
                 else:
                     st.warning("**Log in** to join a table.")
         else:
-            st.warning(f"Table {table_id} is full.", )
+            st.warning(f"Table {table_proposition.table_id} is full.", )
 
     with col2:
         # DELETE
         if st.button(
             "⛔ Delete proposition",
-            key=f"delete_{table_id}_{section_name}",
+            key=f"delete_{table_proposition.table_id}_{section_name}",
             use_container_width=True,
-            disabled=not stu.can_current_user_delete_and_edit(proposed_by),
+            disabled=not stu.can_current_user_delete_and_edit(table_proposition.proposed_by.username),
             help="Only the table owner can delete their tables."
         ):
-            dialog_delete_table_proposition(table_id, game_name, joined_count, joined_players, proposed_by)
+            dialog_delete_table_proposition(
+                table_proposition.table_id,
+                table_proposition.game_name,
+                table_proposition.joined_count,
+                table_proposition.get_joined_players_usernames(),
+                table_proposition.proposed_by.username
+            )
     with col3:
         if st.button(
             "🖋️ Edit",
-            key=f"edit_{table_id}_{section_name}",
+            key=f"edit_{table_proposition.table_id}_{section_name}",
             use_container_width=True,
-            disabled=not stu.can_current_user_delete_and_edit(proposed_by),
+            disabled=not stu.can_current_user_delete_and_edit(table_proposition.proposed_by.username),
             help="Only the table owner can edit their tables."
         ):
-            dialog_edit_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, joined_count, location_alias, expansions)
+            dialog_edit_table_proposition(
+                table_proposition.table_id,
+                table_proposition.game_name,
+                table_proposition.max_players,
+                table_proposition.date,
+                table_proposition.time,
+                table_proposition.duration,
+                table_proposition.notes,
+                table_proposition.bgg_game_id,
+                table_proposition.joined_count,
+                table_proposition.location.location_alias,
+                table_proposition.expansions
+            )
 
     with col4:
         pass
 
 def view_table_propositions(compact=False):
     for proposition in st.session_state.propositions:
-        (table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, proposed_by_user_id, proposed_by,
-         joined_players, joined_players_ids, loc_alias, loc_address, loc_is_system, expansions) = proposition
-        display_table_proposition(
-            section_name="list",
-            compact=compact,
-            table_id=table_id,
-            game_name=game_name,
-            bgg_game_id=bgg_game_id,
-            proposed_by=proposed_by,
-            max_players=max_players,
-            date=date,
-            time=time,
-            duration=duration,
-            notes=notes,
-            joined_players=joined_players,
-            joined_players_ids=joined_players_ids,
-            location_alias=loc_alias,
-            location_address=loc_address,
-            location_is_system=loc_is_system,
-            expansions=expansions
-        )
+        proposition: TableProposition
+        display_table_proposition(section_name="list", compact=compact, table_proposition=proposition)
 
 def timeline_table_propositions(compact=False):
     df = stu.table_propositions_to_df(add_group=True, add_status=True, add_start_and_end_date=True)
@@ -210,25 +206,7 @@ def timeline_table_propositions(compact=False):
         if selected_data.get("selection", {}).get("param_1", {}) and len(selected_data["selection"]["param_1"]) != 0:
             _id = selected_data["selection"]["param_1"][0]['table_id']
             selected_row = df[df['table_id'] == _id].iloc[0]
-            display_table_proposition(
-                section_name="timeline",
-                compact=compact,
-                table_id=int(selected_row['table_id']),
-                game_name=selected_row['game_name'],
-                bgg_game_id=selected_row['bgg_game_id'],
-                proposed_by=selected_row['proposed_by'],
-                max_players=selected_row['max_players'],
-                date=selected_row['start_datetime'].date(),
-                time=selected_row['start_datetime'].time(),
-                duration=selected_row['duration'],
-                notes=selected_row['notes'],
-                joined_players=selected_row['joined_players'],
-                joined_players_ids=selected_row['joined_players_ids'],
-                location_alias=selected_row['location_alias'],
-                location_address=selected_row['location_address'],
-                location_is_system=selected_row['location_is_system'],
-                expansions=selected_row['expansions']
-            )
+            display_table_proposition(section_name="timeline", compact=compact, table_proposition=TableProposition.from_dict(selected_row))
 
 def dataframe_table_propositions(compact=False):
 
@@ -260,25 +238,7 @@ def dataframe_table_propositions(compact=False):
         if selected_data.get("selection", {}).get("rows", {}) and len(selected_data["selection"]["rows"]) != 0:
             _id = selected_data["selection"]["rows"][0]
             selected_row = df.iloc[_id]
-            display_table_proposition(
-                section_name="timeline",
-                compact=compact,
-                table_id=int(selected_row['table_id']),
-                game_name=selected_row['game_name'],
-                bgg_game_id=selected_row['bgg_game_id'],
-                proposed_by=selected_row['proposed_by'],
-                max_players=selected_row['max_players'],
-                date=selected_row['date'],
-                time=selected_row['time'],
-                duration=selected_row['duration'],
-                notes=selected_row['notes'],
-                joined_players=selected_row['joined_players'],
-                joined_players_ids=selected_row['joined_players_ids'],
-                location_alias=selected_row['location_alias'],
-                location_address=selected_row['location_address'],
-                location_is_system=selected_row['location_is_system'],
-                expansions=selected_row['expansions']
-            )
+            display_table_proposition(section_name="timeline", compact=compact, table_proposition=TableProposition.from_dict(selected_row))
 
 def create_view_and_join_page():
 

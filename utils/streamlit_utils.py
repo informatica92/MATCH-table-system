@@ -9,6 +9,7 @@ from datetime import datetime
 from utils.telegram_notifications import TelegramNotifications
 from utils.sql_manager import SQLManager
 from utils.bgg_manager import get_bgg_game_info, get_bgg_url
+from utils.table_system_proposition import TableProposition, TablePropositionLocation, JoinedPlayerOrProposer
 
 
 DEFAULT_IMAGE_URL = "images/no_image.jpg"
@@ -79,9 +80,9 @@ def get_go_to_user_page_link_button(use_container_width: bool = True):
         use_container_width=use_container_width
     )
 
-def username_in_joined_players(joined_players: list[str]):
+def username_in_joined_players(joined_players: list[JoinedPlayerOrProposer]):
     if st.session_state.username:
-        return st.session_state.username.lower() in [player.lower() for player in joined_players if player]
+        return st.session_state.username.lower() in [player.username.lower() for player in joined_players if player.username]
     else:
         return False
 
@@ -117,7 +118,9 @@ def refresh_table_propositions(reason):
         case "row": filter_default_location = False  # Rest of the World
         case _: raise ValueError(f"Invalid mode: {mode}")
 
-    st.session_state.propositions = sql_manager.get_table_propositions(joined_by_me, filter_username, filter_default_location)
+    st.session_state.propositions = TableProposition.from_list_of_tuples(
+        sql_manager.get_table_propositions(joined_by_me, filter_username, filter_default_location)
+    )
     print(f"Table propositions QUERY [{reason}] refreshed in {(time_time() - query_start_time):.4f}s "
           f"({len(st.session_state.propositions)} rows)")
 
@@ -129,13 +132,7 @@ def table_propositions_to_df(
         add_start_and_end_date=False, add_group=False, add_status=False,
         add_image_url=False, add_bgg_url=False, add_players_fraction=False, add_joined=False,
 ):
-    columns = ['table_id', 'game_name', 'max_players', 'date', 'time', 'duration', 'notes', 'bgg_game_id',
-               'proposed_by_id', 'proposed_by', 'joined_players', 'joined_players_ids',
-               'location_alias', 'location_address', 'location_is_system', 'expansions']
-    df = pd.DataFrame(st.session_state.propositions, columns=columns)
-
-    # add 'joined_count' column as the length of 'joined_players'
-    df['joined_count'] = df['joined_players'].apply(lambda x: len(x))
+    df = pd.DataFrame(TableProposition.to_list_of_dicts(st.session_state.propositions, simple=True))
 
     if add_start_and_end_date:
         # concat date and time columns to get the start datetime
@@ -160,7 +157,8 @@ def table_propositions_to_df(
         df['players'] = df['joined_count'].astype(str) + "/" + df['max_players'].astype(str)
 
     if add_joined:
-        df['joined'] = df['joined_players'].apply(username_in_joined_players)
+        # check if st.session_state.username (str) is in the joined_players field (list[str])
+        df['joined'] = df['joined_players'].apply(lambda x: st.session_state.username.lower() in [player.lower() for player in x])
 
     return df.sort_values(["date", "time"])
 
@@ -371,10 +369,10 @@ def get_default_location() -> dict:
 def is_default_location(location_id):
     return int(location_id) == int(get_default_location()["id"])
 
-def get_location_markdown_text(location_alias, location_address, location_is_system):
-    if st.session_state.user.is_logged_in() or location_is_system:
-        if location_alias:
-            location_md = f"🗺️[{location_alias}](https://maps.google.com/?q={location_address.replace(' ', '+')})"
+def get_location_markdown_text(location: TablePropositionLocation):
+    if st.session_state.user.is_logged_in() or location.location_is_system:
+        if location.location_alias:
+            location_md = f"🗺️[{location.location_alias}](https://maps.google.com/?q={location.location_address.replace(' ', '+')})"
         else:
             location_md = "*Unknown*"
     else:
