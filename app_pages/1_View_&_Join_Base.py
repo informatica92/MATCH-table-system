@@ -232,15 +232,13 @@ def create_view_and_join_page():
     stu.add_title_text(col_title, frmt="{title}")
     stu.add_help_button(col_help)
 
-    print(f"Location mode [View Page]: {st.session_state.location_mode}")
+    # print(f"Location mode [View Page]: {st.session_state.location_mode}")
 
     # additional sidebar widgets
     with st.sidebar:
         with st.container(border=True):
             st.selectbox("View mode", options=["📜List", "📊Timeline", "◻️Table"], key="view_mode")
             st.toggle("Compact view", key="compact_view")
-
-    view_start_time = time_time()
 
     # refresh and filter buttons
     refresh_col, filter_col, fake_col = st.columns([1, 1, 4])
@@ -264,5 +262,3 @@ def create_view_and_join_page():
             timeline_table_propositions(st.session_state['compact_view'])
         else:
             dataframe_table_propositions(st.session_state['compact_view'])
-
-    print(f"Table propositions VIEW refreshed in {(time_time() - view_start_time):.4f}s")
