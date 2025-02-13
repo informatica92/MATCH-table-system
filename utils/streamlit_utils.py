@@ -121,7 +121,9 @@ def refresh_table_propositions(reason):
     st.session_state.propositions = TableProposition.from_list_of_tuples(
         sql_manager.get_table_propositions(joined_by_me, filter_username, filter_default_location)
     )
-    print(f"Table propositions QUERY [{reason}] refreshed in {(time_time() - query_start_time):.4f}s "
+    print(f"[{datetime.now()}] "
+          f"[User: {st.session_state.user if st.session_state.get('user') else '(not instantiated)'}] "
+          f"Table propositions QUERY [{reason}] refreshed in {(time_time() - query_start_time):.4f}s "
           f"({len(st.session_state.propositions)} rows)")
 
 def update_table_propositions(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, location_id, expansions):

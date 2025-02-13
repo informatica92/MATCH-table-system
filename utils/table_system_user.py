@@ -82,3 +82,12 @@ class StreamlitTableSystemUser(object):
 
     def is_logged_in(self):
         return self.email is not None
+
+    def __str__(self):
+        """
+        returns "<email> (<user_id>)"
+
+        email and user_id can also be None in case of non-authenticated users
+        :return: email (user_id)
+        """
+        return f"{self.email} ({self.user_id})"

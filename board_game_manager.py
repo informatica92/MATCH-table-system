@@ -49,7 +49,7 @@ if "location_mode" not in st.session_state:
 
 # Initialize propositions in session state
 if "propositions" not in st.session_state:
-    print("Initializing st.session_state.propositions")
+    # print("Initializing st.session_state.propositions")
     stu.refresh_table_propositions("Init")
 
 # Initialize god_mode in session state
