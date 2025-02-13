@@ -9,59 +9,59 @@ from utils.table_system_proposition import TableProposition, TablePropositionExp
 
 
 @st.dialog("🖋️ Edit Table")
-def dialog_edit_table_proposition(table_id, old_name, old_max_players, old_date, old_time, old_duration, old_notes, old_bgg_game_id, joined_count, old_location_alias, old_expansions):
-    with st.form(key=f"form-edit-{table_id}"):
+def dialog_edit_table_proposition(old_table_proposition: TableProposition):
+    with st.form(key=f"form-edit-{old_table_proposition.table_id}"):
         col1, col2 = st.columns([1, 1])
         with col1:
-            game_name = st.text_input("Game Name", value=old_name, disabled=True)
-            max_players = st.number_input("Max Players", value=old_max_players, step=1, min_value=joined_count)
-            date = st.date_input("Date", value=old_date)
+            game_name = st.text_input("Game Name", value=old_table_proposition.game_name, disabled=True)
+            max_players = st.number_input("Max Players", value=old_table_proposition.max_players, step=1, min_value=old_table_proposition.joined_count)
+            date = st.date_input("Date", value=old_table_proposition.date)
         with col2:
-            bgg_game_id = st.text_input("BGG Game ID", value=old_bgg_game_id, help=stu.BGG_GAME_ID_HELP, disabled=True)
-            duration = st.number_input("Duration (hours)", value=old_duration, step=1)
-            time = st.time_input("Time", value=old_time, step=60*30)
+            bgg_game_id = st.text_input("BGG Game ID", value=old_table_proposition.bgg_game_id, help=stu.BGG_GAME_ID_HELP, disabled=True)
+            duration = st.number_input("Duration (hours)", value=old_table_proposition.duration, step=1)
+            time = st.time_input("Time", value=old_table_proposition.time, step=60*30)
 
         # locations
         locations = stu.get_available_locations(st.session_state.user.user_id)  # 'id', 'street_name', 'city', 'house_number', 'country', 'alias', 'user_id'
         locations = [(loc[0], loc[5]) for loc in locations]
         location_old_index = None
         for i, (_, alias) in enumerate(locations):
-            if alias == old_location_alias:
+            if alias == old_table_proposition.location.location_alias:
                 location_old_index = i
         st.selectbox("Location", options=locations, index=location_old_index, key="location_edit", format_func=lambda x: x[1])
 
         # expansions
         expansions_options = get_bgg_game_info(bgg_game_id)[4]
-        expansions_default = TablePropositionExpansion.to_list_of_dicts(old_expansions)
+        expansions_default = TablePropositionExpansion.to_list_of_dicts(old_table_proposition.expansions)
         st.multiselect("Expansions", options=expansions_options, default=expansions_default, format_func=lambda x: x['value'], key="expansions_edit")
 
         # notes
-        notes = st.text_area("Notes", value=old_notes)
+        notes = st.text_area("Notes", value=old_table_proposition.notes)
 
         submitted = st.form_submit_button("💾 Update")
         if submitted:
-            stu.update_table_propositions(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, st.session_state.location_edit[0] if st.session_state.location_edit else None, st.session_state.expansions_edit)
+            stu.update_table_propositions(old_table_proposition.table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, st.session_state.location_edit[0] if st.session_state.location_edit else None, st.session_state.expansions_edit)
             st.rerun()
 
 @st.dialog("⛔ Delete Proposition")
-def dialog_delete_table_proposition(table_id: int, game_name: str, joined_count: int, joined_players: list, proposed_by:str):
-    with st.form(key=f"form-delete-{table_id}"):
-        st.write(f"Please, confirm you want to delete Table {table_id}:")
-        st.write(f"**{game_name}**")
+def dialog_delete_table_proposition(table_proposition: TableProposition):
+    with st.form(key=f"form-delete-{table_proposition.table_id}"):
+        st.write(f"Please, confirm you want to delete Table {table_proposition.table_id}:")
+        st.write(f"**{table_proposition.game_name}**")
 
-        if joined_count:
-            joined_players_markdown = '\n\t - '  + '\n\t - '.join(joined_players)
+        if table_proposition.joined_count:
+            joined_players_markdown = '\n\t - '  + '\n\t - '.join(table_proposition.get_joined_players_usernames())
             st.write(f"Details:\n "
-                     f"- proposed by **{proposed_by}**\n "
-                     f"- with {joined_count} player(s): {joined_players_markdown}\n ")
+                     f"- proposed by **{table_proposition.proposed_by.username}**\n "
+                     f"- with {table_proposition.joined_count} player(s): {joined_players_markdown}\n ")
         else:
             st.write(f"Details:\n "
-                     f"- proposed by **{proposed_by}**\n "
+                     f"- proposed by **{table_proposition.proposed_by.username}**\n "
                      f"- without any joined player\n ")
         st.write("")
         submitted = st.form_submit_button("⛔ Yes, delete table and its joined player(s)")
         if submitted:
-            stu.delete_callback(table_id)
+            stu.delete_callback(table_proposition.table_id)
             st.rerun()
 
 def display_table_proposition(section_name, compact, table_proposition: TableProposition):
@@ -157,13 +157,7 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
             disabled=not stu.can_current_user_delete_and_edit(table_proposition.proposed_by.username),
             help="Only the table owner can delete their tables."
         ):
-            dialog_delete_table_proposition(
-                table_proposition.table_id,
-                table_proposition.game_name,
-                table_proposition.joined_count,
-                table_proposition.get_joined_players_usernames(),
-                table_proposition.proposed_by.username
-            )
+            dialog_delete_table_proposition(table_proposition)
     with col3:
         if st.button(
             "🖋️ Edit",
@@ -172,19 +166,7 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
             disabled=not stu.can_current_user_delete_and_edit(table_proposition.proposed_by.username),
             help="Only the table owner can edit their tables."
         ):
-            dialog_edit_table_proposition(
-                table_proposition.table_id,
-                table_proposition.game_name,
-                table_proposition.max_players,
-                table_proposition.date,
-                table_proposition.time,
-                table_proposition.duration,
-                table_proposition.notes,
-                table_proposition.bgg_game_id,
-                table_proposition.joined_count,
-                table_proposition.location.location_alias,
-                table_proposition.expansions
-            )
+            dialog_edit_table_proposition(table_proposition)
 
     with col4:
         pass
