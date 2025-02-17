@@ -104,7 +104,7 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
             st.write(f"**Notes:**")
             st.write(table_proposition.notes)
         else:
-            st.write(f"**Proposed By:**&nbsp;{table_proposition.proposed_by}")
+            st.write(f"**Proposed By:**&nbsp;{table_proposition.proposed_by.username}")
             st.write(f"**Date Time:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{table_proposition.date} {table_proposition.time}")
             st.write(f"**Duration:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{table_proposition.duration} hours")
 
