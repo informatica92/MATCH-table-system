@@ -1,6 +1,8 @@
 from utils.sql_manager import SQLManager
 import streamlit as st
 
+from utils.table_system_logging import logging
+
 def login_button():
     if st.button("🔐 Login", use_container_width=True, disabled=st.session_state.user.is_logged_in()):
         st.login(provider="auth0")
@@ -12,7 +14,7 @@ def logout_button():
 @st.cache_data(ttl="1h")  # cache user_id, username, is_admin from email but only for 1h
 def _get_or_create_user(email):
     if email:
-        print(f"Getting user info [no cache] for {st.experimental_user.email}")
+        logging.info(f"Getting user info [no cache] for {st.experimental_user.email}")
         sql_manager = SQLManager()
         user_id, username, name, surname, bgg_username, telegram_username, is_admin, is_banned = sql_manager.get_or_create_user(email)
         return user_id, username, name, surname, bgg_username, telegram_username, is_admin, is_banned
@@ -60,11 +62,11 @@ class StreamlitTableSystemUser(object):
 
     def update_user(self):
         if len(st.session_state.username_user_setting or "") < 3:
-            print(f"Error updating username: Username must be at least 3 characters long")
+            logging.error(f"Error updating username: Username must be at least 3 characters long")
             st.session_state.update_username_from_user_error = "Username must be at least 3 characters long"
             return
         try:
-            print(f"Updating username from {st.session_state.username} to {st.session_state.username_user_setting}")
+            logging.info(f"Updating username from {st.session_state.username} to {st.session_state.username_user_setting}")
             self.sql_manager.set_user(
                 email=self.email,
                 username=st.session_state.username_user_setting,
@@ -73,11 +75,11 @@ class StreamlitTableSystemUser(object):
                 bgg_username=st.session_state.bgg_username_user_setting,
                 telegram_username=st.session_state.telegram_username_user_setting
             )
-            print(f"Clearing cache for {self.email}")
+            logging.info(f"Clearing cache for {self.email}")
             _get_or_create_user.clear(self.email)
             # st.session_state.username = st.session_state.username_user_setting
         except AttributeError as e:
-            print(f"Error updating username: {e}")
+            logging.error(f"Error updating username: {e}")
             st.session_state.update_username_from_user_error = e
 
     def is_logged_in(self):

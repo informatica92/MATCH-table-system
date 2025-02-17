@@ -3,6 +3,8 @@ import json
 import os
 import pandas as pd
 
+from utils.table_system_logging import logging
+
 # import uuid
 # def generate_random_string(length=8):
 #     return str(uuid.uuid4()).replace('-', '')[:length]
@@ -514,7 +516,7 @@ class SQLManager(object):
             )
             conn.commit()
         except psycopg2.IntegrityError as e:
-            print(e)
+            logging.error(str(e))
             raise AttributeError("You have already joined this table.")
         finally:
             c.close()

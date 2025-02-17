@@ -2,6 +2,8 @@ import telegram
 import os
 import asyncio
 
+from utils.table_system_logging import logging
+
 
 TEXTS = {
     'IT': {
@@ -64,4 +66,4 @@ class TelegramNotifications(object):
             else:
                 self.loop.run_until_complete(self._bot.send_photo(chat_id=self.channel_id, photo=image_url, caption=text, parse_mode='Markdown'))
         else:
-            print("Skipping Telegram notification since no bot token has been found")
+            logging.warning("Skipping Telegram notification since no bot token has been found")

@@ -4,10 +4,12 @@ import xml.etree.ElementTree as et
 
 from streamlit import cache_data
 
+from utils.table_system_logging import logging
+
 
 @cache_data(ttl=None, max_entries=1000, persist="disk")
 def get_bgg_game_info(game_id):
-    print(f"\tquerying BGG for {game_id}")
+    logging.info(f"\tquerying BGG for {game_id}")
     # BGG API URL for game details
     url = f"https://boardgamegeek.com/xmlapi2/thing?id={game_id}"
 
@@ -40,7 +42,7 @@ def get_bgg_game_info(game_id):
 
         return image_url, html.unescape(game_description), categories, mechanics, expansions
     except Exception as e:
-        print(f"Error fetching game image: {e}")
+        logging.error(f"Error fetching game image: {e}")
         return None
 
 
