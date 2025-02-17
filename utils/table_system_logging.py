@@ -1,5 +1,4 @@
-import logging
+from streamlit.logger import get_logger
 
-
-logging.basicConfig(level=logging.INFO)
-logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+# logging configuration specified into `.streamlit/config.toml`
+logging = get_logger("streamlit")
