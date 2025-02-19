@@ -84,7 +84,7 @@ with (st.sidebar):
         else:
             st.warning("**Log in** to **join** and **create** tables.")
 
-    if st.session_state.user.is_logged_in():
+    if st.session_state.user.is_admin:
         # GOD MODE section
         with st.expander("🔒 God Mode"):
             god_mode_is_active = st.toggle("God Mode", key="god_mode", value=False, disabled=not st.session_state.user.is_admin)
