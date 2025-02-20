@@ -94,7 +94,8 @@ class TableProposition(object):
             location_alias: str,
             location_address: str,
             location_is_system: bool,
-            expansions: list[dict]
+            expansions: list[dict],
+            **kwargs
     ):
         self.table_id: int = table_id
         self.game_name: str = game_name
@@ -116,16 +117,20 @@ class TableProposition(object):
                 'table_id': self.table_id,
                 'game_name': self.game_name,
                 'bgg_game_id': self.bgg_game_id,
-                'proposed_by': self.proposed_by.username,
+                'proposed_by_id': self.proposed_by.user_id,
+                'proposed_by_username': self.proposed_by.username,
                 'max_players': self.max_players,
                 'date': self.date,
                 'time': self.time,
                 'duration': self.duration,
                 'notes': self.notes,
                 'joined_players': self.get_joined_players_usernames(),
+                'joined_players_ids': [player.user_id for player in self.joined_players],
                 'joined_count': self.joined_count,
-                'location': self.location.location_alias,
-                'expansions': [expansion.expansion_name for expansion in self.expansions]
+                'location_alias': self.location.location_alias,
+                'location_address': self.location.location_address,
+                'location_is_system': self.location.location_is_system,
+                'expansions': [expansion.to_dict() for expansion in self.expansions]
             }
         else:
             return {
