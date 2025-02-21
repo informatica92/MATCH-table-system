@@ -69,6 +69,11 @@ with st.form(key="create_new_proposition_form", border=False):
     # 'id', 'street_name', 'city', 'house_number', 'country', 'alias', 'user_id'
     locations = [(loc[0], loc[5]) for loc in locations]  # id, alias
     st.selectbox("Location", options=locations, key="location", format_func=lambda x: x[1])
+    def_loc_alias = stu.get_default_location()['alias']
+    code_html_style = "style='color: black; background-color: #f0f0f0;font-weight: bold;'"
+    stu.st_write(f"Selecting <b>{def_loc_alias}</b> as location, the table will be displayed into the "
+                 f"<code {code_html_style}>View & Join/📜{def_loc_alias}</code> page, otherwise you'll find it into the "
+                 f"<code {code_html_style}>View & Join/🌍Rest of the World</code> page")
     if not can_users_set_location:
         stu.st_write("ℹ️ User locations are not displayed at the moment. <i>(CAN_USERS_SET_LOCATION set to False)</i>")
 
