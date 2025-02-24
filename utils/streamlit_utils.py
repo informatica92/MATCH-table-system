@@ -298,7 +298,7 @@ def _on_location_df_change(entire_locations_df: pd.DataFrame, user_id: int|None)
         get_default_location.clear()
 
 def manage_user_locations(user_id: int|None):
-    df = sql_manager.get_user_locations(user_id, include_system_ones=True if not user_id else False)
+    df = get_available_locations(user_id, include_system_ones=True if not user_id else False, return_as_df=True)
 
     default_location = {}
     if user_id is None:
@@ -369,8 +369,8 @@ def manage_user_locations(user_id: int|None):
         st.write(f"Default location: {default_location['alias']} (ID: {default_location['id']})")
 
 @st.cache_data
-def get_available_locations(user_id):
-    locations = sql_manager.get_user_locations(user_id, include_system_ones=True, return_as_df=False)
+def get_available_locations(user_id, include_system_ones=True, return_as_df=False):
+    locations = sql_manager.get_user_locations(user_id, include_system_ones=include_system_ones, return_as_df=return_as_df)
     return locations
 
 @st.cache_data
