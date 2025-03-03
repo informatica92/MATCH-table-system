@@ -131,6 +131,17 @@ In fase di creazione di un tavolo, nella pagina "Create", è possibile seleziona
 
 ATTENZIONE: le location di sistema appariranno sempre a tutti gli utenti e sono quindi trasversali, le location utente, invece, possono essere usate come location solo dall'utente che l'ha creata.
 
+### (OPZIONALE) Invio notifica su un canale Telegram dedicato
+
+<p><img src="https://github.com/user-attachments/assets/1c3af6b9-63ec-4867-aa89-831e861af4cb" alt="user page" height="400"/></p>
+
+Valorizzando le variabili d'ambiente 
+ - TELEGRAM_CHAT_ID
+ - TELEGRAM_BOT_TOKEN
+
+Una notifica sul rispettivo canale (chat id/channel id) verrà inviata automaticamente: 
+ - al momento della creazione di un tavolo
+
 ### Delete ora con finestra di conferma e permette eliminazione di tavoli con 1+ giocatori
 <p><img src="https://github.com/user-attachments/assets/b3589ef2-7869-43fa-9f53-94d2d6562e5a" alt="join toast" max-height="400"/></p>
 
@@ -146,7 +157,9 @@ Leave/Delete/Edit possibili solo per sè stessi e per i propri tavoli:
 ### GOD MODE introdotta per rendere Leave/Delete/Edit possibili sempre
 <p><img src="https://github.com/user-attachments/assets/2c133444-8b32-46a0-bc41-ae115bf36d71" alt="join toast" max-height="400" /></p>
 
-La GOD MODE permette, in caso si disponga di una password, di superare il vincolo per cui Leave/Delete/Edit è possibile solo per sè stessi e per i propri tavoli 
+La GOD MODE permette, in caso di opportuna configurazione dell'utenta da parte degli amministratori, di superare il vincolo per cui Leave/Delete/Edit è possibile solo per sè stessi e per i propri tavoli.
+
+Utile per testing e manutenzione
 
 ### Vista a Tabella
 <p><img src="https://github.com/user-attachments/assets/9d5dd314-2af6-4d2d-9114-5d3464e9d993" alt="join toast" max-height="400"/></p>
@@ -233,17 +246,6 @@ NB:
 NB: 
  - Per ragioni di sicurezza, possono essere rimossi solo i tavoli vuoti
  - Elimina tutti i giocatori prima di rimuovere il tavolo se ve ne è qualcuno 
-### (OPZIONALE) Invio notifica su un canale Telegram dedicato
-
-![image](https://github.com/user-attachments/assets/9e38d50c-fa2e-4ccf-bf38-519b69532097)
-
-Valorizzando le variabili d'ambiente 
- - TELEGRAM_CHAT_ID
- - TELEGRAM_BOT_TOKEN
-
-Una notifica sul rispettivo canale (chat id/channel id) verrà inviata automaticamente: 
- - al momento della creazione di un tavolo
-
 
 ### (OPZIONALE) Data precompilata
 ![image](https://github.com/user-attachments/assets/4fb6777c-46f2-4356-992e-f34f96f49b0e)
