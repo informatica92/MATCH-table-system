@@ -9,7 +9,8 @@ from datetime import datetime
 from utils.telegram_notifications import TelegramNotifications
 from utils.sql_manager import SQLManager
 from utils.bgg_manager import get_bgg_game_info, get_bgg_url
-from utils.table_system_proposition import TableProposition, TablePropositionLocation, JoinedPlayerOrProposer
+from utils.table_system_proposition import TableProposition, TablePropositionLocation, JoinedPlayerOrProposer, \
+    TablePropositionExpansion
 from utils.table_system_logging import logging
 
 
@@ -389,3 +390,15 @@ def get_location_markdown_text(location: TablePropositionLocation):
     else:
         location_md = "*Login to see the location*"
     return location_md
+
+
+def get_expansions_markdown_text(expansions: list[TablePropositionExpansion]):
+
+    def _format_as_markdown_list(sub_list):
+        return ', '.join(
+            [f"\n - [{expansion.expansion_name}]({get_bgg_url(expansion.expansion_id)})" for expansion in sub_list]
+        )
+
+    expansions_markdown = _format_as_markdown_list(expansions)
+
+    return expansions_markdown

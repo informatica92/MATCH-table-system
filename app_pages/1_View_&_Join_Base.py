@@ -99,7 +99,7 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
             st.write(f"**Duration:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{table_proposition.duration} hours")
             location_markdown = stu.get_location_markdown_text(table_proposition.location)
             st.write(f"**Location:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{location_markdown}")
-            expansions_markdown = ''.join([f"\n- [{expansion.expansion_name}]({get_bgg_url(expansion.expansion_id)})" for expansion in table_proposition.expansions])
+            expansions_markdown = stu.get_expansions_markdown_text(table_proposition.expansions)
             st.write(f"**Expansions:** {expansions_markdown}")
             st.write(f"**Notes:**")
             st.write(table_proposition.notes)
