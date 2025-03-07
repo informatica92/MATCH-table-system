@@ -192,8 +192,8 @@ def timeline_table_propositions(compact=False):
 
 def dataframe_table_propositions(compact=False):
 
-    default_columns = ['image', 'time', 'game_name', 'duration', 'players', 'proposed_by', 'joined', 'bgg']
-    all_columns = ['table_id', 'image', 'time', 'game_name', 'duration', 'date', 'players', 'joined_players', 'proposed_by', 'joined', 'bgg']
+    default_columns = ['image', 'time', 'game_name', 'duration', 'players', 'proposed_by_username', 'joined', 'bgg']
+    all_columns = ['table_id', 'image', 'time', 'game_name', 'duration', 'date', 'players', 'joined_players', 'proposed_by_username', 'joined', 'bgg']
     st.multiselect("Columns", options=all_columns, default=default_columns, key="columns_order")
 
     df = stu.table_propositions_to_df(add_image_url=True, add_bgg_url=True, add_players_fraction=True, add_joined=True)
@@ -208,7 +208,7 @@ def dataframe_table_propositions(compact=False):
         "players": st.column_config.TextColumn("Players"),
         "joined_players": st.column_config.ListColumn("Joined Players"),
         "game_name": st.column_config.TextColumn("Name"),
-        "proposed_by": st.column_config.TextColumn("Proposed By"),
+        "proposed_by_username": st.column_config.TextColumn("Proposed By"),
         "joined": st.column_config.CheckboxColumn("Joined", width="small")
     }
 
