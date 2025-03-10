@@ -170,7 +170,10 @@ def table_propositions_to_df(
 
     if add_joined:
         # check if st.session_state.username (str) is in the joined_players field (list[str])
-        df['joined'] = df['joined_players'].apply(lambda x: st.session_state.username.lower() in [player.lower() for player in x])
+        if st.session_state.username:
+            df['joined'] = df['joined_players'].apply(lambda x: st.session_state.username.lower() in [player.lower() for player in x])
+        else:
+            df['joined'] = False
 
     return df.sort_values(["date", "time"])
 
