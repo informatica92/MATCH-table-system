@@ -1,8 +1,10 @@
 # MATCH Table System
 <p align='center'><img src="https://github.com/user-attachments/assets/e033d757-35dc-4d73-8761-c5b929b3c418" alt="logo" height="250"/></p>
 
-This Streamlit app allows users to manage and join board game reservations. Users can create new table propositions, view available tables, and join them once logged in and specifying an username for identification. 
-The app also collects the game's image, description, category and mechanics from BoardGameGeek.
+This Streamlit app allows users to manage and join board game reservations. Users, once logged in, can create new table propositions specifying game name, duration and number of allowed players; there is also a dedicated page to view all the available tables and join them.
+The view page supports multiple view modes: list, timeline and table and integrate above mentioned user settings with BGG game information like image, category and mechanics.
+The system is also connected to a Telegram bot that can send notification to a given community when determined events occur (for example table creation)
+
 
 https://github.com/user-attachments/assets/c912f9c9-cff5-4aaf-acea-162151b3803f
 
