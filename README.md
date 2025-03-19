@@ -1,5 +1,5 @@
 # MATCH Table System
-<p align='center'><img src="https://github.com/user-attachments/assets/e033d757-35dc-4d73-8761-c5b929b3c418" alt="logo" height="250"/></p>
+<p align='center'><img src="https://github.com/informatica92/MATCH-table-system/blob/4c28fe477478bd7fca8dfa09bff6038fb216333e/static/images/table_system_logo.png" alt="logo" height="250"/></p>
 
 This Streamlit app allows users to manage and join board game reservations. Users, once logged in, can create new table propositions specifying game name, duration and number of allowed players; there is also a dedicated page to view all the available tables and join them.
 The view page supports multiple view modes: list, timeline and table and integrate above mentioned user settings with BGG game information like image, category and mechanics.
