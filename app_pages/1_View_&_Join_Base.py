@@ -15,7 +15,7 @@ def dialog_edit_table_proposition(old_table_proposition: TableProposition):
         with col1:
             game_name = st.text_input("Game Name", value=old_table_proposition.game_name, disabled=True)
             max_players = st.number_input("Max Players", value=old_table_proposition.max_players, step=1, min_value=old_table_proposition.joined_count)
-            date = st.date_input("Date", value=old_table_proposition.date)
+            date = st.date_input("Date", value=old_table_proposition.date, min_value="today")
         with col2:
             bgg_game_id = st.text_input("BGG Game ID", value=old_table_proposition.bgg_game_id, help=stu.BGG_GAME_ID_HELP, disabled=True)
             duration = st.number_input("Duration (hours)", value=old_table_proposition.duration, step=1)
