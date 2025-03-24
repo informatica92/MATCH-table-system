@@ -46,7 +46,7 @@ def resize_image_from_url(image_url) -> BytesIO:
     new_width = int((new_height / height) * width)
 
     # Resize the image
-    image = image.resize((new_width, new_height))
+    image = image.resize((new_width, new_height), Image.Resampling.NEAREST)
 
     image_bytes = BytesIO()
     image.save(image_bytes, format='PNG')
@@ -88,9 +88,12 @@ class TelegramNotifications(object):
             # asyncio.run(self._bot.send_message(chat_id=self.channel_id, text=text, parse_mode='Markdown', disable_web_page_preview=True))
             if not image_url:
                 self.loop.run_until_complete(self._bot.send_message(chat_id=self.channel_id, text=text, parse_mode='Markdown', disable_web_page_preview=True))
-
             else:
                 image_file = resize_image_from_url(image_url)
-                self.loop.run_until_complete(self._bot.send_photo(chat_id=self.channel_id, photo=image_file, caption=text, parse_mode='Markdown'))
+                try:
+                    self.loop.run_until_complete(self._bot.send_photo(chat_id=self.channel_id, photo=image_file, caption=text, parse_mode='Markdown'))
+                except telegram.error.TelegramError as e:
+                    logging.warning(f"Warning sending Telegram message: '{e}', retrying without image")
+                    self.loop.run_until_complete(self._bot.send_message(chat_id=self.channel_id, text=text, parse_mode='Markdown', disable_web_page_preview=True))
         else:
             logging.warning("Skipping Telegram notification since no bot token has been found")
