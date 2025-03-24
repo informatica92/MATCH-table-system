@@ -1,6 +1,9 @@
 import telegram
 import os
 import asyncio
+import requests
+from io import BytesIO
+from PIL import Image
 
 from utils.table_system_logging import logging
 
@@ -14,8 +17,8 @@ TEXTS = {
                      "\n - 🀄 *{game_name}* "
                      "\n - 👤 {max_players} giocatori "
                      "\n - 📅 {date} alle *{time}* "
-                     "\n - ⌛ {duration} ore."
-                     "\n - 🗺️ presso *{location_alias}*"
+                     "\n - ⌛ {duration} ore"
+                     "\n - 🗺️ presso *{location_alias}*."
                      "\n\n🔗 Dai un'occhiata qui:\n{base_url}/{row_page}#table-{table_id}"
     }
 }
@@ -27,6 +30,29 @@ def get_telegram_profile_page_url(telegram_username, as_html_link=False):
         return f"<a href='{url}'>{url}</a>"
     else:
         return url
+
+
+def resize_image_from_url(image_url) -> BytesIO:
+    # Download the image
+    response = requests.get(image_url)
+    response.raise_for_status()
+
+    # Load image into memory
+    image = Image.open(BytesIO(response.content))
+
+    # Compute new width while maintaining aspect ratio
+    width, height = image.size
+    new_height = 1000 if height > 1000 else height
+    new_width = int((new_height / height) * width)
+
+    # Resize the image
+    image = image.resize((new_width, new_height))
+
+    image_bytes = BytesIO()
+    image.save(image_bytes, format='PNG')
+    image_bytes.seek(0)
+
+    return image_bytes  # Returns a PIL Image object
 
 class TelegramNotifications(object):
     def __init__(self, bot_token=None, chat_id=None, language='IT'):
@@ -64,6 +90,7 @@ class TelegramNotifications(object):
                 self.loop.run_until_complete(self._bot.send_message(chat_id=self.channel_id, text=text, parse_mode='Markdown', disable_web_page_preview=True))
 
             else:
-                self.loop.run_until_complete(self._bot.send_photo(chat_id=self.channel_id, photo=image_url, caption=text, parse_mode='Markdown'))
+                image_file = resize_image_from_url(image_url)
+                self.loop.run_until_complete(self._bot.send_photo(chat_id=self.channel_id, photo=image_file, caption=text, parse_mode='Markdown'))
         else:
             logging.warning("Skipping Telegram notification since no bot token has been found")
