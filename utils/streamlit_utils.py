@@ -14,7 +14,7 @@ from utils.table_system_proposition import TableProposition, TablePropositionLoc
 from utils.table_system_logging import logging
 
 
-DEFAULT_IMAGE_URL = "images/no_image.jpg"
+DEFAULT_IMAGE_URL = "static/images/no_image.jpg"
 
 BGG_GAME_ID_HELP = ("It's the id in the BGG URL. EX: for Wingspan the URL is "
                     "https://boardgamegeek.com/boardgame/266192/wingspan, hence the BGG game id is 266192")
