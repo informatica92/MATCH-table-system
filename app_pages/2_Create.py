@@ -3,6 +3,7 @@ from datetime import datetime
 import os
 
 import utils.streamlit_utils as stu
+from streamlit_searchbox import st_searchbox
 from utils.bgg_manager import search_bgg_games, get_bgg_game_info
 
 # redirect to "User" page if username is not set
@@ -14,25 +15,48 @@ stu.add_help_button(col_help)
 
 st.header("➕ Create a New Table Proposition")
 
-game_name = st.text_input("Search for Game Name")
-stu.st_write("Write a game name in the above text box and press ENTER. The matching games from BGG will appear here:")
-bgg_game_id = None
+# game_name = st.text_input("Search for Game Name")
+# stu.st_write("Write a game name in the above text box and press ENTER. The matching games from BGG will appear here:")
+# bgg_game_id = None
+#
+# try:
+#     matching_games = search_bgg_games(game_name)
+# except AttributeError as e:
+#     st.error(f"Error searching for games: {e}")
+#     matching_games = []
+#
+# selected_game = st.selectbox("Select the matching game", matching_games, format_func=lambda x: x[1])
+# stu.st_write("Select the matching game from BGG for auto detecting information like the board game image")
+# if selected_game:
+#     bgg_game_id = selected_game[0]
+#
 
-try:
-    matching_games = search_bgg_games(game_name)
-except AttributeError as e:
-    st.error(f"Error searching for games: {e}")
-    matching_games = []
+def reverse_search_bgg_games(search_str):
+    matching_games = search_bgg_games(search_str)
+    return [(e[1], e[0]) for e in matching_games]
 
-selected_game = st.selectbox("Select the matching game", matching_games, format_func=lambda x: x[1])
-stu.st_write("Select the matching game from BGG for auto detecting information like the board game image")
-if selected_game:
-    bgg_game_id = selected_game[0]
+def get_default_searchterm() -> str:
+    if st.session_state.get("search_bgg", {}).get('result') is None:
+        return st.session_state.get("search_bgg", {}).get('search')
+    else:
+        return st.session_state.search_bgg['options_js'][
+            st.session_state.search_bgg['options_py'].index(st.session_state.search_bgg['result'])
+        ]['label']
 
-image_url, game_description, categories, mechanics, available_expansions = None, None, [], [], []
+bgg_game_id = st_searchbox(
+    reverse_search_bgg_games,
+    placeholder="Search BGG... ",
+    key="search_bgg",
+    default_searchterm="",
+)
+
+image_url, game_description, categories, mechanics, available_expansions, game_name = None, None, [], [], [], None
 if bgg_game_id:
-    st.write(f"Selected BGG Game ID: {bgg_game_id}")
-    image_url, game_description, categories, mechanics, available_expansions = get_bgg_game_info(bgg_game_id)
+    image_url, game_description, categories, mechanics, available_expansions, game_name = get_bgg_game_info(bgg_game_id)
+    col1, col2 = st.columns([1, 4])
+    col1.image(image_url if image_url else stu.DEFAULT_IMAGE_URL, use_container_width=True)
+    col2.subheader(game_name)
+    col2.write(f"Selected BGG Game ID: {bgg_game_id}")
 
 with st.form(key="create_new_proposition_form", border=False):
 
@@ -85,8 +109,8 @@ with st.form(key="create_new_proposition_form", border=False):
 
     if st.session_state['username']:
         if bgg_game_id:
-            if st.form_submit_button("Create Proposition", on_click=stu.create_callback, args=[selected_game[1] if selected_game else None, bgg_game_id, image_url]):
-                st.success(f"Table proposition created successfully: {selected_game[1]} - {date_time} {time.strftime('%H:%M')}")
+            if st.form_submit_button("Create Proposition", on_click=stu.create_callback, args=[game_name, bgg_game_id, image_url]):
+                st.success(f"Table proposition created successfully: {game_name} - {date_time} {time.strftime('%H:%M')}")
                 if st.session_state.join_me_by_default:
                     st.success(f"You have also joined this table by default as {st.session_state.username}.")
         else:
