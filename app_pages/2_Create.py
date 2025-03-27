@@ -32,7 +32,7 @@ if selected_game:
 image_url, game_description, categories, mechanics, available_expansions = None, None, [], [], []
 if bgg_game_id:
     st.write(f"Selected BGG Game ID: {bgg_game_id}")
-    image_url, game_description, categories, mechanics, available_expansions = get_bgg_game_info(bgg_game_id)
+    image_url, game_description, categories, mechanics, available_expansions, _ = get_bgg_game_info(bgg_game_id)
 
 with st.form(key="create_new_proposition_form", border=False):
 
