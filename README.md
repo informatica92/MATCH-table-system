@@ -76,7 +76,19 @@ Le "Section" che invece hanno forma `[nome]` sono obbligatorie e devono essere r
  ```
 ## Funzionalità
 
-### 🎉 Novità: Gestione delle Espansioni
+### 🎉 Novità: Visualizzazione dei tavoli migliorata
+<p><img src="https://github.com/user-attachments/assets/f8f9dd41-4af7-49b5-8c76-758fa57ee986" alt="expansions" height="400"/></p>
+
+Con lo scopo di incrementare la leggibilità e allo stesso tempo avere una maggiore compattezza della vista (non influenzata dalla lunghezza di Espansioni e Note), l'interfaccia è stata aggiornata con degli Expander che di default visualizzano una preview dell'informazione ma, se espansi, permettono di accedere ad ulteriori dettagli. 
+
+Ad esempio:
+| Campo           | Visualizzazione Compatta   | Visualizzazione Espansa           |
+|:----------------|:---------------------------|:----------------------------------|
+| **Proposed By** | Username                   | Telegram e BGG username con link  |  
+| **Expansions**  | Numero di Espansioni       | La lista di espansioni            |
+| **Notes**       | Primi caratteri            | L'intera nota                     |
+
+### Gestione delle Espansioni
 <p><img src="https://github.com/user-attachments/assets/9d14ad22-6b10-47af-8a12-b86aa870bf9e" alt="expansions" height="400"/></p>
 
 E' ora possibile aggiungere espansioni ai giochi, in modo da poter specificare quali espansioni saranno utilizzate durante la partita.
@@ -85,14 +97,14 @@ Le espansioni selezionate in fase di "Create" vengono poi mostrate nella pagine 
 
 E' anche possibile modificare le espansioni in seguito utilizzando il tasto "Edit" disponibile sotto ogni proposta.
 
-### 🎉 Novità: Le Tabs sono ora Pages
+### Le Tabs sono ora Pages
 <p><img src="https://github.com/user-attachments/assets/6394b19d-08e8-4ede-8227-ca28c6739ab4" alt="tabs vs pages" height="180" width="800"/></p>
 
 Quelle che precedentemente erano tabs (destra nell'immagine) ora sono state trasformate in pagine (sinistra nell'immagine), per una navigazione più fluida e intuitiva
 
 Seleziona una pagina dal menu a sinistra, all'interno della sidebar, per accedere alle funzionalità desiderate
 
-### 🎉 Novità: Login
+### Login
 <p><img src="https://github.com/user-attachments/assets/111d3ec2-7f21-45fa-b3f7-979ec0fe80b0" alt="login" height="400"/></p>
 D'ora in avanti agli utenti sarà richiesto di effettuare un "Login" al sistema. Questo renderà più robusta l'intera piattaforma garantendo maggiore controllo.
 
@@ -103,7 +115,7 @@ ATTENZIONE: L'username è univoco! Non vi sarà quindi possibile selezionare un 
 Il provider principale di autenticazione è Auth0 ma sono offerti anche i seguenti social providers:
  - Google
 
-### 🎉 Novità: Nuova pagina "User"
+### Nuova pagina "User"
 <p><img src="https://github.com/user-attachments/assets/be58f0b5-8f3c-42c5-b9fd-340c60d39b27" alt="user page" height="400"/></p>
 
 E' ora possibile accedere ad una pagina interamente dedicata all'utente in cui è possibile impostare campi come:
@@ -117,7 +129,7 @@ ATTENZIONE: L'username è univoco! Non vi sarà quindi possibile selezionare un 
 
 ATTENZIONE: L'username è inoltre necessario per abilitare creazione e unione ai tavoli.
 
-### 🎉 Novità: Funzionalità "Locations"
+### Funzionalità "Locations"
 <p><img src="https://github.com/user-attachments/assets/c0755854-42f3-41c4-a87d-0f7f53413ea5" alt="user page" height="400"/></p>
 
 A parte le location di sistema, ogni utente può ora aggiungere una o più location in cui è disponibile a giocare.
