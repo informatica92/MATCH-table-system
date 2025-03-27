@@ -77,7 +77,7 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
 
     with col1:
         if table_proposition.bgg_game_id and int(table_proposition.bgg_game_id) >= 1:
-            image_url, game_description, categories, mechanics, _ = get_bgg_game_info(table_proposition.bgg_game_id)
+            image_url, game_description, categories, mechanics, _, _ = get_bgg_game_info(table_proposition.bgg_game_id)
             image_width = 300 if not compact else 150
             caption = f"{game_description[:120]}..." if not compact else None
             if not image_url:

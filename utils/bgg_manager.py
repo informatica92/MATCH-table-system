@@ -23,6 +23,13 @@ def get_bgg_game_info(game_id):
         # Parse the XML response
         root = et.fromstring(response.content)
 
+        # Find the game name
+        game_name = root.find('item/name[@type="primary"]').get('value')
+
+        # Find the game year published
+        year = root.find('item/yearpublished')
+
+        game_name_with_year = f"{game_name} ({year.get('value')})" if year is not None else game_name
 
         # Find the image tag and extract the URL
         image_url = root.find('item/image').text if root.find('item/image') is not None else None
@@ -41,7 +48,7 @@ def get_bgg_game_info(game_id):
         for expansion in root.findall('item/link[@type="boardgameexpansion"]'):
             expansions.append({'id': expansion.get('id'), 'value': expansion.get('value')})
 
-        return image_url, html.unescape(game_description), categories, mechanics, expansions
+        return image_url, html.unescape(game_description), categories, mechanics, expansions, game_name_with_year
     except Exception as e:
         logging.error(f"Error fetching game image: {e}")
         return None
