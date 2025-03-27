@@ -23,8 +23,9 @@ def get_bgg_game_info(game_id):
         # Parse the XML response
         root = et.fromstring(response.content)
 
+
         # Find the image tag and extract the URL
-        image_url = root.find('item/image').text
+        image_url = root.find('item/image').text if root.find('item/image') is not None else None
 
         game_description = root.find('item/description').text
 

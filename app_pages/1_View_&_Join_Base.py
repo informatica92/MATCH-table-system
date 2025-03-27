@@ -92,17 +92,33 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
             st.image(stu.DEFAULT_IMAGE_URL)
 
     with col2:
+        def reset_table_info(key: str):
+            st.session_state[key] = None
+
+        st.pills(
+            label="table_info", label_visibility="collapsed",
+            options=[
+                # f"🧑‍🤝‍🧑 {table_proposition.max_players} players",
+                f"⌚ **{table_proposition.time.strftime('%H:%M')}**",
+                f"📅 {table_proposition.date}",
+                f"⏳ {table_proposition.duration}h",
+            ],
+            key=f"table_info_{table_proposition.table_id}_{section_name}",
+            on_change=reset_table_info, kwargs={"key": f"table_info_{table_proposition.table_id}_{section_name}"},
+        )
         if not compact:
-            st.write(f"**Proposed By:**&nbsp;{table_proposition.proposed_by.username}")
-            st.write(f"**Max Players:**&nbsp;&nbsp;{table_proposition.max_players}")
-            st.write(f"**Date Time:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{table_proposition.date} {table_proposition.time.strftime('%H:%M')}")
-            st.write(f"**Duration:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{table_proposition.duration} hours")
-            location_markdown = stu.get_location_markdown_text(table_proposition.location)
-            st.write(f"**Location:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{location_markdown}")
-            expansions_markdown = stu.get_expansions_markdown_text(table_proposition.expansions)
-            st.write(f"**Expansions:** {expansions_markdown}")
-            st.write(f"**Notes:**")
-            st.write(table_proposition.notes)
+            with st.expander(f"🧔🏻 **Proposed By**: {table_proposition.proposed_by.username}"):
+                st.write(f"**BGG**: *coming soon* **Telegram**: *coming soon*")
+            with st.expander(f"🗺️ **Location**: {table_proposition.location.location_alias}"):
+                location_markdown = stu.get_location_markdown_text(table_proposition.location, icon="🔗")
+                st.markdown(table_proposition.location.location_address)
+                st.write(location_markdown)
+            with st.expander(f"📦 **Expansions** ({len(table_proposition.expansions)}):"):
+                expansions_markdown = stu.get_expansions_markdown_text(table_proposition.expansions)
+                st.write(expansions_markdown)
+            notes_preview = f"*{table_proposition.notes[:30]}...*" if len(str(table_proposition.notes)) > 30 else table_proposition.notes
+            with st.expander(f"📒 **Notes**: {notes_preview}"):
+                st.write(table_proposition.notes)
         else:
             st.write(f"**Proposed By:**&nbsp;{table_proposition.proposed_by.username}")
             st.write(f"**Date Time:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{table_proposition.date} {table_proposition.time}")

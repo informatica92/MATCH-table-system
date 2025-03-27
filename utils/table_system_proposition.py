@@ -36,16 +36,19 @@ class JoinedPlayerOrProposer(object):
     def __init__(
             self,
             user_id: int,
-            username: str
+            username: str,
+            email: str = None
     ):
         self.user_id = user_id
         self.username = username
+        self.email = email
 
     @staticmethod
     def from_dict(dict_) -> 'JoinedPlayerOrProposer':
         return JoinedPlayerOrProposer(
             user_id=dict_['user_id'],
-            username=dict_['username']
+            username=dict_['username'],
+            email=dict_['email']
         )
 
     @staticmethod
@@ -53,8 +56,8 @@ class JoinedPlayerOrProposer(object):
         return [JoinedPlayerOrProposer.from_dict(player) for player in list_]
 
     @staticmethod
-    def from_tuples(id_tuple, username_tuples) -> list['JoinedPlayerOrProposer']:
-        return [JoinedPlayerOrProposer(user_id, username) for user_id, username in zip(id_tuple, username_tuples) if username]
+    def from_tuples(id_tuple, username_tuples, email_tuples) -> list['JoinedPlayerOrProposer']:
+        return [JoinedPlayerOrProposer(user_id, username, email) for user_id, username, email in zip(id_tuple, username_tuples, email_tuples) if username]
 
 
 class TablePropositionLocation(object):
@@ -89,7 +92,9 @@ class TableProposition(object):
             bgg_game_id: int,
             proposed_by_id: int,
             proposed_by_username: str,
+            proposed_by_email: str,
             joined_players: list[str],
+            joined_players_emails: list[str],
             joined_players_ids: list[int],
             location_alias: str,
             location_address: str,
@@ -100,13 +105,13 @@ class TableProposition(object):
         self.table_id: int = table_id
         self.game_name: str = game_name
         self.bgg_game_id: int = bgg_game_id
-        self.proposed_by: JoinedPlayerOrProposer = JoinedPlayerOrProposer(proposed_by_id, proposed_by_username)
+        self.proposed_by: JoinedPlayerOrProposer = JoinedPlayerOrProposer(proposed_by_id, proposed_by_username, proposed_by_email)
         self.max_players: int = max_players
         self.date: datetime.date = date
         self.time: time_module.time = time
         self.duration: int = duration
         self.notes: str = notes
-        self.joined_players: list[JoinedPlayerOrProposer] = JoinedPlayerOrProposer.from_tuples(joined_players_ids, joined_players)
+        self.joined_players: list[JoinedPlayerOrProposer] = JoinedPlayerOrProposer.from_tuples(joined_players_ids, joined_players, joined_players_emails)
         self.location: TablePropositionLocation = TablePropositionLocation(location_alias, location_address, location_is_system)
         self.expansions: list[TablePropositionExpansion] = TablePropositionExpansion.from_list_of_dicts(expansions)
 
@@ -119,12 +124,14 @@ class TableProposition(object):
                 'bgg_game_id': self.bgg_game_id,
                 'proposed_by_id': self.proposed_by.user_id,
                 'proposed_by_username': self.proposed_by.username,
+                'proposed_by_email': self.proposed_by.email,
                 'max_players': self.max_players,
                 'date': self.date,
                 'time': self.time,
                 'duration': self.duration,
                 'notes': self.notes,
                 'joined_players': self.get_joined_players_usernames(),
+                'joined_players_emails': [player.email for player in self.joined_players],
                 'joined_players_ids': [player.user_id for player in self.joined_players],
                 'joined_count': self.joined_count,
                 'location_alias': self.location.location_alias,
@@ -139,7 +146,8 @@ class TableProposition(object):
                 'bgg_game_id': self.bgg_game_id,
                 'proposed_by': {
                     'user_id': self.proposed_by.user_id,
-                    'username': self.proposed_by.username
+                    'username': self.proposed_by.username,
+                    'email': self.proposed_by.email
                 },
                 'max_players': self.max_players,
                 'date': self.date,
@@ -149,7 +157,8 @@ class TableProposition(object):
                 'joined_players': [
                     {
                         'user_id': player.user_id,
-                        'username': player.username
+                        'username': player.username,
+                        'email': player.email
                     } for player in self.joined_players
                 ],
                 'joined_count': self.joined_count,

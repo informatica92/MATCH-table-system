@@ -411,13 +411,12 @@ class SQLManager(object):
                     tp.bgg_game_id,
                     tp.proposed_by_user_id,
                     proposing_user.username as proposed_by,
-                    -- count(jp.id) as joined_count,
+                    proposing_user.email as proposed_by_email,
                     json_agg(joined_user.username) as joined_users,
-                    json_agg(jp.user_id) as joined_users_id,
-                    loc.alias as location_alias,
-                    -- concat loc country, city, street_name, house_number into a single string:
+                    json_agg(joined_user.email) as joined_users_email,
+                    json_agg(jp.user_id) as joined_users_id,                    
+                    loc.alias as location_alias,                    
                     concat_ws(' ', loc.country, loc.city, loc.street_name, loc.house_number) as location_full_address,   
-                    -- create a new field if loc.user_id is null => True, else False
                     CASE WHEN loc.user_id IS NULL THEN TRUE ELSE FALSE END as is_system_location,
                     expansions                                     
                 FROM 
@@ -442,6 +441,7 @@ class SQLManager(object):
                     tp.bgg_game_id,
                     tp.proposed_by_user_id,
                     proposing_user.username,
+                    proposing_user.email,
                     loc.alias,
                     loc.country, loc.city, loc.street_name, loc.house_number,
                     loc.user_id
