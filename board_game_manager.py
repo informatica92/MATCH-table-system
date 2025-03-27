@@ -5,10 +5,8 @@ import utils.streamlit_utils as stu
 from utils.table_system_user import StreamlitTableSystemUser, login_button, logout_button
 
 # # FEATURES
-# TODO: into "View & Join" page add a tertiary button on usernames to show the user profile with a dialog
 # TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (requires no streamlit_extras => no cookies)
 # TODO: add board game image during creation (for check)
-# TODO: add "see N more expansions" in case of 3+ expansions selected (global: all the expansion lists expanded or not)
 # TODO: add proposition types: Proposition, Tournament, Demo
 # TODO: differentiate chat/topic depending on the type of the table (e.g. "TOPIC1" -> Default location, "TOPIC2" -> RoW)
 # # IMPROVEMENTS
