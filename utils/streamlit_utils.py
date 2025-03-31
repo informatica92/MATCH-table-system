@@ -126,8 +126,10 @@ def refresh_table_propositions(reason, **kwargs):
         case "row": filter_default_location = False  # Rest of the World
         case _: raise ValueError(f"Invalid mode: {mode}")
 
+    proposition_type_id_mode = st.session_state.get("proposition_type_id_mode", 0)  # 0 = Proposition, 1 = Tournament, 2 = Demo
+
     st.session_state.propositions = TableProposition.from_list_of_tuples(
-        sql_manager.get_table_propositions(joined_by_me, filter_username, filter_default_location)
+        sql_manager.get_table_propositions(joined_by_me, filter_username, filter_default_location, proposition_type_id_mode)
     )
 
     logging.info(f"[User: {st.session_state.user if st.session_state.get('user') else '(not instantiated)'}] "
@@ -225,8 +227,10 @@ def delete_callback(table_id):
 
 def create_callback(game_name, bgg_game_id, image_url):
     if game_name:
+        proposition_type_id = st.session_state.proposition_type['id'] if st.session_state.get('proposition_type') else 0  # 0 -> default type
+        game_prefix = "" if proposition_type_id == 0 else f"{st.session_state.proposition_type['value'].upper()} | "
         last_row_id = sql_manager.create_proposition(
-            game_name,
+            f"{game_prefix}{game_name}",
             st.session_state.max_players,
             st.session_state.date,
             time_option_to_time(st.session_state.time_option),
@@ -236,11 +240,12 @@ def create_callback(game_name, bgg_game_id, image_url):
             st.session_state.user.user_id,
             st.session_state.join_me_by_default,
             st.session_state.location[0] if st.session_state.location else None,  # location id,
-            st.session_state.expansions
+            st.session_state.expansions,
+            proposition_type_id
         )
 
         telegram_bot.send_new_table_message(
-            game_name,
+            f"{game_prefix}{game_name}",
             st.session_state.max_players,
             st.session_state.date.strftime('%Y-%m-%d'),
             time_option_to_time(st.session_state.time_option).strftime('%H:%M'),
@@ -252,7 +257,7 @@ def create_callback(game_name, bgg_game_id, image_url):
             image_url
         )
 
-        refresh_table_propositions("Created", table_id=last_row_id, game_name=game_name, bgg_game_id=bgg_game_id)
+        refresh_table_propositions("Created", table_id=last_row_id, game_name=f"{game_prefix}{game_name}", bgg_game_id=bgg_game_id)
         if st.session_state.join_me_by_default:
             st.toast(f"✅ Joined Table {last_row_id} as {st.session_state.username}!")
         st.toast(f"➕ Table proposition created successfully!\nTable ID: {last_row_id} - {game_name}")
@@ -405,3 +410,17 @@ def get_expansions_markdown_text(expansions: list[TablePropositionExpansion]):
     expansions_markdown = _format_as_markdown_list(expansions)
 
     return expansions_markdown
+
+def get_table_proposition_types(as_list_of_dicts: bool = False):
+    table_proposition_types = SQLManager.TABLE_PROPOSITION_TYPES
+
+    if not str_to_bool(os.getenv("CAN_ADMIN_CREATE_TOURNAMENT")):
+        table_proposition_types = {k: v for k, v in table_proposition_types.items() if v != 1}
+
+    if not str_to_bool(os.getenv("CAN_ADMIN_CREATE_DEMO")):
+        table_proposition_types = {k: v for k, v in table_proposition_types.items() if v != 2}
+
+    if as_list_of_dicts:
+        return [{"id": v, "value": k} for k, v in table_proposition_types.items()]
+    else:
+        return table_proposition_types

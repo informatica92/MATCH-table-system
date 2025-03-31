@@ -31,17 +31,30 @@ if st.session_state['user'].is_banned:
 # ...alternatively, show the normal pages
 def_loc = stu.get_default_location()
 def_loc_alias = def_loc['alias']
+
+view_and_join_pages = [
+    st.Page("app_pages/1_View_&_Join_Default.py", icon="📜", default=True, title=def_loc_alias),
+    st.Page("app_pages/1_View_&_Join_RoW.py", icon="🌍", title="Rest of the World", url_path="restoftheworld"),
+]
+if stu.str_to_bool(os.getenv('CAN_ADMIN_CREATE_TOURNAMENT')) is True:
+    view_and_join_pages.append(
+        st.Page("app_pages/1_View_&_Join_Tournaments.py", icon="⚔️", title="Tournaments", url_path="tournaments")
+    )
+if stu.str_to_bool(os.getenv('CAN_ADMIN_CREATE_DEMO')) is True:
+    view_and_join_pages.append(
+        st.Page("app_pages/1_View_&_Join_Demos.py", icon="🎁", title="Demos", url_path="demos")
+    )
+
+other_pages = [
+    st.Page("app_pages/2_Create.py", icon="➕"),
+    st.Page("app_pages/3_Map.py", icon="🗺️"),
+    st.Page("app_pages/4_User.py", icon="👦🏻")
+]
+
 pg = st.navigation(
     {
-        "View & Join": [
-            st.Page("app_pages/1_View_&_Join_Default.py", icon="📜", default=True, title=def_loc_alias),
-            st.Page("app_pages/1_View_&_Join_RoW.py", icon="🌍", title="Rest of the World", url_path="restoftheworld"),
-        ],
-        "Other": [
-            st.Page("app_pages/2_Create.py", icon="➕"),
-            st.Page("app_pages/3_Map.py", icon="🗺️"),
-            st.Page("app_pages/4_User.py", icon="👦🏻")
-        ]
+        "View & Join": view_and_join_pages,
+        "Other": other_pages
     }
 )
 
@@ -50,6 +63,9 @@ st.markdown(stu.BOUNCE_SIDEBAR_ICON, unsafe_allow_html=True)
 # Initialize location_mode in session state
 if "location_mode" not in st.session_state:
     st.session_state['location_mode'] = "default"
+
+if "proposition_type_id_mode" not in st.session_state:
+    st.session_state['proposition_type_id_mode'] = 0  # 0 = Proposition, 1 = Tournament, 2 = Demo
 
 # Initialize propositions in session state
 if "propositions" not in st.session_state:

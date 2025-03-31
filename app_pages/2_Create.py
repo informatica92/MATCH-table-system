@@ -34,6 +34,16 @@ if bgg_game_id:
     st.write(f"Selected BGG Game ID: {bgg_game_id}")
     image_url, game_description, categories, mechanics, available_expansions, _ = get_bgg_game_info(bgg_game_id)
 
+if st.session_state.user.is_admin:
+    # Selection of the Proposition Type
+    st.divider()
+
+    st.selectbox("Proposition Type", options=stu.get_table_proposition_types(as_list_of_dicts=True), key="proposition_type", format_func=lambda x: x["value"])
+    stu.st_write(f"Selecting a Type different from \"Proposition\" this will disable location selection")
+    # st.write(st.session_state.proposition_type)
+
+    st.divider()
+
 with st.form(key="create_new_proposition_form", border=False):
 
     # expansions selector
@@ -62,7 +72,7 @@ with st.form(key="create_new_proposition_form", border=False):
 
     # locations
     can_users_set_location = stu.str_to_bool(os.getenv('CAN_USERS_SET_LOCATION', 'False'))
-    if can_users_set_location:
+    if can_users_set_location and st.session_state.get("proposition_type", {}).get("id") == 0:
         locations = stu.get_available_locations(st.session_state.user.user_id)
     else:
         locations = [list(stu.get_default_location().values())]
