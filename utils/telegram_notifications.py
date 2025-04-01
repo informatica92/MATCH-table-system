@@ -54,6 +54,12 @@ def resize_image_from_url(image_url) -> BytesIO:
 
     return image_bytes  # Returns a PIL Image object
 
+class TelegramNotificationsOutput(object):
+    def __init__(self, message: telegram.Message=None, error=None):
+        self.message_id = message.message_id if message else None
+        self.error = str(error) if error else None
+
+
 class TelegramNotifications(object):
     def __init__(self, bot_token=None, chat_id=None, language='IT'):
         self._default_chat_id = chat_id or os.environ.get('TELEGRAM_CHAT_ID')
@@ -84,6 +90,9 @@ class TelegramNotifications(object):
         :return: chat_id, message_thread_id
         """
         chat_id = self.chat_id_map.get((proposition_type_id, is_default_location)) or self._default_chat_id
+        if not chat_id:
+            logging.warning("No chat_id found for the given proposition_type_id and is_default_location")
+            return None, None
         if '_' in chat_id:
             chat_id, message_thread_id = chat_id.split('_')
             message_thread_id = int(message_thread_id)
@@ -115,10 +124,10 @@ class TelegramNotifications(object):
         else:
             return ""
 
-    def _send_text_message(self, text: str, chat_id: str, message_thread_id: int):
-        if self._bot:
+    def _send_text_message(self, text: str, chat_id: str, message_thread_id: int) -> TelegramNotificationsOutput:
+        if self._bot and chat_id:
             try:
-                self.loop.run_until_complete(
+                m = self.loop.run_until_complete(
                     self._bot.send_message(
                         chat_id=chat_id,
                         text=text,
@@ -127,16 +136,26 @@ class TelegramNotifications(object):
                         message_thread_id=message_thread_id
                     )
                 )
+                return TelegramNotificationsOutput(message=m)
             except telegram.error.TelegramError as e:
                 logging.error(f"Error sending Telegram TEXT message: '{e}'")
+                return TelegramNotificationsOutput(error=e)
         else:
-            logging.warning("Skipping Telegram notification since no bot token has been found")
+            if not self._bot and chat_id:
+                logging.warning("Skipping Telegram TEXT notification since no bot token has been found")
+                return TelegramNotificationsOutput(error="No bot token found")
+            elif self._bot and not chat_id:
+                logging.warning("Skipping Telegram TEXT notification since no chat_id has been found")
+                return TelegramNotificationsOutput(error="No chat_id found")
+            else:
+                logging.warning("Skipping Telegram TEXT notification since no bot token and chat_id have been found")
+                return TelegramNotificationsOutput(error="No bot token and chat_id found")
 
-    def _send_photo_message(self, text: str, chat_id: str, message_thread_id: int, image_url: str):
-        if self._bot:
+    def _send_photo_message(self, text: str, chat_id: str, message_thread_id: int, image_url: str) -> TelegramNotificationsOutput:
+        if self._bot and chat_id:
             image_file = resize_image_from_url(image_url)
             try:
-                self.loop.run_until_complete(
+                m = self.loop.run_until_complete(
                     self._bot.send_photo(
                         chat_id=chat_id,
                         photo=image_file,
@@ -145,17 +164,26 @@ class TelegramNotifications(object):
                         message_thread_id=message_thread_id
                     )
                 )
+                return TelegramNotificationsOutput(message=m)
             except telegram.error.TelegramError as e:
                 logging.error(f"Error sending Telegram PHOTO message with image: '{e}', retrying without image")
-                self._send_text_message(text=text, chat_id=chat_id, message_thread_id=message_thread_id)
+                return self._send_text_message(text=text, chat_id=chat_id, message_thread_id=message_thread_id)
         else:
-            logging.warning("Skipping Telegram notification since no bot token has been found")
+            if not self._bot and chat_id:
+                logging.warning("Skipping Telegram PHOTO notification since no bot token has been found")
+                return TelegramNotificationsOutput(error="No bot token found")
+            elif self._bot and not chat_id:
+                logging.warning("Skipping Telegram PHOTO notification since no chat_id has been found")
+                return TelegramNotificationsOutput(error="No chat_id found")
+            else:
+                logging.warning("Skipping Telegram PHOTO notification since no bot token and chat_id have been found")
+                return TelegramNotificationsOutput(error="No bot token and chat_id found")
 
-    def send_message(self, text: str, chat_id: str, message_thread_id: int, image_url: str=None):
+    def send_message(self, text: str, chat_id: str, message_thread_id: int, image_url: str=None) -> TelegramNotificationsOutput:
         if image_url:
-            self._send_photo_message(text=text, chat_id=chat_id, message_thread_id=message_thread_id, image_url=image_url)
+            return self._send_photo_message(text=text, chat_id=chat_id, message_thread_id=message_thread_id, image_url=image_url)
         else:
-            self._send_text_message(text=text, chat_id=chat_id, message_thread_id=message_thread_id)
+            return self._send_text_message(text=text, chat_id=chat_id, message_thread_id=message_thread_id)
 
     def send_new_table_message(
             self,
@@ -170,7 +198,7 @@ class TelegramNotifications(object):
             location_alias: str,
             image_url: str=None,
             proposition_type_id: int=None
-    ):
+    ) -> TelegramNotificationsOutput:
         """
         Send a new table message to the Telegram chat.
         :param game_name:
@@ -203,5 +231,5 @@ class TelegramNotifications(object):
             location_alias=location_alias
         )
 
-        self.send_message(text=text, image_url=image_url, chat_id=chat_id, message_thread_id=message_thread_id)
+        return self.send_message(text=text, image_url=image_url, chat_id=chat_id, message_thread_id=message_thread_id)
         # print(text, chat_id, message_thread_id)

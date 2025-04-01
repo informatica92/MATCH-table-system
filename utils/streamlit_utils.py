@@ -244,7 +244,7 @@ def create_callback(game_name, bgg_game_id, image_url):
             proposition_type_id
         )
 
-        telegram_bot.send_new_table_message(
+        telegram_output = telegram_bot.send_new_table_message(
             f"{game_prefix}{game_name}",
             st.session_state.max_players,
             st.session_state.date.strftime('%Y-%m-%d'),
@@ -261,6 +261,10 @@ def create_callback(game_name, bgg_game_id, image_url):
         if st.session_state.join_me_by_default:
             st.toast(f"✅ Joined Table {last_row_id} as {st.session_state.username}!")
         st.toast(f"➕ Table proposition created successfully!\nTable ID: {last_row_id} - {game_name}")
+        if telegram_output.message_id:
+            st.toast(f"✅ Telegram notification sent successfully!")
+        else:
+            st.toast(f"🚫 Telegram notification failed: **{telegram_output.error}**")
 
 def get_num_active_filters(as_str=True):
     number_of_active_filters = 0

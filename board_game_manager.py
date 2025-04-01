@@ -7,8 +7,6 @@ from utils.table_system_user import StreamlitTableSystemUser, login_button, logo
 # # FEATURES
 # TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (requires no streamlit_extras => no cookies)
 # TODO: add board game image during creation (for check)
-# TODO: add proposition types: Proposition, Tournament, Demo
-# TODO: differentiate chat/topic depending on the type of the table (e.g. "TOPIC1" -> Default location, "TOPIC2" -> RoW)
 # # IMPROVEMENTS
 # TODO: use @st.fragments
 # TODO: optimize return data in BGG info (from tuple to dataclass)
