@@ -55,9 +55,10 @@ def resize_image_from_url(image_url) -> BytesIO:
     return image_bytes  # Returns a PIL Image object
 
 class TelegramNotificationsOutput(object):
-    def __init__(self, message: telegram.Message=None, error=None):
+    def __init__(self, message: telegram.Message=None, error=None, skipped=False):
         self.message_id = message.message_id if message else None
         self.error = str(error) if error else None
+        self.skipped = skipped
 
 
 class TelegramNotifications(object):
@@ -143,13 +144,13 @@ class TelegramNotifications(object):
         else:
             if not self._bot and chat_id:
                 logging.warning("Skipping Telegram TEXT notification since no bot token has been found")
-                return TelegramNotificationsOutput(error="No bot token found")
+                return TelegramNotificationsOutput(skipped=True)
             elif self._bot and not chat_id:
                 logging.warning("Skipping Telegram TEXT notification since no chat_id has been found")
-                return TelegramNotificationsOutput(error="No chat_id found")
+                return TelegramNotificationsOutput(skipped=True)
             else:
                 logging.warning("Skipping Telegram TEXT notification since no bot token and chat_id have been found")
-                return TelegramNotificationsOutput(error="No bot token and chat_id found")
+                return TelegramNotificationsOutput(skipped=True)
 
     def _send_photo_message(self, text: str, chat_id: str, message_thread_id: int, image_url: str) -> TelegramNotificationsOutput:
         if self._bot and chat_id:
@@ -171,13 +172,13 @@ class TelegramNotifications(object):
         else:
             if not self._bot and chat_id:
                 logging.warning("Skipping Telegram PHOTO notification since no bot token has been found")
-                return TelegramNotificationsOutput(error="No bot token found")
+                return TelegramNotificationsOutput(skipped=True)
             elif self._bot and not chat_id:
                 logging.warning("Skipping Telegram PHOTO notification since no chat_id has been found")
-                return TelegramNotificationsOutput(error="No chat_id found")
+                return TelegramNotificationsOutput(skipped=True)
             else:
                 logging.warning("Skipping Telegram PHOTO notification since no bot token and chat_id have been found")
-                return TelegramNotificationsOutput(error="No bot token and chat_id found")
+                return TelegramNotificationsOutput(skipped=True)
 
     def send_message(self, text: str, chat_id: str, message_thread_id: int, image_url: str=None) -> TelegramNotificationsOutput:
         if image_url:

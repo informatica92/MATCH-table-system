@@ -261,10 +261,11 @@ def create_callback(game_name, bgg_game_id, image_url):
         if st.session_state.join_me_by_default:
             st.toast(f"✅ Joined Table {last_row_id} as {st.session_state.username}!")
         st.toast(f"➕ Table proposition created successfully!\nTable ID: {last_row_id} - {game_name}")
-        if telegram_output.message_id:
-            st.toast(f"✅ Telegram notification sent successfully!")
-        else:
-            st.toast(f"🚫 Telegram notification failed: **{telegram_output.error}**")
+        if not telegram_output.skipped:
+            if telegram_output.message_id:
+                st.toast(f"✅ Telegram notification sent successfully!")
+            else:
+                st.toast(f"🚫 Telegram notification failed: **{telegram_output.error}**")
 
 def get_num_active_filters(as_str=True):
     number_of_active_filters = 0
