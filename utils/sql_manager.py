@@ -12,6 +12,12 @@ from utils.table_system_logging import logging
 
 class SQLManager(object):
 
+    TABLE_PROPOSITION_TYPES = {
+        "Proposition": 0,
+        "Tournament": 1,
+        "Demo": 2
+    }
+
     # Use the following code to reset the database:
     # # truncate table_propositions cascade;
     # # ALTER SEQUENCE table_propositions_id_seq RESTART;
@@ -99,7 +105,17 @@ class SQLManager(object):
                                      "DEFAULT_LOCATION_ALIAS, DEFAULT_LOCATION_COUNTRY, DEFAULT_LOCATION_CITY, "
                                      "DEFAULT_LOCATION_STREEN_NAME, DEFAULT_LOCATION_STREEN_NUMBER")
 
-
+        # Create a new table if not exists named table_proposition_types with ID (PK) and name (TEXT)
+        c.execute('''CREATE TABLE IF NOT EXISTS table_proposition_types (
+                        id SERIAL PRIMARY KEY,
+                        name TEXT
+                )''')
+        # Insert the table proposition types if not exists: check the number of rows and if 0 insert the default ones
+        # NB: use a single instruction to insert all the values at once and insert ID and name according to the TABLE_PROPOSITION_TYPES dict
+        c.execute('''SELECT count(*) FROM table_proposition_types''')
+        if c.fetchone()[0] == 0:
+            for proposition_type, id_ in SQLManager.TABLE_PROPOSITION_TYPES.items():
+                c.execute('''INSERT INTO table_proposition_types (id, name) VALUES (%s, %s)''', (id_, proposition_type))
 
         c.execute('''CREATE TABLE IF NOT EXISTS table_propositions (
                         id SERIAL PRIMARY KEY,
@@ -113,7 +129,8 @@ class SQLManager(object):
                         proposed_by_user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
                         location_id INTEGER REFERENCES locations(id) ON DELETE SET NULL,
                         expansions JSONB DEFAULT '[]',
-                        creation_timestamp_tz timestamptz NULL DEFAULT now()
+                        creation_timestamp_tz timestamptz NULL DEFAULT now(),
+                        type_id INTEGER REFERENCES table_proposition_types(id) ON DELETE SET NULL
                     )''')
 
         c.execute('''CREATE TABLE IF NOT EXISTS joined_players (
@@ -390,7 +407,7 @@ class SQLManager(object):
         conn.close()
 
     # TABLES
-    def get_table_propositions(self, joined_by_me: bool, filter_username: str, filter_default_location: bool):
+    def get_table_propositions(self, joined_by_me: bool, filter_username: str, filter_default_location: bool, proposition_type_id_mode: int):
 
         if joined_by_me:
             joined_by_me_clause = "and tp.id in (SELECT table_id FROM joined_players jp WHERE LOWER(joined_user.username) = LOWER(%s))"
@@ -431,6 +448,7 @@ class SQLManager(object):
                     -- check if date is in the future with 1 day of margin
                     and tp.date >= current_date - INTERVAL '1 day'
                     and coalesce(loc.is_default, FALSE) = {filter_default_location}  --if is_default is NULL (original location has been removed) assume it is a non default location
+                    and tp.type_id = {proposition_type_id_mode}
                 group by 
                     tp.id,
                     tp.game_name,
@@ -454,7 +472,7 @@ class SQLManager(object):
 
         return propositions
 
-    def create_proposition(self, selected_game, max_players, date_time, time, duration, notes, bgg_game_id, user_id, join_me_by_default, location_id, expansions):
+    def create_proposition(self, selected_game, max_players, date_time, time, duration, notes, bgg_game_id, user_id, join_me_by_default, location_id, expansions, type_id):
         conn = self.get_db_connection()
         c = conn.cursor()
         c.execute('''
@@ -468,8 +486,9 @@ class SQLManager(object):
                     bgg_game_id, 
                     proposed_by_user_id,
                     location_id,
-                    expansions
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
+                    expansions,
+                    type_id
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
             ''', (
                 selected_game,
                 max_players,
@@ -480,7 +499,8 @@ class SQLManager(object):
                 bgg_game_id,
                 user_id,
                 location_id,
-                json.dumps(expansions)
+                json.dumps(expansions),
+                type_id
             )
         )
 
