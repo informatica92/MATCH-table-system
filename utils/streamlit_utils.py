@@ -305,7 +305,10 @@ def _on_location_df_change(entire_locations_df: pd.DataFrame, user_id: int|None)
 
     if user_id:
         # clear user cache
-        get_available_locations.clear(user_id)
+        get_available_locations.clear(user_id, True, True)
+        get_available_locations.clear(user_id, True, False)
+        get_available_locations.clear(user_id, False, True)
+        get_available_locations.clear(user_id, False, False)
     else:
         # clear all caches
         get_available_locations.clear()
