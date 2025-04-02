@@ -111,7 +111,8 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
                 st.write(f"**BGG**: *coming soon* **Telegram**: *coming soon*")
             with st.expander(f"🗺️ **Location**: {table_proposition.location.location_alias}"):
                 location_markdown = stu.get_location_markdown_text(table_proposition.location, icon="🔗")
-                st.markdown(table_proposition.location.location_address)
+                # location_markdown includes address + link to google maps IF default location or logged users
+                # otherwise it is equal to "*Unknown*"
                 st.write(location_markdown)
             with st.expander(f"📦 **Expansions** ({len(table_proposition.expansions)}):"):
                 expansions_markdown = stu.get_expansions_markdown_text(table_proposition.expansions)
