@@ -400,7 +400,8 @@ def is_default_location(location_id):
 def get_location_markdown_text(location: TablePropositionLocation, icon="🗺️"):
     if st.session_state.user.is_logged_in() or location.location_is_system:
         if location.location_alias:
-            location_md = f"{icon} [{location.location_alias}](https://maps.google.com/?q={location.location_address.replace(' ', '+')})"
+            location_md = f"{location.location_address}\n\n"
+            location_md += f"{icon} [{location.location_alias}](https://maps.google.com/?q={location.location_address.replace(' ', '+')})"
         else:
             location_md = "*Unknown*"
     else:
