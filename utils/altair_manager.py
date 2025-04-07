@@ -29,7 +29,7 @@ def timeline_chart(df: pd.DataFrame):
         y=alt.Y(
             'start_datetime:T',
             title="date time",
-            axis=alt.Axis(format='%H:%M', labelLimit=600, labelColor='#999999'),
+            axis=alt.Axis(format='%Y-%m-%d %H:%M', labelLimit=600, labelColor='#999999'),
             scale=alt.Scale(reverse=True)
         ),
         y2='end_datetime:T',
