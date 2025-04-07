@@ -216,12 +216,12 @@ def join_callback(table_id, joining_username, joining_user_id):
 
 
 def leave_callback(table_id, leaving_username, leaving_user_id):
-    sql_manager.leave_table(table_id, leaving_user_id)
+    sql_manager.leave_table(int(table_id), int(leaving_user_id))
     refresh_table_propositions("Leave", leaving_user=f"{leaving_username}({leaving_user_id})", table_id=table_id)
     st.toast(f"⛔ {leaving_username} left Table {table_id}")
 
 def delete_callback(table_id):
-    sql_manager.delete_proposition(table_id)
+    sql_manager.delete_proposition(int(table_id))
     refresh_table_propositions("Delete", table_id=table_id)
     st.toast(f"⛔ Deleted Table {table_id}")
 
