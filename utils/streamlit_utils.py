@@ -208,7 +208,7 @@ def time_option_to_time(time_option):
 
 def join_callback(table_id, joining_username, joining_user_id):
     try:
-        sql_manager.join_table(table_id, joining_user_id)
+        sql_manager.join_table(int(table_id), int(joining_user_id))
         refresh_table_propositions("Join", table_id=table_id)
         st.toast(f"✅ Joined Table {table_id} as {joining_username}!")
     except AttributeError:
