@@ -22,7 +22,7 @@ def dialog_edit_table_proposition(old_table_proposition: TableProposition):
             time = st.time_input("Time", value=old_table_proposition.time, step=60*30)
 
         # locations
-        locations = stu.get_available_locations(st.session_state.user.user_id)  # 'id', 'street_name', 'city', 'house_number', 'country', 'alias', 'user_id'
+        locations = stu.get_available_locations(st.session_state.user.user_id, True, False)  # 'id', 'street_name', 'city', 'house_number', 'country', 'alias', 'user_id'
         locations = [(loc[0], loc[5]) for loc in locations]
         location_old_index = None
         for i, (_, alias) in enumerate(locations):

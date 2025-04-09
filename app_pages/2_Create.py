@@ -73,7 +73,7 @@ with st.form(key="create_new_proposition_form", border=False):
     # locations
     can_users_set_location = stu.str_to_bool(os.getenv('CAN_USERS_SET_LOCATION', 'False'))
     if can_users_set_location and st.session_state.get("proposition_type", {}).get("id") == 0:
-        locations = stu.get_available_locations(st.session_state.user.user_id)
+        locations = stu.get_available_locations(st.session_state.user.user_id, True, False)
     else:
         locations = [list(stu.get_default_location().values())]
     # 'id', 'street_name', 'city', 'house_number', 'country', 'alias', 'user_id'
