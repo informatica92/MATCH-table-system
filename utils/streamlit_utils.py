@@ -1,9 +1,10 @@
 import os
 
 import streamlit as st
+from streamlit import components
 
 import pandas as pd
-from time import time as time_time
+from time import time as time_time, sleep
 from datetime import datetime
 
 from utils.telegram_notifications import TelegramNotifications
@@ -137,6 +138,38 @@ def refresh_table_propositions(reason, **kwargs):
           f"({len(st.session_state.propositions)} rows) "
           f"(context: {kwargs})")
 
+def scroll_to(element_id):
+    tmp = st.empty()
+    with tmp:
+        components.v1.html(f'''
+            <script>
+                var element = window.parent.document.getElementById("{element_id}");
+                element.scrollIntoView({{behavior: 'smooth'}});
+            </script>
+        '''.encode())
+        sleep(0.5)
+    tmp.empty()
+
+def check_overlaps_in_joined_tables(table_propositions:  list[TableProposition], current_username: str):
+    joined_tables = [tp for tp in table_propositions if current_username in tp.get_joined_players_usernames()]
+    # check if the start time and duration of the tables joined by the user (in joined_tables) contain any kind of
+    # overlaps. In particular mark the cases in which the start date is exactly the same as ERROR and all the other
+    # types of overlaps as warning
+    # TableProposition fields: table_id, proposed_by_id, proposed_by_username, proposed_by_email, date, time, duration (h)
+    # JoinedPlayerOrProposer fields: username, email
+    errors_overlaps = []
+    warnings_overlaps = []
+    n = len(joined_tables)
+    for i in range(n):
+        tp = joined_tables[i]
+        for j in range(i+1, n):
+            tp2 = joined_tables[j]
+            if tp.start_datetime <= tp2.start_datetime < tp.end_datetime or tp.start_datetime < tp2.end_datetime <= tp.end_datetime:
+                if tp.start_datetime == tp2.start_datetime:
+                    errors_overlaps.append((tp, tp2))
+                else:
+                    warnings_overlaps.append((tp, tp2))
+    return errors_overlaps, warnings_overlaps
 
 def update_table_propositions(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, location_id, expansions):
     sql_manager.update_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, location_id, expansions)
