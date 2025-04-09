@@ -184,6 +184,14 @@ class TableProposition(object):
     def joined_count(self):
         return len(self.joined_players)
 
+    @property
+    def start_datetime(self):
+        return datetime.datetime.strptime(f"{self.date} {self.time}", "%Y-%m-%d %H:%M:%S")
+
+    @property
+    def end_datetime(self):
+        return self.start_datetime + datetime.timedelta(hours=self.duration)
+
     # STATIC METHODS
     # # FROMS
 
