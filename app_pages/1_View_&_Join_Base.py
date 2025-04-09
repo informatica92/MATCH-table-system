@@ -258,7 +258,7 @@ def create_view_and_join_page():
             st.toggle("Compact view", key="compact_view")
 
     # refresh and filter buttons
-    refresh_col, filter_col, fake_col = st.columns([1, 1, 4])
+    refresh_col, filter_col, errors_warnings_col, fake_col = st.columns([1, 1, 1, 3])
     with refresh_col:
         refresh_button = st.button("🔄️ Refresh", key="refresh", use_container_width=True)
         if refresh_button:
@@ -267,6 +267,34 @@ def create_view_and_join_page():
         filter_label_num_active_filters = stu.get_num_active_filters(as_str=True)
         with st.popover(f"🔍 {filter_label_num_active_filters}Filters:", use_container_width=True):
             st.toggle("Joined by me", key="joined_by_me", value=False, on_change=stu.refresh_table_propositions, kwargs={"reason": "Filtering"}, disabled=not st.session_state['username'])
+    with errors_warnings_col:
+        errors, warnings = stu.check_overlaps_in_joined_tables(st.session_state.propositions, st.session_state.user.username)
+        num_overlaps = len(errors) + len(warnings)
+        if num_overlaps == 0:
+            with st.popover("✅ No overlaps", use_container_width=True):
+                st.write("No overlaps found")
+        else:
+            with st.popover(f"{':exclamation:' if len(errors) else ':warning:'} {num_overlaps} overlaps", use_container_width=True):
+                if len(errors):
+                    st.write(f":exclamation: {len(errors)} important:")
+                    for error_left, error_right in errors:
+                        st.write(f"Table **\"{error_left.game_name}\"** (ID {error_left.table_id}) :red[has the same start date] "
+                                 f"time as **\"{error_right.game_name}\"** (ID {error_right.table_id})")
+                        col1, col2 = st.columns([1, 1])
+                        if col1.button(f"Go to table {error_left.table_id}", key=f"ov-err-{error_left.table_id}-{error_right.table_id}-{error_left.table_id}", use_container_width=True):
+                            stu.scroll_to(f"table-{error_left.table_id}")
+                        if col2.button(f"Go to table {error_right.table_id}", key=f"ov-err-{error_left.table_id}-{error_right.table_id}-{error_right.table_id}", use_container_width=True):
+                            stu.scroll_to(f"table-{error_right.table_id}")
+                if len(warnings):
+                    st.write(f":warning: {len(warnings)} warnings:")
+                    for warning_left, warning_right in warnings:
+                        st.write(f"Table **\"{warning_left.game_name}\"** (ID {warning_left.table_id}) :orange[has a partial "
+                                 f"overlap] with **\"{warning_right.game_name}\"** (ID {warning_right.table_id})")
+                        col1, col2 = st.columns([1, 1])
+                        if col1.button(f"Go to table {warning_left.table_id}", key=f"ov-warn-{warning_left.table_id}-{warning_right.table_id}-{warning_left.table_id}", use_container_width=True):
+                            stu.scroll_to(f"table-{warning_left.table_id}")
+                        if col2.button(f"Go to table {warning_right.table_id}", key=f"ov-warn-{warning_left.table_id}-{warning_right.table_id}-{warning_right.table_id}", use_container_width=True):
+                            stu.scroll_to(f"table-{warning_right.table_id}")
 
     # show propositions
     if len(st.session_state.propositions) == 0:
