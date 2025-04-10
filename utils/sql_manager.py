@@ -538,6 +538,9 @@ class SQLManager(object):
         except psycopg2.IntegrityError as e:
             logging.error(str(e))
             raise AttributeError("You have already joined this table.")
+        except psycopg2.errors.RaiseException as e:
+            logging.error(str(e))
+            raise AttributeError("Maximum number of players exceeded for this table")
         finally:
             c.close()
             conn.close()

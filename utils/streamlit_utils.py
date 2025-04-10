@@ -244,8 +244,9 @@ def join_callback(table_id, joining_username, joining_user_id):
         sql_manager.join_table(int(table_id), int(joining_user_id))
         refresh_table_propositions("Join", table_id=table_id)
         st.toast(f"✅ Joined Table {table_id} as {joining_username}!")
-    except AttributeError:
-        st.toast("🚫 You have already joined this table.")
+    except AttributeError as e :
+        st.toast(f"🚫 {e}")
+        refresh_table_propositions(reason="Error joining")
 
 
 def leave_callback(table_id, leaving_username, leaving_user_id):
