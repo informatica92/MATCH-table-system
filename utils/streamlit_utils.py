@@ -244,8 +244,9 @@ def join_callback(table_id, joining_username, joining_user_id):
         sql_manager.join_table(int(table_id), int(joining_user_id))
         refresh_table_propositions("Join", table_id=table_id)
         st.toast(f"✅ Joined Table {table_id} as {joining_username}!")
-    except AttributeError:
-        st.toast("🚫 You have already joined this table.")
+    except AttributeError as e :
+        st.toast(f"🚫 {e}")
+        refresh_table_propositions(reason="Error joining")
 
 
 def leave_callback(table_id, leaving_username, leaving_user_id):
@@ -287,7 +288,8 @@ def create_callback(game_name, bgg_game_id, image_url):
             last_row_id,
             is_default_location(st.session_state.location[0]) if st.session_state.location else True,
             st.session_state.location[1] if st.session_state.location else None,  # location alias
-            image_url
+            image_url,
+            proposition_type_id
         )
 
         refresh_table_propositions("Created", table_id=last_row_id, game_name=f"{game_prefix}{game_name}", bgg_game_id=bgg_game_id)

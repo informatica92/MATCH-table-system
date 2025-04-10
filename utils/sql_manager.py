@@ -172,13 +172,13 @@ class SQLManager(object):
                     ;
                     ''')
 
-        c.execute('''DO $$
+        c.execute(f'''DO $$
                     BEGIN
                         -- Check if the trigger already exists in information_schema.triggers
                         IF NOT EXISTS (
                             SELECT 1
                             FROM information_schema.triggers
-                            WHERE trigger_name = 'before_insert_or_update_joined_players'
+                            WHERE trigger_name = 'before_insert_or_update_joined_players' and event_object_schema = '{self._schema}'
                         ) THEN
                             -- Create the trigger if it doesn't exist
                             CREATE TRIGGER before_insert_or_update_joined_players
@@ -538,6 +538,9 @@ class SQLManager(object):
         except psycopg2.IntegrityError as e:
             logging.error(str(e))
             raise AttributeError("You have already joined this table.")
+        except psycopg2.errors.RaiseException as e:
+            logging.error(str(e))
+            raise AttributeError("Maximum number of players exceeded for this table")
         finally:
             c.close()
             conn.close()
