@@ -281,9 +281,21 @@ def create_view_and_join_page():
                         st.write(f"Table **\"{error_left.game_name}\"** (ID {error_left.table_id}) :red[has the same start date] "
                                  f"time as **\"{error_right.game_name}\"** (ID {error_right.table_id})")
                         col1, col2 = st.columns([1, 1])
-                        if col1.button(f"Go to table {error_left.table_id}", key=f"ov-err-{error_left.table_id}-{error_right.table_id}-{error_left.table_id}", use_container_width=True):
+                        if col1.button(
+                                f"Go to table {error_left.table_id}",
+                                key=f"ov-err-{error_left.table_id}-{error_right.table_id}-{error_left.table_id}",
+                                use_container_width=True,
+                                disabled=True if st.session_state.get("view_mode") != "📜List" else False,
+                                help="Only available in the '📜List' view mode"
+                        ):
                             stu.scroll_to(f"table-{error_left.table_id}")
-                        if col2.button(f"Go to table {error_right.table_id}", key=f"ov-err-{error_left.table_id}-{error_right.table_id}-{error_right.table_id}", use_container_width=True):
+                        if col2.button(
+                                f"Go to table {error_right.table_id}",
+                                key=f"ov-err-{error_left.table_id}-{error_right.table_id}-{error_right.table_id}",
+                                use_container_width=True,
+                                disabled=True if st.session_state.get("view_mode") != "📜List" else False,
+                                help="Only available in the '📜List' view mode"
+                        ):
                             stu.scroll_to(f"table-{error_right.table_id}")
                 if len(warnings):
                     st.write(f":warning: {len(warnings)} warnings:")
@@ -291,9 +303,21 @@ def create_view_and_join_page():
                         st.write(f"Table **\"{warning_left.game_name}\"** (ID {warning_left.table_id}) :orange[has a partial "
                                  f"overlap] with **\"{warning_right.game_name}\"** (ID {warning_right.table_id})")
                         col1, col2 = st.columns([1, 1])
-                        if col1.button(f"Go to table {warning_left.table_id}", key=f"ov-warn-{warning_left.table_id}-{warning_right.table_id}-{warning_left.table_id}", use_container_width=True):
+                        if col1.button(
+                                f"Go to table {warning_left.table_id}",
+                                key=f"ov-warn-{warning_left.table_id}-{warning_right.table_id}-{warning_left.table_id}",
+                                use_container_width=True,
+                                disabled=True if st.session_state.get("view_mode") != "📜List" else False,
+                                help="Only available in the '📜List' view mode"
+                        ):
                             stu.scroll_to(f"table-{warning_left.table_id}")
-                        if col2.button(f"Go to table {warning_right.table_id}", key=f"ov-warn-{warning_left.table_id}-{warning_right.table_id}-{warning_right.table_id}", use_container_width=True):
+                        if col2.button(
+                                f"Go to table {warning_right.table_id}",
+                                key=f"ov-warn-{warning_left.table_id}-{warning_right.table_id}-{warning_right.table_id}",
+                                use_container_width=True,
+                                disabled=True if st.session_state.get("view_mode") != "📜List" else False,
+                                help="Only available in the '📜List' view mode"
+                        ):
                             stu.scroll_to(f"table-{warning_right.table_id}")
 
     # show propositions
