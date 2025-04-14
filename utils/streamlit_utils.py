@@ -106,7 +106,7 @@ def refresh_table_propositions(reason, **kwargs):
     """
     Refresh the table propositions in the session state
     :param reason: the reason why the refresh is needed (Init, Delete, Join...)
-    :param kwargs: contextual information for the given reason (Delete: the deleted table id, Create: game name, table id...
+    :param kwargs: contextual information for the given reason (Delete: the deleted table id, Create: game name, table id...)
     :return:
     """
     query_start_time = time_time()
