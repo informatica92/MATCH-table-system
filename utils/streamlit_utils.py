@@ -106,7 +106,7 @@ def refresh_table_propositions(reason, **kwargs):
     """
     Refresh the table propositions in the session state
     :param reason: the reason why the refresh is needed (Init, Delete, Join...)
-    :param kwargs: contextual information for the given reason (Delete: the deleted table id, Create: game name, table id...
+    :param kwargs: contextual information for the given reason (Delete: the deleted table id, Create: game name, table id...)
     :return:
     """
     query_start_time = time_time()
@@ -289,7 +289,8 @@ def create_callback(game_name, bgg_game_id, image_url):
             is_default_location(st.session_state.location[0]) if st.session_state.location else True,
             st.session_state.location[1] if st.session_state.location else None,  # location alias
             image_url,
-            proposition_type_id
+            proposition_type_id,
+            st.session_state.notes
         )
 
         refresh_table_propositions("Created", table_id=last_row_id, game_name=f"{game_prefix}{game_name}", bgg_game_id=bgg_game_id)

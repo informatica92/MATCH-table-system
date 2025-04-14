@@ -32,39 +32,46 @@ In caso si voglia invece eseguire l'applicazione in locale è necessario seguire
  ```
 6. Creazione di un file `secrets.toml` con le seguenti variabili d'ambiente (oppure valorizza i secrets durante il deploy su Streamlit Cloud):
 
-| Section               | Variabile d'ambiente           | Descrizione                                                                                                                                            | Default              | Obbligatorio |
-|-----------------------|--------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------|--------------|  
-| # POSTGRESQL DATABASE | ---                            | ---                                                                                                                                                    | ---                  | ---          |
-|                       | DB_HOST                        | Hostname del database                                                                                                                                  | localhost            | No           |
-|                       | DB_NAME                        | Nome del database                                                                                                                                      |                      | Sì           |
-|                       | DB_USER                        | Username del database                                                                                                                                  |                      | Sì           | 
-|                       | DB_PASSWORD                    | Password del database                                                                                                                                  |                      | Sì           |
-|                       | DB_PORT                        | Porta del database                                                                                                                                     | 5432                 | No           |
-|                       | DB_SCHEMA                      | Schema del database (pre esistente)                                                                                                                    | public               | No           |
-| # TELEGRAM            | ---                            | ---                                                                                                                                                    | ---                  | ---          |
-|                       | TELEGRAM_CHAT_ID               | Chat ID di Telegram a cui inviare messaggi                                                                                                             |                      | No           |
-|                       | TELEGRAM_BOT_TOKEN             | Token del bot di Telegram, se mancante, non viene effettuato alcun invio                                                                               |                      | No           |
-| # MAP                 | ---                            | ---                                                                                                                                                    | ---                  | ---          |
-|                       | GMAP_MAP_URL                   | URL della mappa di Google Maps, se mancante non viene mostrata alcuna mappa                                                                            |                      | No           |
-| # GENERAL SETTINGS    | ---                            | ---                                                                                                                                                    | ---                  | ---          |
-|                       | TITLE                          | Titolo dell'applicazione                                                                                                                               | Board Game Proposals | No           |
-|                       | LOGO                           | URL del logo dell'applicazione                                                                                                                         |                      | Sì           |
-|                       | LOGO_LARGE                     | URL del logo grande dell'applicazione, se mancante viene usato come logo della sidebar il logo in LOGO                                                 |                      | No           |
-|                       | DEFAULT_DATE                   | Data predefinita per la creazione di un tavolo nel formato `YYYY-MM-DD`, se mancante o nel passato, viene usata la data odierna                        | *data odierna*       | No           |
-| # DEFAULT LOCATION    | ---                            | ---                                                                                                                                                    | ---                  | ---          |
-|                       | DEFAULT_LOCATION_ALIAS         | L'alias (nome breve e parlante) della location principale del sistema (es "MATCH")                                                                     |                      |              |
-|                       | DEFAULT_LOCATION_COUNTRY       | Il Paese in cui è presente la location principale del sistema (es: "Italia")                                                                           |                      |              |
-|                       | DEFAULT_LOCATION_CITY          | La città in cui è presente la location principale del sistema (es: "Bari")                                                                             |                      |              |
-|                       | DEFAULT_LOCATION_STREEN_NAME   | L'indirizzo in cui è presente la location principale del sistema (es: "via XX Settembre")                                                              |                      |              |
-|                       | DEFAULT_LOCATION_STREEN_NUMBER | Il numero civico in cui è presente la location principale del sistema (es: "18")                                                                       |                      |              |
-|                       | CAN_USERS_SET_LOCATION         | Se gli utenti possono scegliere una location diversa da quella principale in fase di Creazione ("true"/"false")                                        | false                | No           |
-| [auth]                | ---                            | ---                                                                                                                                                    | ---                  | ---          |
-|                       | redirect_uri                   | URI di reindirizzamento per l'autenticazione, può essere: <br/> - http://localhost:8501/oauth2callback <br/> - https://`dominio deploy`/oauth2callback |                      | Sì           |
-|                       | cookie_secret                  | Nome del cookie in cui inserire il token di autenticazione                                                                                             |                      | Sì           |
-| [auth.auth0]          | ---                            | ---                                                                                                                                                    | ---                  | ---          |
-|                       | client_id                      | Client ID di Auth0                                                                                                                                     |                      | Sì           |
-|                       | client_secret                  | Client Secret di Auth0                                                                                                                                 |                      | Sì           |
-|                       | server_metadata_url            | URL del server metadata di Auth0, nella forma https://`dominio auth0`.com/.well-known/openid-configuration                                             |                      | Sì           |
+| Section               | Variabile d'ambiente                 | Descrizione                                                                                                                                            | Default               | Obbligatorio |
+|-----------------------|--------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------|--------------|  
+| # POSTGRESQL DATABASE | ---                                  | ---                                                                                                                                                    | ---                   | ---          |
+|                       | DB_HOST                              | Hostname del database                                                                                                                                  | localhost             | No           |
+|                       | DB_NAME                              | Nome del database                                                                                                                                      |                       | Sì           |
+|                       | DB_USER                              | Username del database                                                                                                                                  |                       | Sì           | 
+|                       | DB_PASSWORD                          | Password del database                                                                                                                                  |                       | Sì           |
+|                       | DB_PORT                              | Porta del database                                                                                                                                     | 5432                  | No           |
+|                       | DB_SCHEMA                            | Schema del database (pre esistente)                                                                                                                    | public                | No           |
+| # TELEGRAM            | ---                                  | ---                                                                                                                                                    | ---                   | ---          |
+|                       | TELEGRAM_CHAT_ID                     | Chat ID di Telegram a cui inviare messaggi                                                                                                             |                       | No           |
+|                       | TELEGRAM_BOT_TOKEN                   | Token del bot di Telegram, se mancante, non viene effettuato alcun invio                                                                               |                       | No           |
+|                       | TELEGRAM_CHAT_ID_PROPOSITION_DEFAULT | Chat ID di Telegram a cui inviare messaggi nel caso delle proposition nella location di default                                                        | TELEGRAM_CHAT_ID      | No           |
+|                       | TELEGRAM_CHAT_ID_PROPOSITION_ROW     | Chat ID di Telegram a cui inviare messaggi nel caso delle proposition nelle location custom (system e user ma non default)                             | TELEGRAM_CHAT_ID      | No           |
+|                       | TELEGRAM_CHAT_ID_TOURNAMENT          | Chat ID di Telegram a cui inviare messaggi nel caso di Tornei                                                                                          | TELEGRAM_CHAT_ID      | No           |
+|                       | TELEGRAM_CHAT_ID_DEMO                | Chat ID di Telegram a cui inviare messaggi nel caso di Demo                                                                                            | TELEGRAM_CHAT_ID      | No           |
+| # MAP                 | ---                                  | ---                                                                                                                                                    | ---                   | ---          |
+|                       | GMAP_MAP_URL                         | URL della mappa di Google Maps, se mancante non viene mostrata alcuna mappa                                                                            |                       | No           |
+| # GENERAL SETTINGS    | ---                                  | ---                                                                                                                                                    | ---                   | ---          |
+|                       | TITLE                                | Titolo dell'applicazione                                                                                                                               | Board Game Proposals  | No           |
+|                       | LOGO                                 | URL del logo dell'applicazione                                                                                                                         |                       | Sì           |
+|                       | LOGO_LARGE                           | URL del logo grande dell'applicazione, se mancante viene usato come logo della sidebar il logo in LOGO                                                 |                       | No           |
+|                       | DEFAULT_DATE                         | Data predefinita per la creazione di un tavolo nel formato `YYYY-MM-DD`, se mancante o nel passato, viene usata la data odierna                        | *data odierna*        | No           |
+|                       | BASE_URL                             | Il base URL in cui è running l'applicazione (per i link telegram e altro)                                                                              | http://localhost:8501 | No           |
+|                       | CAN_ADMIN_CREATE_TOURNAMENT          | Se gli ADMIN possono creare proposte di tipo TOURNAMENT (attiva anche la pagina corrispondente)                                                        | false                 | No           |
+|                       | CAN_ADMIN_CREATE_DEMO                | Se gli ADMIN possono creare proposte di tipo DEMO (attiva anche la pagina corrispondente)                                                              | false                 | No           |
+| # DEFAULT LOCATION    | ---                                  | ---                                                                                                                                                    | ---                   | ---          |
+|                       | DEFAULT_LOCATION_ALIAS               | L'alias (nome breve e parlante) della location principale del sistema (es "MATCH")                                                                     |                       |              |
+|                       | DEFAULT_LOCATION_COUNTRY             | Il Paese in cui è presente la location principale del sistema (es: "Italia")                                                                           |                       |              |
+|                       | DEFAULT_LOCATION_CITY                | La città in cui è presente la location principale del sistema (es: "Bari")                                                                             |                       |              |
+|                       | DEFAULT_LOCATION_STREEN_NAME         | L'indirizzo in cui è presente la location principale del sistema (es: "via XX Settembre")                                                              |                       |              |
+|                       | DEFAULT_LOCATION_STREEN_NUMBER       | Il numero civico in cui è presente la location principale del sistema (es: "18")                                                                       |                       |              |
+|                       | CAN_USERS_SET_LOCATION               | Se gli utenti possono scegliere una location diversa da quella principale in fase di Creazione ("true"/"false")                                        | false                 | No           |
+| [auth]                | ---                                  | ---                                                                                                                                                    | ---                   | ---          |
+|                       | redirect_uri                         | URI di reindirizzamento per l'autenticazione, può essere: <br/> - http://localhost:8501/oauth2callback <br/> - https://`dominio deploy`/oauth2callback |                       | Sì           |
+|                       | cookie_secret                        | Nome del cookie in cui inserire il token di autenticazione                                                                                             |                       | Sì           |
+| [auth.auth0]          | ---                                  | ---                                                                                                                                                    | ---                   | ---          |
+|                       | client_id                            | Client ID di Auth0                                                                                                                                     |                       | Sì           |
+|                       | client_secret                        | Client Secret di Auth0                                                                                                                                 |                       | Sì           |
+|                       | server_metadata_url                  | URL del server metadata di Auth0, nella forma https://`dominio auth0`.com/.well-known/openid-configuration                                             |                       | Sì           |
 
 NB: Alcune "Section" iniziando con `#` sono commenti e non vengono considerate, servo solo a scopo di organizzazione del file.
 
@@ -75,6 +82,48 @@ Le "Section" che invece hanno forma `[nome]` sono obbligatorie e devono essere r
  streamlit run board_game_manager.py
  ```
 ## Funzionalità
+
+### 🎉 Novità: Check delle sovrapposizioni (Overlaps)
+<p><img src="https://github.com/user-attachments/assets/7bd795d7-8c38-4cb4-b8a9-7a90cf3b53e5" alt="overlaps" max-height="400"/></p>
+
+Ora è disponibile un check in alto che permette di avere una panoramica su eventuali sovrapposizioni dei vari tavoli a cui ci si è uniti.
+
+Il sistema riconosce tre casistiche: 
+ - **No Overlaps**: i tavoli a cui ci si è uniti non sono sovrapposti
+ - **Important**: due tavoli a cui ci si è uniti hanno la medesima data di inizio
+ - **Warning**: due tavoli a cui ci si è uniti hanno una sovrapposizione parziale
+
+Important e Warning sono aggregati in termini di numero se il popover è compresso e l'icona è quella della gravità più alta presente (punto esclamativo se c'è almeno un errore, warning se non ci sono errori ma almeno un warning).
+
+Espandendo il popover si ha poi il detagli delle coppie di tavoli e si può navigare direttamente verso uno di questi per rimuovers, spostare il tavolo...
+
+NB: Il "Go to Table" è disponibile solo nella modalità di visualizzazione "LISTA"
+
+<p><img src="https://github.com/user-attachments/assets/b9f50a7b-a7f7-417b-8484-96d452fb8380" alt="overlaps-ex" max-height="200"/></p>
+
+
+### 🎉 Novità: Aggiunta delle modalità Tournamemnt e Demo
+<p><img src="https://github.com/user-attachments/assets/55f5a354-37f6-4958-98ce-5ded51f70e7d" alt="overlaps" max-height="400"/></p>
+
+E' disponibile ora il concetto di "Proposition Type". Un tavolo può essere dei seguenti tipi:
+ - **PROPOSITION**: tutti i tavoli creati dagli utenti, che siano nella location di sistema, user location o system location
+ - **TOURNAMENT**: se abilitato tramite la variabile d'ambiente CAN_ADMIN_CREATE_TOURNAMENT, gli admin (e solo gli admin) potranno creare tavoli di tipo TOURNAMENT
+ - **DEMO**: se abilitato tramite la variabile d'ambiente CAN_ADMIN_CREATE_DEMO, gli admin (e solo gli admin) potranno creare tavoli di tipo DEMO
+
+TOURNAMENT e DEMO hanno poi, se abilitati, delle pagine dedicate.
+
+Tutti gli utenti potranno comunque unirsi a questi tavoli
+
+Inoltre ora è anche possibile differenziare le destinazioni delle **notifiche Telegram** sulla base della tipologia di proposta e della location:
+ - **TELEGRAM_CHAT_ID_PROPOSITION_DEFAULT**: dove inviare le proposte base nella location di default (se assente si userà TELEGRAM_CHAT_ID)
+ - **TELEGRAM_CHAT_ID_PROPOSITION_ROW**: dove inviare le proposte base nelle location NON di default (se assente si userà TELEGRAM_CHAT_ID)
+ - **TELEGRAM_CHAT_ID_TOURNAMENT**: dove inviare le proposte TOURNAMENT (se assente si userà TELEGRAM_CHAT_ID)
+ - **TELEGRAM_CHAT_ID_DEMO**: dove inviare le proposte DEMO (se assente si userà TELEGRAM_CHAT_ID)
+
+Tutte le variabili d'ambiente che riportano una destinazione Telegram possono avere le seguenti forme:
+ - **personal** - "123456789"
+ - **gruppo** - "-100123456789" -> "-100123456789_1" -> General
+ - **gruppo + topic** - "-100123456789_4" 
 
 ### 🎉 Novità: Visualizzazione dei tavoli migliorata
 <p><img src="https://github.com/user-attachments/assets/f8f9dd41-4af7-49b5-8c76-758fa57ee986" alt="expansions" height="400"/></p>
