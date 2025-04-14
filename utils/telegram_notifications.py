@@ -13,12 +13,13 @@ TEXTS = {
         'new_table_simple': "*{proposed_by}* ha appena creato un tavolo di *{game_name}* per {max_players} giocatori "
                             "il {date} alle *{time}* ({duration} ore) - (id: {table_id})."
                             "\n\nDai un'occhiata qui: https://match-table-system.streamlit.app/",
-        'new_table': "*{proposed_by}* ha appena proposto un nuovo tavolo (id: {table_id}):"
-                     "\n - 🀄 *{game_name}* "
+        'new_table': "<b>{proposed_by}</b> ha appena proposto un nuovo tavolo (id: {table_id}):"
+                     "\n - 🀄 <b>{game_name}</b> "
                      "\n - 👤 {max_players} giocatori "
-                     "\n - 📅 {date} alle *{time}* "
+                     "\n - 📅 {date} alle <b>{time}</b> "
                      "\n - ⌛ {duration} ore"
-                     "\n - 🗺️ presso *{location_alias}*."
+                     "\n - 🗺️ presso <b>{location_alias}</b>."
+                     "{notes}"
                      "\n\n🔗 Dai un'occhiata qui:\n{base_url}/{row_page}#table-{table_id}"
     }
 }
@@ -132,7 +133,7 @@ class TelegramNotifications(object):
                     self._bot.send_message(
                         chat_id=chat_id,
                         text=text,
-                        parse_mode='Markdown',
+                        parse_mode='HTML',
                         disable_web_page_preview=True,
                         message_thread_id=message_thread_id
                     )
@@ -161,7 +162,7 @@ class TelegramNotifications(object):
                         chat_id=chat_id,
                         photo=image_file,
                         caption=text,
-                        parse_mode='Markdown',
+                        parse_mode='HTML',
                         message_thread_id=message_thread_id
                     )
                 )
@@ -198,7 +199,8 @@ class TelegramNotifications(object):
             is_default_location: bool,
             location_alias: str,
             image_url: str=None,
-            proposition_type_id: int=None
+            proposition_type_id: int=None,
+            notes: str=None
     ) -> TelegramNotificationsOutput:
         """
         Send a new table message to the Telegram chat.
@@ -213,6 +215,7 @@ class TelegramNotifications(object):
         :param location_alias:
         :param image_url:
         :param proposition_type_id:
+        :param notes
         :return:
         """
 
@@ -229,7 +232,8 @@ class TelegramNotifications(object):
             table_id=table_id,
             row_page=page_name,
             base_url=os.environ.get('BASE_URL', 'http://localhost:8501'),
-            location_alias=location_alias
+            location_alias=location_alias,
+            notes=f"\n\nNotes:\n<blockquote expandable>{notes}</blockquote>" if notes else ""
         )
 
         return self.send_message(text=text, image_url=image_url, chat_id=chat_id, message_thread_id=message_thread_id)

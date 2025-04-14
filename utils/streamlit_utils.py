@@ -289,7 +289,8 @@ def create_callback(game_name, bgg_game_id, image_url):
             is_default_location(st.session_state.location[0]) if st.session_state.location else True,
             st.session_state.location[1] if st.session_state.location else None,  # location alias
             image_url,
-            proposition_type_id
+            proposition_type_id,
+            st.session_state.notes
         )
 
         refresh_table_propositions("Created", table_id=last_row_id, game_name=f"{game_prefix}{game_name}", bgg_game_id=bgg_game_id)
