@@ -233,7 +233,7 @@ class TelegramNotifications(object):
             row_page=page_name,
             base_url=os.environ.get('BASE_URL', 'http://localhost:8501'),
             location_alias=location_alias,
-            notes=f"\n\nNotes:\n<blockquote expandable>{notes[:350]}</blockquote>" if notes else ""
+            notes=f"\n\nNote:\n<blockquote expandable>{notes[:350]}</blockquote>" if notes else ""
         )
 
         return self.send_message(text=text, image_url=image_url, chat_id=chat_id, message_thread_id=message_thread_id)
