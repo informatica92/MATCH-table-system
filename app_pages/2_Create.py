@@ -83,7 +83,7 @@ with st.form(key="create_new_proposition_form", border=False):
     code_html_style = "style='color: black; background-color: #f0f0f0;font-weight: bold;'"
     stu.st_write(f"Selecting <b>{def_loc_alias}</b> as location, the table will be displayed into the "
                  f"<code {code_html_style}>View & Join/📜{def_loc_alias}</code> page, otherwise you'll find it into the "
-                 f"<code {code_html_style}>View & Join/🌍Rest of the World</code> page")
+                 f"<code {code_html_style}>View & Join/🌍{stu.get_rest_of_the_world_page_name()}</code> page")
     if not can_users_set_location:
         stu.st_write("ℹ️ User locations are not displayed at the moment. <i>(CAN_USERS_SET_LOCATION set to False)</i>")
 

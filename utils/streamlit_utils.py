@@ -124,7 +124,7 @@ def refresh_table_propositions(reason, **kwargs):
     match mode:
         case "default": filter_default_location = True  # only default location
         case "none": filter_default_location = True  # only default location
-        case "row": filter_default_location = False  # Rest of the World
+        case "row": filter_default_location = False  # Rest of the World or REST_OF_THE_WORLD_PAGE_NAME
         case _: raise ValueError(f"Invalid mode: {mode}")
 
     proposition_type_id_mode = st.session_state.get("proposition_type_id_mode", 0)  # 0 = Proposition, 1 = Tournament, 2 = Demo
@@ -469,3 +469,6 @@ def get_table_proposition_types(as_list_of_dicts: bool = False):
         return [{"id": v, "value": k} for k, v in table_proposition_types.items()]
     else:
         return table_proposition_types
+
+def get_rest_of_the_world_page_name():
+    return os.environ.get("REST_OF_THE_WORLD_PAGE_NAME") or "Rest of the World"
