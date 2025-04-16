@@ -32,7 +32,7 @@ def_loc_alias = def_loc['alias']
 
 view_and_join_pages = [
     st.Page("app_pages/1_View_&_Join_Default.py", icon="📜", default=True, title=def_loc_alias),
-    st.Page("app_pages/1_View_&_Join_RoW.py", icon="🌍", title="Rest of the World", url_path="restoftheworld"),
+    st.Page("app_pages/1_View_&_Join_RoW.py", icon="🌍", title=stu.get_rest_of_the_world_page_name(), url_path="restoftheworld"),
 ]
 if stu.str_to_bool(os.getenv('CAN_ADMIN_CREATE_TOURNAMENT')) is True:
     view_and_join_pages.append(
