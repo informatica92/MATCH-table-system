@@ -72,6 +72,10 @@ with st.form("user_setting_form", border=False):
 st.subheader("User Admin")
 st.toggle("Admin", value=st.session_state.user.is_admin, disabled=True, help="Ask the admin to change this setting for your user")
 if st.session_state.user.is_admin:
+    st.subheader("Admin locations (visible only to admins)")
+    stu.st_write(f"Use the following list to manage admin locations. <br>"
+                 f"This lists differs from the \"User locations\", below, since <b>\"Admin locations\" are visible to "
+                 f"all users</b> while \"User locations\" are only visible to the user who created them. <br>")
     stu.manage_user_locations(user_id=None)
 
 st.subheader("User locations")
