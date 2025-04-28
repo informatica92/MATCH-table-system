@@ -10,6 +10,9 @@ from utils.table_system_user import StreamlitTableSystemUser, login_button, logo
 # # IMPROVEMENTS
 # TODO: use @st.fragments
 # TODO: optimize return data in BGG info (from tuple to dataclass)
+# TODO: SQC: duration should be float4 (so it can be 0.5hours, 1.5hours, etc.)
+# TODO: SQC: redirect to created table once done
+# TODO: SQC: sidebar button more visible
 
 st.set_page_config(page_title=stu.get_title(), layout="wide", page_icon="🎴")
 
