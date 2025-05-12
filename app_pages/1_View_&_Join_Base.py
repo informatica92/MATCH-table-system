@@ -256,6 +256,7 @@ def create_view_and_join_page():
         with st.container(border=True):
             st.selectbox("View mode", options=["📜List", "📊Timeline", "◻️Table"], key="view_mode")
             st.toggle("Compact view", key="compact_view")
+        stu.add_donation_button()
 
     # refresh and filter buttons
     refresh_col, filter_col, errors_warnings_col, fake_col = st.columns([1, 1, 1, 3])

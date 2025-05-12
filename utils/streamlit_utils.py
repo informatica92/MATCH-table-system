@@ -472,3 +472,11 @@ def get_table_proposition_types(as_list_of_dicts: bool = False):
 
 def get_rest_of_the_world_page_name():
     return os.environ.get("REST_OF_THE_WORLD_PAGE_NAME") or "Rest of the World"
+
+def add_donation_button(label='Support me on Ko-fi', color='#29abe0'):
+    user = os.environ.get("DONATION_USER", "informatica92")
+    script = f"""
+    <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+    <script type='text/javascript'>kofiwidget2.init('{label}', '{color}', '{user}');kofiwidget2.draw();</script>
+    """
+    components.v1.html(script)
