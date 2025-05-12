@@ -85,6 +85,13 @@ Le "Section" che invece hanno forma `[nome]` sono obbligatorie e devono essere r
  ```
 ## Funzionalità
 
+### 🎉 Novità: Link a Ko-fi per donazioni
+<p><img src="https://github.com/user-attachments/assets/1472e494-813d-40e9-992b-92f71653a202" alt="kofi" max-height="400"/></p>
+
+Ora è possibile accedere, tramite apposito bottone presente sempre nella sidebar e in altre location chiave, ad una pagina di Ko-fi nella quale è possibile effettuare donazioni spontanee e volontaree per supportare lo sviluppo e il mantenimento del server APP e il suo DB.
+
+Minimo 1€ (che neanche un caffè, dai)
+
 ### 🎉 Novità: Check delle sovrapposizioni (Overlaps)
 <p><img src="https://github.com/user-attachments/assets/7bd795d7-8c38-4cb4-b8a9-7a90cf3b53e5" alt="overlaps" max-height="400"/></p>
 
