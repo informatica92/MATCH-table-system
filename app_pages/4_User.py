@@ -89,3 +89,10 @@ stu.st_write("Using <b>'Locations'</b> you automatically accept the "
              "<a href='https://github.com/informatica92/MATCH-table-system/tree/main/static/gdpr'>GDPR policy</a> "
              "of this application")
 
+st.divider()
+st.write("This is a open source project and is free to use. "
+         "If you like it, please consider supporting the development of this application by donating or buying me a coffee.")
+stu.add_donation_button()
+
+with st.sidebar:
+    stu.add_donation_button()

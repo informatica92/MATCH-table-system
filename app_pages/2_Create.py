@@ -109,3 +109,5 @@ with st.form(key="create_new_proposition_form", border=False):
         else:
             st.warning("**Log in** to create a proposition.")
 
+with st.sidebar:
+    stu.add_donation_button()

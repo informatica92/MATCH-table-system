@@ -16,3 +16,5 @@ if gmap_url:
 else:
     st.warning("GMAP_MAP_URL environment variable not set")
 
+with st.sidebar:
+    stu.add_donation_button()
