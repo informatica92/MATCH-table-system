@@ -111,7 +111,7 @@ NB: Il "Go to Table" è disponibile solo nella modalità di visualizzazione "LIS
 <p><img src="https://github.com/user-attachments/assets/b9f50a7b-a7f7-417b-8484-96d452fb8380" alt="overlaps-ex" max-height="200"/></p>
 
 
-### 🎉 Novità: Aggiunta delle modalità Tournamemnt e Demo
+### 🎉 Novità: Aggiunta delle modalità Tournament e Demo
 <p><img src="https://github.com/user-attachments/assets/55f5a354-37f6-4958-98ce-5ded51f70e7d" alt="overlaps" max-height="400"/></p>
 
 E' disponibile ora il concetto di "Proposition Type". Un tavolo può essere dei seguenti tipi:

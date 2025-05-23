@@ -15,6 +15,8 @@ from utils.table_system_user import StreamlitTableSystemUser, login_button, logo
 # TODO: SQC: redirect to created table once done
 # TODO: SQC: sidebar button more visible
 # TODO: SQC: add notifications for Edit
+# TODO: SQC: add possibility to edit table proposition (proposition, tournament, demo)
+
 
 st.set_page_config(page_title=stu.get_title(), layout="wide", page_icon="🎴")
 
