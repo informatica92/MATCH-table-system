@@ -407,12 +407,20 @@ class SQLManager(object):
         conn.close()
 
     # TABLES
-    def get_table_propositions(self, joined_by_me: bool, filter_username: str, filter_default_location: bool, proposition_type_id_mode: int):
+    def get_table_propositions(self, joined_by_me: bool, filter_username: str, filter_default_location: bool, proposition_type_id_mode: int, proposed_by_me: bool = False):
 
+        _vars = []
         if joined_by_me:
             joined_by_me_clause = "and tp.id in (SELECT table_id FROM joined_players jp1 join users ju1 on (jp1.user_id = ju1.id) WHERE LOWER(ju1.username) = LOWER(%s))"
+            _vars.append(filter_username)
         else:
             joined_by_me_clause = "and TRUE"
+
+        if proposed_by_me:
+            proposed_by_me_clause = " and LOWER(proposing_user.username) = LOWER(%s)"
+            _vars.append(filter_username)
+        else:
+            proposed_by_me_clause = "and TRUE"
 
         conn = self.get_db_connection()
         c = conn.cursor()
@@ -445,6 +453,7 @@ class SQLManager(object):
                 WHERE
                     TRUE
                     {joined_by_me_clause}
+                    {proposed_by_me_clause}
                     -- check if date is in the future with 1 day of margin
                     and tp.date >= current_date - INTERVAL '1 day'
                     and coalesce(loc.is_default, FALSE) = {filter_default_location}  --if is_default is NULL (original location has been removed) assume it is a non default location
@@ -464,7 +473,7 @@ class SQLManager(object):
                     loc.country, loc.city, loc.street_name, loc.house_number,
                     loc.user_id
                 order by tp.date, tp.time, tp.id
-            ''', (filter_username,)
+            ''', _vars
         )
         propositions = c.fetchall()
         c.close()
