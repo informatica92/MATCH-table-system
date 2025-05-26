@@ -267,7 +267,8 @@ def create_view_and_join_page():
     with filter_col:
         filter_label_num_active_filters = stu.get_num_active_filters(as_str=True)
         with st.popover(f"🔍 {filter_label_num_active_filters}Filters:", use_container_width=True):
-            st.toggle("Joined by me", key="joined_by_me", value=False, on_change=stu.refresh_table_propositions, kwargs={"reason": "Filtering"}, disabled=not st.session_state['username'])
+            st.toggle("Joined by me", key="joined_by_me", value=False, on_change=stu.refresh_table_propositions, kwargs={"reason": "Filtering joined_by_me"}, disabled=not st.session_state['username'])
+            st.toggle("Proposed by me", key="proposed_by_me", value=False, on_change=stu.refresh_table_propositions, kwargs={"reason": "Filtering proposed_by_me"}, disabled=not st.session_state['username'])
     with errors_warnings_col:
         errors, warnings = stu.check_overlaps_in_joined_tables(st.session_state.propositions, st.session_state.user.username)
         num_overlaps = len(errors) + len(warnings)

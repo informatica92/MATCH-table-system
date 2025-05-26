@@ -115,10 +115,13 @@ def refresh_table_propositions(reason, **kwargs):
         joined_by_me = st.session_state.joined_by_me
     else:
         joined_by_me = False
-    if joined_by_me and "username" in st.session_state:
-        filter_username = st.session_state.username
+
+    if "proposed_by_me" in st.session_state:
+        proposed_by_me = st.session_state.proposed_by_me
     else:
-        filter_username = None
+        proposed_by_me = False
+
+    filter_username = st.session_state.username
 
     mode = str(st.session_state.get("location_mode", "default")).lower()
     match mode:
@@ -130,7 +133,7 @@ def refresh_table_propositions(reason, **kwargs):
     proposition_type_id_mode = st.session_state.get("proposition_type_id_mode", 0)  # 0 = Proposition, 1 = Tournament, 2 = Demo
 
     st.session_state.propositions = TableProposition.from_list_of_tuples(
-        sql_manager.get_table_propositions(joined_by_me, filter_username, filter_default_location, proposition_type_id_mode)
+        sql_manager.get_table_propositions(joined_by_me, filter_username, filter_default_location, proposition_type_id_mode, proposed_by_me),
     )
 
     logging.info(f"[User: {st.session_state.user if st.session_state.get('user') else '(not instantiated)'}] "
@@ -306,6 +309,8 @@ def create_callback(game_name, bgg_game_id, image_url):
 def get_num_active_filters(as_str=True):
     number_of_active_filters = 0
     if st.session_state.get('joined_by_me', False):
+        number_of_active_filters += 1
+    if st.session_state.get('proposed_by_me', False):
         number_of_active_filters += 1
     filter_label_num_active_filters = "" if number_of_active_filters == 0 else f" ({number_of_active_filters}) "
     return filter_label_num_active_filters if as_str else number_of_active_filters
