@@ -410,7 +410,7 @@ class SQLManager(object):
     def get_table_propositions(self, joined_by_me: bool, filter_username: str, filter_default_location: bool, proposition_type_id_mode: int):
 
         if joined_by_me:
-            joined_by_me_clause = "and tp.id in (SELECT table_id FROM joined_players jp WHERE LOWER(joined_user.username) = LOWER(%s))"
+            joined_by_me_clause = "and tp.id in (SELECT table_id FROM joined_players jp1 join users ju1 on (jp1.user_id = ju1.id) WHERE LOWER(ju1.username) = LOWER(%s))"
         else:
             joined_by_me_clause = "and TRUE"
 
