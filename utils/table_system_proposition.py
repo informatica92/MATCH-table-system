@@ -114,7 +114,7 @@ class TableProposition(object):
         self.joined_players: list[JoinedPlayerOrProposer] = JoinedPlayerOrProposer.from_tuples(joined_players_ids, joined_players, joined_players_emails)
         self.location: TablePropositionLocation = TablePropositionLocation(location_alias, location_address, location_is_system)
         self.expansions: list[TablePropositionExpansion] = TablePropositionExpansion.from_list_of_dicts(expansions)
-
+        # TODO: add bgg_description, bgg_image_url, ...
 
     def to_dict(self, simple=False) -> dict:
         if simple:
