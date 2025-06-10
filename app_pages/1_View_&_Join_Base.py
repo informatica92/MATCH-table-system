@@ -41,7 +41,7 @@ def dialog_edit_table_proposition(old_table_proposition: TableProposition):
 
         submitted = st.form_submit_button("💾 Update")
         if submitted:
-            stu.update_table_propositions(old_table_proposition.table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, st.session_state.location_edit[0] if st.session_state.location_edit else None, st.session_state.expansions_edit)
+            stu.update_table_propositions(old_table_proposition, game_name, max_players, date, time, duration, notes, bgg_game_id, st.session_state.location_edit[0] if st.session_state.location_edit else None, st.session_state.expansions_edit)
             st.rerun()
 
 @st.dialog("⛔ Delete Proposition")

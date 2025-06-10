@@ -174,8 +174,49 @@ def check_overlaps_in_joined_tables(table_propositions:  list[TableProposition],
                     warnings_overlaps.append((tp, tp2))
     return errors_overlaps, warnings_overlaps
 
-def update_table_propositions(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, location_id, expansions):
+def update_table_propositions(
+        old_table: TableProposition,
+        game_name: str,
+        max_players: int,
+        date: datetime.date,
+        time: datetime.time,
+        duration: int,
+        notes: str,
+        bgg_game_id: int,
+        location_id: int,
+        expansions: list[dict] = None
+):
+    table_id = old_table.table_id
     sql_manager.update_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, location_id, expansions)
+
+    location_alias = get_available_locations(user_id=None, include_system_ones=True, return_as_df=True).set_index("id").loc[location_id, "alias"]
+    location_is_default = is_default_location(location_id)
+    old_proposition_type_id = st.session_state.proposition_type['id'] if st.session_state.get('proposition_type') else 0  # 0 -> default type
+    expansions_name_list = [expansion['value'] for expansion in expansions] if expansions else []
+    old_expansions_name_list = [expansion.expansion_name for expansion in old_table.expansions] if old_table.expansions else []
+
+    telegram_bot.send_update_table_message(
+        game_name=game_name,
+        proposed_by=st.session_state.username,
+        table_id=table_id,
+        is_default_location=location_is_default,
+        image_url=get_bgg_game_info(bgg_game_id)[0] if bgg_game_id else None,
+        proposition_type_id=old_proposition_type_id,
+        old_max_players=old_table.max_players,
+        new_max_players=max_players,
+        old_date=old_table.date.strftime('%Y-%m-%d'),
+        new_date=date.strftime('%Y-%m-%d'),
+        old_time=old_table.time.strftime('%H:%M'),
+        new_time=time.strftime('%H:%M'),
+        old_duration=old_table.duration,
+        new_duration=duration,
+        old_location_alias=old_table.location.location_alias if old_table.location else "Unknown",
+        new_location_alias=location_alias if location_alias else "Unknown",
+        old_notes=old_table.notes,
+        new_notes=notes,
+        old_expansions=old_expansions_name_list,
+        new_expansions=expansions_name_list if expansions_name_list else [],
+    )
     refresh_table_propositions("Table Update")
 
 def table_propositions_to_df(
