@@ -1,5 +1,6 @@
 import datetime
 import time as time_module
+from utils.bgg_manager import get_bgg_game_info
 
 class TablePropositionExpansion(object):
     def __init__(
@@ -115,6 +116,13 @@ class TableProposition(object):
         self.location: TablePropositionLocation = TablePropositionLocation(location_alias, location_address, location_is_system)
         self.expansions: list[TablePropositionExpansion] = TablePropositionExpansion.from_list_of_dicts(expansions)
         # TODO: add bgg_description, bgg_image_url, ...
+        image_url, game_description, categories, mechanics, available_expansions, _ = get_bgg_game_info(bgg_game_id)
+        self.image_url = image_url
+        self.game_description = game_description
+        self.categories = categories
+        self.mechanics = mechanics
+        self.available_expansions = TablePropositionExpansion.from_list_of_dicts(available_expansions)
+
 
     def to_dict(self, simple=False) -> dict:
         if simple:
@@ -137,7 +145,8 @@ class TableProposition(object):
                 'location_alias': self.location.location_alias,
                 'location_address': self.location.location_address,
                 'location_is_system': self.location.location_is_system,
-                'expansions': [expansion.to_dict() for expansion in self.expansions]
+                'expansions': [expansion.to_dict() for expansion in self.expansions],
+                'image_url': self.image_url,
             }
         else:
             return {
@@ -172,7 +181,8 @@ class TableProposition(object):
                         'id': expansion.expansion_id,
                         'value': expansion.expansion_name
                     } for expansion in self.expansions
-                ]
+                ],
+                'image_url': self.image_url,
             }
 
     def get_joined_players_usernames(self):

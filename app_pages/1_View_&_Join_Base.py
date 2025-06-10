@@ -4,7 +4,7 @@ from time import time as time_time
 import datetime
 
 import utils.streamlit_utils as stu
-from utils.bgg_manager import get_bgg_game_info, get_bgg_url
+from utils.bgg_manager import get_bgg_url
 from utils.altair_manager import timeline_chart
 from utils.table_system_proposition import TableProposition, TablePropositionExpansion
 
@@ -32,7 +32,7 @@ def dialog_edit_table_proposition(old_table_proposition: TableProposition):
         st.selectbox("Location", options=locations, index=location_old_index, key="location_edit", format_func=lambda x: x[1])
 
         # expansions
-        expansions_options = get_bgg_game_info(bgg_game_id)[4]
+        expansions_options = TablePropositionExpansion.to_list_of_dicts(old_table_proposition.available_expansions)
         expansions_default = TablePropositionExpansion.to_list_of_dicts(old_table_proposition.expansions)
         st.multiselect("Expansions", options=expansions_options, default=expansions_default, format_func=lambda x: x['value'], key="expansions_edit")
 
@@ -78,16 +78,14 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
 
     with col1:
         if table_proposition.bgg_game_id and int(table_proposition.bgg_game_id) >= 1:
-            image_url, game_description, categories, mechanics, _, _ = get_bgg_game_info(table_proposition.bgg_game_id)
+            # image_url, game_description, categories, mechanics, _, _ = get_bgg_game_info(table_proposition.bgg_game_id)
             image_width = 300 if not compact else 150
-            caption = f"{game_description[:120]}..." if not compact else None
-            if not image_url:
-                image_url = stu.DEFAULT_IMAGE_URL
-            st.image(image_url, width=image_width, caption=caption)
+            caption = f"{table_proposition.game_description[:120]}..." if not compact else None
+            st.image(table_proposition.image_url or stu.DEFAULT_IMAGE_URL, width=image_width, caption=caption)
             if not compact:
                 stu.st_write(
-                    f"<b>Categories:</b> {', '.join(categories)}<br>"
-                    f"<b>Mechanics:</b> {', '.join(mechanics)}"
+                    f"<b>Categories:</b> {', '.join(table_proposition.categories)}<br>"
+                    f"<b>Mechanics:</b> {', '.join(table_proposition.mechanics)}"
                 )
         else:
             st.image(stu.DEFAULT_IMAGE_URL)
@@ -210,15 +208,11 @@ def timeline_table_propositions(compact=False):
 
 def dataframe_table_propositions(compact=False):
 
-    default_columns = ['image', 'time', 'game_name', 'duration', 'players', 'proposed_by_username', 'joined', 'bgg']
-    all_columns = ['table_id', 'image', 'time', 'game_name', 'duration', 'date', 'players', 'joined_players', 'proposed_by_username', 'joined', 'bgg']
-    st.multiselect("Columns", options=all_columns, default=default_columns, key="columns_order")
-
-    df = stu.table_propositions_to_df(add_image_url=True, add_bgg_url=True, add_players_fraction=True, add_joined=True)
+    df = stu.table_propositions_to_df(add_bgg_url=True, add_players_fraction=True, add_joined=True)
 
     column_config = {
         "table_id":  st.column_config.TextColumn("ID", width="small"),
-        "image": st.column_config.ImageColumn("Image", width="small"),
+        "image_url": st.column_config.ImageColumn("Image", width="small"),
         "bgg":  st.column_config.LinkColumn("BGG", display_text="link"),
         "date":  st.column_config.DateColumn("Date"),
         "time": st.column_config.TimeColumn("Time", format='HH:mm'),
@@ -229,8 +223,9 @@ def dataframe_table_propositions(compact=False):
         "proposed_by_username": st.column_config.TextColumn("Proposed By"),
         "joined": st.column_config.CheckboxColumn("Joined", width="small")
     }
-
-    selected_data = st.dataframe(df, hide_index=True, use_container_width=True, column_config=column_config, column_order=st.session_state.columns_order, on_select="rerun", selection_mode="single-row")
+    # 'table_id', 'image', 'time', 'game_name', 'duration', 'date', 'players', 'joined_players', 'proposed_by_username', 'joined', 'bgg'
+    columns_order =  ['table_id', 'image_url', 'date', 'time', 'game_name', 'duration', 'players', 'proposed_by_username', 'joined', 'bgg', 'joined_players']
+    selected_data = st.dataframe(df, hide_index=True, use_container_width=True, column_config=column_config, column_order=columns_order, on_select="rerun", selection_mode="single-row", row_height=50)
 
     st.subheader("Selected item")
 

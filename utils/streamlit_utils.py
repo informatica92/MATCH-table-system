@@ -9,7 +9,7 @@ from datetime import datetime
 
 from utils.telegram_notifications import TelegramNotifications
 from utils.sql_manager import SQLManager
-from utils.bgg_manager import get_bgg_game_info, get_bgg_url
+from utils.bgg_manager import get_bgg_url
 from utils.table_system_proposition import TableProposition, TablePropositionLocation, JoinedPlayerOrProposer, \
     TablePropositionExpansion
 from utils.table_system_logging import logging
@@ -200,7 +200,7 @@ def update_table_propositions(
         proposed_by=st.session_state.username,
         table_id=table_id,
         is_default_location=location_is_default,
-        image_url=get_bgg_game_info(bgg_game_id)[0] if bgg_game_id else None,
+        image_url=old_table.image_url if bgg_game_id else None,
         proposition_type_id=old_proposition_type_id,
         old_max_players=old_table.max_players,
         new_max_players=max_players,
@@ -221,7 +221,7 @@ def update_table_propositions(
 
 def table_propositions_to_df(
         add_start_and_end_date=False, add_group=False, add_status=False,
-        add_image_url=False, add_bgg_url=False, add_players_fraction=False, add_joined=False,
+        add_bgg_url=False, add_players_fraction=False, add_joined=False,
 ):
     df = pd.DataFrame(TableProposition.to_list_of_dicts(st.session_state.propositions, simple=True))
 
@@ -237,9 +237,6 @@ def table_propositions_to_df(
 
     if add_status:
         df['status'] = df.apply(lambda x: 'Full' if x['joined_count'] == x['max_players'] else 'Available', axis=1)
-
-    if add_image_url:
-        df['image'] = df['bgg_game_id'].apply(lambda x: get_bgg_game_info(x)[0])  # image_url, description), categories, mechanics
 
     if add_bgg_url:
         df['bgg'] = df['bgg_game_id'].apply(get_bgg_url)
