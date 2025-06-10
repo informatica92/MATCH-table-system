@@ -186,7 +186,7 @@ def update_table_propositions(
         location_id: int,
         expansions: list[dict] = None
 ):
-    table_id = old_table.table_id
+    table_id = int(old_table.table_id)
     sql_manager.update_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, location_id, expansions)
 
     location_alias = get_available_locations(user_id=None, include_system_ones=True, return_as_df=True).set_index("id").loc[location_id, "alias"]
