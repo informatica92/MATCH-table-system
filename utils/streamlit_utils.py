@@ -464,6 +464,28 @@ def manage_user_locations(user_id: int|None):
     if default_location:
         st.write(f"Default location: {default_location['alias']} (ID: {default_location['id']})")
 
+def display_system_locations():
+    system_locations = get_available_locations(None, True, True)
+    system_locations["address"] = system_locations[['street_name', 'house_number', 'city']].agg(', '.join, axis=1)
+    system_locations['pages'] = system_locations['is_default'].map(
+        {
+            True:  [f"📜{get_default_location()['alias']}"],
+            False: [f"🌍{get_rest_of_the_world_page_name()}"]
+        }
+    )
+
+    st.dataframe(
+        system_locations[['alias', 'pages', 'address']],
+        hide_index=True,
+        row_height=25,
+        use_container_width=False,
+        column_config={
+            'alias': st.column_config.TextColumn("Alias", help="Alias of the location, used to identify the location"),
+            'pages': st.column_config.ListColumn("Pages", help="Pages in which tables at this location are displayed"),
+            'address': st.column_config.TextColumn("Address", help="Address of the location"),
+        }
+    )
+
 @st.cache_data
 def get_available_locations(user_id, include_system_ones=True, return_as_df=False):
     locations = sql_manager.get_user_locations(user_id, include_system_ones=include_system_ones, return_as_df=return_as_df)
