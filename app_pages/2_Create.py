@@ -54,7 +54,7 @@ with st.form(key="create_new_proposition_form", border=False):
     with col1:
         st.number_input("Max Number of Players", min_value=1, max_value=100, step=1, key="max_players")
     with col2:
-        st.number_input("Duration (in hours)", min_value=1, max_value=24, step=1, key="duration")
+        st.number_input("Duration (in minutes)", min_value=30, max_value=24*60, step=30, key="duration")
 
     # date and time
     col1, col2 = st.columns([1, 1])

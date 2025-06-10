@@ -200,7 +200,7 @@ class TableProposition(object):
 
     @property
     def end_datetime(self):
-        return self.start_datetime + datetime.timedelta(hours=self.duration)
+        return self.start_datetime + datetime.timedelta(minutes=self.duration)
 
     # STATIC METHODS
     # # FROMS

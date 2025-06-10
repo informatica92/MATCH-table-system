@@ -19,7 +19,7 @@ def dialog_edit_table_proposition(old_table_proposition: TableProposition):
             date = st.date_input("Date", value=old_table_proposition.date, min_value=min(old_table_proposition.date, datetime.date.today()))
         with col2:
             bgg_game_id = st.text_input("BGG Game ID", value=old_table_proposition.bgg_game_id, help=stu.BGG_GAME_ID_HELP, disabled=True)
-            duration = st.number_input("Duration (hours)", value=old_table_proposition.duration, step=1)
+            duration = st.number_input("Duration (minutes)", value=old_table_proposition.duration, step=30)
             time = st.time_input("Time", value=old_table_proposition.time, step=60*30)
 
         # locations
@@ -100,7 +100,7 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
                 # f"🧑‍🤝‍🧑 {table_proposition.max_players} players",
                 f"⌚ **{table_proposition.time.strftime('%H:%M')}**",
                 f"📅 {table_proposition.date}",
-                f"⏳ {table_proposition.duration}h",
+                f"⏳ {'{:02d}:{:02d}'.format(*divmod(table_proposition.duration, 60))}h",
             ],
             key=f"table_info_{table_proposition.table_id}_{section_name}",
             on_change=reset_table_info, kwargs={"key": f"table_info_{table_proposition.table_id}_{section_name}"},
@@ -122,7 +122,7 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
         else:
             st.write(f"**Proposed By:**&nbsp;{table_proposition.proposed_by.username}")
             st.write(f"**Date Time:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{table_proposition.date} {table_proposition.time}")
-            st.write(f"**Duration:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{table_proposition.duration} hours")
+            st.write(f"**Duration:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{table_proposition.duration} mins")
 
     with col3:
         is_full = table_proposition.joined_count >= table_proposition.max_players
@@ -216,7 +216,7 @@ def dataframe_table_propositions(compact=False):
         "bgg":  st.column_config.LinkColumn("BGG", display_text="link"),
         "date":  st.column_config.DateColumn("Date"),
         "time": st.column_config.TimeColumn("Time", format='HH:mm'),
-        "duration": st.column_config.NumberColumn("Duration", format="%dh", width="small"),
+        "duration": st.column_config.NumberColumn("Duration", format="%dmin", width="small"),
         "players": st.column_config.TextColumn("Players"),
         "joined_players": st.column_config.ListColumn("Joined Players"),
         "game_name": st.column_config.TextColumn("Name"),
