@@ -14,7 +14,6 @@ from utils.table_system_user import StreamlitTableSystemUser, login_button, logo
 # TODO: SQC: duration should be float4 (so it can be 0.5hours, 1.5hours, etc.) or minutes
 # TODO: SQC: redirect to created table once done
 # TODO: SQC: sidebar button more visible
-# TODO: SQC: add notifications for Edit
 # TODO: SQC: add possibility to edit table proposition (proposition, tournament, demo)
 
 
