@@ -233,8 +233,8 @@ class TelegramNotifications(object):
         time = compare_and_format(new_time, old_time, str)
         duration = compare_and_format(new_duration, old_duration, str)
         location_alias = compare_and_format(new_location_alias, old_location_alias, str)
-        notes = new_notes if new_notes == old_notes else f"**NEW:** {new_notes}" if new_notes else "**NEW:** NO"
-        expansions_len = str(len(new_expansions)) if set(new_expansions) == set(old_expansions) else f"**NEW:** {len(new_expansions)})"
+        notes = new_notes if new_notes == old_notes else f"<b>NEW:</b> {new_notes}" if new_notes else "<b>NEW:</b> NO"
+        expansions_len = str(len(new_expansions)) if set(new_expansions) == set(old_expansions) else f"<b>NEW:</b> {len(new_expansions)}"
 
         chat_id, message_thread_id = self._get_chat_id(proposition_type_id, is_default_location)
         page_name = self._get_page(proposition_type_id, is_default_location)
