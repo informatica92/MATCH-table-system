@@ -443,7 +443,8 @@ class SQLManager(object):
                     loc.alias as location_alias,                    
                     concat_ws(' ', loc.country, loc.city, loc.street_name, loc.house_number) as location_full_address,   
                     CASE WHEN loc.user_id IS NULL THEN TRUE ELSE FALSE END as is_system_location,
-                    expansions                                     
+                    expansions,
+                    tp.type_id
                 FROM 
                     table_propositions tp
                     join users proposing_user on proposing_user.id = tp.proposed_by_user_id
@@ -569,7 +570,7 @@ class SQLManager(object):
         c.close()
         conn.close()
 
-    def update_table_proposition(self, table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, location_id, expansions):
+    def update_table_proposition(self, table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, location_id, expansions, proposition_type_id):
         conn = self.get_db_connection()
         c = conn.cursor()
         c.execute(
@@ -583,10 +584,11 @@ class SQLManager(object):
                     notes = %s,
                     bgg_game_id = %s,
                     location_id = %s,
-                    expansions = %s
+                    expansions = %s,
+                    type_id = %s
                 WHERE id = %s
             ''',
-            (game_name, max_players, date, time, duration, notes, bgg_game_id, location_id, json.dumps(expansions), table_id)
+            (game_name, max_players, date, time, duration, notes, bgg_game_id, location_id, json.dumps(expansions), proposition_type_id, table_id)
         )
         conn.commit()
         c.close()

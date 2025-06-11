@@ -39,9 +39,13 @@ def dialog_edit_table_proposition(old_table_proposition: TableProposition):
         # notes
         notes = st.text_area("Notes", value=old_table_proposition.notes)
 
+        # table proposition type
+        if st.session_state.user.is_admin:
+            st.selectbox("Proposition Type", options=stu.get_table_proposition_types(as_list_of_dicts=True), key="proposition_type_edit", format_func=lambda x: x["value"], index=old_table_proposition.proposition_type_id)
+
         submitted = st.form_submit_button("💾 Update")
         if submitted:
-            stu.update_table_propositions(old_table_proposition, game_name, max_players, date, time, duration, notes, bgg_game_id, st.session_state.location_edit[0] if st.session_state.location_edit else None, st.session_state.expansions_edit)
+            stu.update_table_propositions(old_table_proposition, game_name, max_players, date, time, duration, notes, bgg_game_id, st.session_state.location_edit[0] if st.session_state.location_edit else None, st.session_state.expansions_edit, st.session_state.proposition_type_edit['id'])
             st.rerun()
 
 @st.dialog("⛔ Delete Proposition")

@@ -101,6 +101,7 @@ class TableProposition(object):
             location_address: str,
             location_is_system: bool,
             expansions: list[dict],
+            proposition_type_id: int,
             **kwargs
     ):
         self.table_id: int = table_id
@@ -115,14 +116,14 @@ class TableProposition(object):
         self.joined_players: list[JoinedPlayerOrProposer] = JoinedPlayerOrProposer.from_tuples(joined_players_ids, joined_players, joined_players_emails)
         self.location: TablePropositionLocation = TablePropositionLocation(location_alias, location_address, location_is_system)
         self.expansions: list[TablePropositionExpansion] = TablePropositionExpansion.from_list_of_dicts(expansions)
-        # TODO: add bgg_description, bgg_image_url, ...
+        self.proposition_type_id: int = proposition_type_id or 0
+        # BGG info:
         image_url, game_description, categories, mechanics, available_expansions, _ = get_bgg_game_info(bgg_game_id)
         self.image_url = image_url
         self.game_description = game_description
         self.categories = categories
         self.mechanics = mechanics
         self.available_expansions = TablePropositionExpansion.from_list_of_dicts(available_expansions)
-
 
     def to_dict(self, simple=False) -> dict:
         if simple:
@@ -146,6 +147,7 @@ class TableProposition(object):
                 'location_address': self.location.location_address,
                 'location_is_system': self.location.location_is_system,
                 'expansions': [expansion.to_dict() for expansion in self.expansions],
+                'proposition_type_id': self.proposition_type_id,
                 'image_url': self.image_url,
             }
         else:
@@ -182,6 +184,7 @@ class TableProposition(object):
                         'value': expansion.expansion_name
                     } for expansion in self.expansions
                 ],
+                'proposition_type_id': self.proposition_type_id,
                 'image_url': self.image_url,
             }
 
@@ -232,6 +235,7 @@ class TableProposition(object):
          - location_address,
          - location_is_system,
          - expansions
+         - proposition_type_id
         :param tuple_:
         :return:
         """

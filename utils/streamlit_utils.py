@@ -174,6 +174,28 @@ def check_overlaps_in_joined_tables(table_propositions:  list[TableProposition],
                     warnings_overlaps.append((tp, tp2))
     return errors_overlaps, warnings_overlaps
 
+# All game names start with 'TOURNAMENT | ' or 'DEMO | ' if old proposition_type_id is 1 or 2 respectively,
+# otherwise it's just the game name.
+# Since now, we are updating the proposition_type_id, we need to check if the game name starts with
+# 'TOURNAMENT | ' or 'DEMO | ' and remove it if necessary based on the new proposition_type_id.
+def edit_game_name(game_name: str, old_proposition_type_id: int, new_proposition_type_id: int) -> str:
+
+    if old_proposition_type_id == new_proposition_type_id:
+        return game_name  # no change in proposition type, keep the same name
+    else:
+        # Remove optional prefix based on old proposition type and add new one if needed
+        if old_proposition_type_id == 1:  # was TOURNAMENT
+            game_name = game_name.replace("TOURNAMENT | ", "", 1)
+        elif old_proposition_type_id == 2:  # was DEMO
+            game_name = game_name.replace("DEMO | ", "", 1)
+        # Add new prefix based on new proposition type
+        if new_proposition_type_id == 1:  # is TOURNAMENT
+            return f"TOURNAMENT | {game_name}"
+        elif new_proposition_type_id == 2:  # is DEMO
+            return f"DEMO | {game_name}"
+        else:  # is PROPOSITION (0)
+            return game_name
+
 def update_table_propositions(
         old_table: TableProposition,
         game_name: str,
@@ -184,14 +206,15 @@ def update_table_propositions(
         notes: str,
         bgg_game_id: int,
         location_id: int,
-        expansions: list[dict] = None
+        expansions: list[dict] = None,
+        proposition_type_id: int = None
 ):
     table_id = int(old_table.table_id)
-    sql_manager.update_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, location_id, expansions)
+    game_name = edit_game_name(game_name, old_table.proposition_type_id, proposition_type_id or 0)
+    sql_manager.update_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, location_id, expansions, proposition_type_id)
 
     location_alias = get_available_locations(user_id=None, include_system_ones=True, return_as_df=True).set_index("id").loc[location_id, "alias"]
     location_is_default = is_default_location(location_id)
-    old_proposition_type_id = st.session_state.proposition_type['id'] if st.session_state.get('proposition_type') else 0  # 0 -> default type
     expansions_name_list = [expansion['value'] for expansion in expansions] if expansions else []
     old_expansions_name_list = [expansion.expansion_name for expansion in old_table.expansions] if old_table.expansions else []
 
@@ -201,7 +224,7 @@ def update_table_propositions(
         table_id=table_id,
         is_default_location=location_is_default,
         image_url=old_table.image_url if bgg_game_id else None,
-        proposition_type_id=old_proposition_type_id,
+        proposition_type_id=proposition_type_id,
         old_max_players=old_table.max_players,
         new_max_players=max_players,
         old_date=old_table.date.strftime('%Y-%m-%d'),
@@ -217,7 +240,7 @@ def update_table_propositions(
         old_expansions=old_expansions_name_list,
         new_expansions=expansions_name_list if expansions_name_list else [],
     )
-    refresh_table_propositions("Table Update")
+    refresh_table_propositions("Table Update",table_id=table_id, game_name=game_name)
 
 def table_propositions_to_df(
         add_start_and_end_date=False, add_group=False, add_status=False,
