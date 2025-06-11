@@ -14,7 +14,7 @@ def logout_button():
 @st.cache_data(ttl="1h")  # cache user_id, username, is_admin from email but only for 1h
 def _get_or_create_user(email):
     if email:
-        logging.info(f"Getting user info [no cache] for {st.experimental_user.email}")
+        logging.info(f"Getting user info [no cache] for {st.user.email}")
         sql_manager = SQLManager()
         user_id, username, name, surname, bgg_username, telegram_username, is_admin, is_banned = sql_manager.get_or_create_user(email)
         return user_id, username, name, surname, bgg_username, telegram_username, is_admin, is_banned
@@ -44,7 +44,7 @@ class StreamlitTableSystemUser(object):
             init_session_state_for_username (bool): Whether to initialize the session state for username
         """
         self.sql_manager = SQLManager()
-        self.email = st.experimental_user.get("email")
+        self.email = st.user.get("email")
 
         (
             self.user_id,

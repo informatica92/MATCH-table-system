@@ -10,7 +10,6 @@ from utils.table_system_user import StreamlitTableSystemUser, login_button, logo
 # # IMPROVEMENTS
 # TODO: use @st.fragments
 # TODO: optimize return data in BGG info (from tuple to dataclass)
-# TODO: upgrade to Streamlit 1.45 (url/ip in st.context, icons into text/number input, select with extra input)
 # TODO: SQC: duration should be float4 (so it can be 0.5hours, 1.5hours, etc.) or minutes
 # TODO: SQC: redirect to created table once done
 # TODO: SQC: sidebar button more visible
