@@ -49,6 +49,9 @@ sql_manager.create_tables()
 
 telegram_bot = TelegramNotifications()
 
+def get_duration_step():
+    return int(os.getenv("DURATION_MINUTES_STEP", 30))
+
 def get_title():
     return os.environ.get("TITLE") or "Board Game Proposals"
 

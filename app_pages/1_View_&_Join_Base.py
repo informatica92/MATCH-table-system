@@ -19,7 +19,7 @@ def dialog_edit_table_proposition(old_table_proposition: TableProposition):
             date = st.date_input("Date", value=old_table_proposition.date, min_value=min(old_table_proposition.date, datetime.date.today()))
         with col2:
             bgg_game_id = st.text_input("BGG Game ID", value=old_table_proposition.bgg_game_id, help=stu.BGG_GAME_ID_HELP, disabled=True)
-            duration = st.number_input("Duration (minutes)", value=old_table_proposition.duration, step=30)
+            duration = st.number_input(f"Duration (minutes, step: {stu.get_duration_step()}mins)", value=old_table_proposition.duration, step=stu.get_duration_step())
             time = st.time_input("Time", value=old_table_proposition.time, step=60*30)
 
         # locations
