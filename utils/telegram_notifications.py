@@ -18,6 +18,7 @@ TEXTS = {
                      "\n - 👤 {max_players} giocatori "
                      "\n - 📅 {date} alle <b>{time}</b> "
                      "\n - ⌛ {duration} ore"
+                     "\n - 📦 {expansions_len} espansioni"
                      "\n - 🗺️ presso <b>{location_alias}</b>."
                      "{notes}"
                      "\n\n🔗 Dai un'occhiata qui:\n{base_url}/{row_page}#table-{table_id}",
@@ -270,7 +271,8 @@ class TelegramNotifications(object):
             location_alias: str,
             image_url: str=None,
             proposition_type_id: int=None,
-            notes: str=None
+            notes: str=None,
+            expansions: list=None
     ) -> TelegramNotificationsOutput:
         """
         Send a new table message to the Telegram chat.
@@ -285,7 +287,8 @@ class TelegramNotifications(object):
         :param location_alias:
         :param image_url:
         :param proposition_type_id:
-        :param notes
+        :param notes:
+        :param expansions:
         :return:
         """
 
@@ -303,7 +306,8 @@ class TelegramNotifications(object):
             row_page=page_name,
             base_url=os.environ.get('BASE_URL', 'http://localhost:8501'),
             location_alias=location_alias,
-            notes=f"\n\nNote:\n<blockquote expandable>{notes[:350]+'...' if len(notes)>350 else notes}</blockquote>" if notes else ""
+            notes=f"\n\nNote:\n<blockquote expandable>{notes[:350]+'...' if len(notes)>350 else notes}</blockquote>" if notes else "",
+            expansions_len=len(expansions) if expansions else 0
         )
 
         return self.send_message(text=text, image_url=image_url, chat_id=chat_id, message_thread_id=message_thread_id)
