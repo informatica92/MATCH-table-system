@@ -20,7 +20,16 @@ TEXTS = {
                      "\n - ⌛ {duration} ore"
                      "\n - 🗺️ presso <b>{location_alias}</b>."
                      "{notes}"
-                     "\n\n🔗 Dai un'occhiata qui:\n{base_url}/{row_page}#table-{table_id}"
+                     "\n\n🔗 Dai un'occhiata qui:\n{base_url}/{row_page}#table-{table_id}",
+        'updated_table': "<b>{proposed_by}</b> ha appena modificato un tavolo (id: {table_id}):"
+                         "\n - 🀄 <b>{game_name}</b> "
+                         "\n - 👤 {max_players} giocatori "
+                         "\n - 📅 {date} alle <b>{time}</b> "
+                         "\n - ⌛ {duration} ore"
+                         "\n - 📦 {expansions_len} espansioni"
+                         "\n - 🗺️ presso <b>{location_alias}</b>."
+                         "{notes}"
+                         "\n\n🔗 Dai un'occhiata qui:\n{base_url}/{row_page}#table-{table_id}",
     }
 }
 
@@ -187,6 +196,67 @@ class TelegramNotifications(object):
         else:
             return self._send_text_message(text=text, chat_id=chat_id, message_thread_id=message_thread_id)
 
+    def send_update_table_message(
+            self,
+            game_name: str,
+            proposed_by: str,
+            table_id: int,
+            is_default_location: bool,
+            image_url: str = None,
+            proposition_type_id: int = None,
+            *,
+            old_max_players: int,
+            new_max_players: int,
+            old_date: str,
+            new_date: str,
+            old_time: str,
+            new_time: str,
+            old_duration: int,
+            new_duration: int,
+            old_location_alias: str,
+            new_location_alias: str,
+            old_notes: str = None,
+            new_notes: str = None,
+            old_expansions: list[str] = None,
+            new_expansions: list[str] = None
+    ) -> TelegramNotificationsOutput:
+
+        def compare_and_format(value, old_value, format_func=lambda x: x):
+            if value == old_value:
+                return str(value)
+            else:
+                return f"<s>{str(old_value)}</s> {format_func(value)}"
+
+        # Prepare the data for the message
+        max_players = compare_and_format(new_max_players, old_max_players, str)
+        date = compare_and_format(new_date, old_date, str)
+        time = compare_and_format(new_time, old_time, str)
+        duration = compare_and_format('{:02d}:{:02d}'.format(*divmod(new_duration, 60)), '{:02d}:{:02d}'.format(*divmod(old_duration, 60)), str)
+        location_alias = compare_and_format(new_location_alias, old_location_alias, str)
+        notes = new_notes if new_notes == old_notes else f"<b>NEW:</b> {new_notes}" if new_notes else "<b>NEW:</b> NO"
+        expansions_len = str(len(new_expansions)) if set(new_expansions) == set(old_expansions) else f"<b>NEW:</b> {len(new_expansions)}"
+
+        chat_id, message_thread_id = self._get_chat_id(proposition_type_id, is_default_location)
+        page_name = self._get_page(proposition_type_id, is_default_location)
+
+        text = TEXTS[self.language]['updated_table'].format(
+            game_name=game_name,
+            max_players=max_players,
+            date=date,
+            time=time,
+            duration=duration,
+            proposed_by=proposed_by,
+            table_id=table_id,
+            row_page=page_name,
+            base_url=os.environ.get('BASE_URL', 'http://localhost:8501'),
+            location_alias=location_alias,
+            expansions_len=expansions_len,
+            notes=f"\n\nNote:\n<blockquote expandable>{notes[:350] + '...' if len(notes) > 350 else notes}</blockquote>" if notes else ""
+        )
+
+        return self.send_message(text=text, image_url=image_url, chat_id=chat_id, message_thread_id=message_thread_id)
+        # print(text, chat_id, message_thread_id)
+
     def send_new_table_message(
             self,
             game_name: str,
@@ -227,7 +297,7 @@ class TelegramNotifications(object):
             max_players=max_players,
             date=date,
             time=time,
-            duration=duration,
+            duration='{:02d}:{:02d}'.format(*divmod(duration, 60)),
             proposed_by=proposed_by,
             table_id=table_id,
             row_page=page_name,

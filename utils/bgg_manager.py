@@ -1,4 +1,6 @@
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 import html
 import xml.etree.ElementTree as et
 
@@ -13,9 +15,24 @@ def get_bgg_game_info(game_id):
     # BGG API URL for game details
     url = f"https://boardgamegeek.com/xmlapi2/thing?id={game_id}"
 
+    # --- Create a session with retries ---
+    session = requests.Session()
+
+    retries = Retry(
+        total=5,  # Total number of retries
+        backoff_factor=1,  # Wait time between retries (exponential backoff)
+        status_forcelist=[429, 500, 502, 503, 504],  # Retry on these HTTP status codes
+        allowed_methods=["GET"],  # Only retry on GET requests
+        raise_on_status=False  # Do not raise on status; we'll handle it
+    )
+
+    adapter = HTTPAdapter(max_retries=retries)
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+
     try:
         # Make a GET request to fetch the game data
-        response = requests.get(url)
+        response = session.get(url)
 
         # Raise an HTTPError for bad responses
         response.raise_for_status()
@@ -51,7 +68,7 @@ def get_bgg_game_info(game_id):
         return image_url, html.unescape(game_description), categories, mechanics, expansions, game_name_with_year
     except Exception as e:
         logging.error(f"Error fetching game image: {e}")
-        return None
+        return None, "", [], [], [], ""
 
 
 def get_bgg_url(game_id):

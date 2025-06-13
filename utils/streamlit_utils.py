@@ -9,7 +9,7 @@ from datetime import datetime
 
 from utils.telegram_notifications import TelegramNotifications
 from utils.sql_manager import SQLManager
-from utils.bgg_manager import get_bgg_game_info, get_bgg_url
+from utils.bgg_manager import get_bgg_url
 from utils.table_system_proposition import TableProposition, TablePropositionLocation, JoinedPlayerOrProposer, \
     TablePropositionExpansion
 from utils.table_system_logging import logging
@@ -48,6 +48,9 @@ sql_manager = SQLManager()
 sql_manager.create_tables()
 
 telegram_bot = TelegramNotifications()
+
+def get_duration_step():
+    return int(os.getenv("DURATION_MINUTES_STEP", 30))
 
 def get_title():
     return os.environ.get("TITLE") or "Board Game Proposals"
@@ -174,13 +177,77 @@ def check_overlaps_in_joined_tables(table_propositions:  list[TableProposition],
                     warnings_overlaps.append((tp, tp2))
     return errors_overlaps, warnings_overlaps
 
-def update_table_propositions(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, location_id, expansions):
-    sql_manager.update_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, location_id, expansions)
-    refresh_table_propositions("Table Update")
+# All game names start with 'TOURNAMENT | ' or 'DEMO | ' if old proposition_type_id is 1 or 2 respectively,
+# otherwise it's just the game name.
+# Since now, we are updating the proposition_type_id, we need to check if the game name starts with
+# 'TOURNAMENT | ' or 'DEMO | ' and remove it if necessary based on the new proposition_type_id.
+def edit_game_name(game_name: str, old_proposition_type_id: int, new_proposition_type_id: int) -> str:
+
+    if old_proposition_type_id == new_proposition_type_id:
+        return game_name  # no change in proposition type, keep the same name
+    else:
+        # Remove optional prefix based on old proposition type and add new one if needed
+        if old_proposition_type_id == 1:  # was TOURNAMENT
+            game_name = game_name.replace("TOURNAMENT | ", "", 1)
+        elif old_proposition_type_id == 2:  # was DEMO
+            game_name = game_name.replace("DEMO | ", "", 1)
+        # Add new prefix based on new proposition type
+        if new_proposition_type_id == 1:  # is TOURNAMENT
+            return f"TOURNAMENT | {game_name}"
+        elif new_proposition_type_id == 2:  # is DEMO
+            return f"DEMO | {game_name}"
+        else:  # is PROPOSITION (0)
+            return game_name
+
+def update_table_propositions(
+        old_table: TableProposition,
+        game_name: str,
+        max_players: int,
+        date: datetime.date,
+        time: datetime.time,
+        duration: int,
+        notes: str,
+        bgg_game_id: int,
+        location_id: int,
+        expansions: list[dict] = None,
+        proposition_type_id: int = None
+):
+    table_id = int(old_table.table_id)
+    game_name = edit_game_name(game_name, old_table.proposition_type_id, proposition_type_id or 0)
+    sql_manager.update_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, location_id, expansions, proposition_type_id)
+
+    location_alias = get_available_locations(user_id=None, include_system_ones=True, return_as_df=True).set_index("id").loc[location_id, "alias"]
+    location_is_default = is_default_location(location_id)
+    expansions_name_list = [expansion['value'] for expansion in expansions] if expansions else []
+    old_expansions_name_list = [expansion.expansion_name for expansion in old_table.expansions] if old_table.expansions else []
+
+    telegram_bot.send_update_table_message(
+        game_name=game_name,
+        proposed_by=st.session_state.username,
+        table_id=table_id,
+        is_default_location=location_is_default,
+        image_url=old_table.image_url if bgg_game_id else None,
+        proposition_type_id=proposition_type_id,
+        old_max_players=old_table.max_players,
+        new_max_players=max_players,
+        old_date=old_table.date.strftime('%Y-%m-%d'),
+        new_date=date.strftime('%Y-%m-%d'),
+        old_time=old_table.time.strftime('%H:%M'),
+        new_time=time.strftime('%H:%M'),
+        old_duration=old_table.duration,
+        new_duration=duration,
+        old_location_alias=old_table.location.location_alias if old_table.location else "Unknown",
+        new_location_alias=location_alias if location_alias else "Unknown",
+        old_notes=old_table.notes,
+        new_notes=notes,
+        old_expansions=old_expansions_name_list,
+        new_expansions=expansions_name_list if expansions_name_list else [],
+    )
+    refresh_table_propositions("Table Update",table_id=table_id, game_name=game_name)
 
 def table_propositions_to_df(
         add_start_and_end_date=False, add_group=False, add_status=False,
-        add_image_url=False, add_bgg_url=False, add_players_fraction=False, add_joined=False,
+        add_bgg_url=False, add_players_fraction=False, add_joined=False,
 ):
     df = pd.DataFrame(TableProposition.to_list_of_dicts(st.session_state.propositions, simple=True))
 
@@ -188,7 +255,7 @@ def table_propositions_to_df(
         # concat date and time columns to get the start datetime
         df['start_datetime'] = pd.to_datetime(df['date'].astype(str) + ' ' + df['time'].astype(str))
         # add 'duration' to 'start_datetime'
-        df['end_datetime'] = df['start_datetime'] + pd.to_timedelta(df['duration'], unit='hour')
+        df['end_datetime'] = df['start_datetime'] + pd.to_timedelta(df['duration'], unit='minute')
 
     if add_group:
         # 'Morning' if time.hour < 12 else 'Afternoon' if time.hour < 18 else 'Evening'
@@ -196,9 +263,6 @@ def table_propositions_to_df(
 
     if add_status:
         df['status'] = df.apply(lambda x: 'Full' if x['joined_count'] == x['max_players'] else 'Available', axis=1)
-
-    if add_image_url:
-        df['image'] = df['bgg_game_id'].apply(lambda x: get_bgg_game_info(x)[0])  # image_url, description), categories, mechanics
 
     if add_bgg_url:
         df['bgg'] = df['bgg_game_id'].apply(get_bgg_url)
@@ -425,6 +489,28 @@ def manage_user_locations(user_id: int|None):
 
     if default_location:
         st.write(f"Default location: {default_location['alias']} (ID: {default_location['id']})")
+
+def display_system_locations():
+    system_locations = get_available_locations(None, True, True)
+    system_locations["address"] = system_locations[['street_name', 'house_number', 'city']].agg(', '.join, axis=1)
+    system_locations['pages'] = system_locations['is_default'].map(
+        {
+            True:  [f"📜{get_default_location()['alias']}"],
+            False: [f"🌍{get_rest_of_the_world_page_name()}"]
+        }
+    )
+
+    st.dataframe(
+        system_locations[['alias', 'pages', 'address']],
+        hide_index=True,
+        row_height=25,
+        use_container_width=False,
+        column_config={
+            'alias': st.column_config.TextColumn("Alias", help="Alias of the location, used to identify the location"),
+            'pages': st.column_config.ListColumn("Pages", help="Pages in which tables at this location are displayed"),
+            'address': st.column_config.TextColumn("Address", help="Address of the location"),
+        }
+    )
 
 @st.cache_data
 def get_available_locations(user_id, include_system_ones=True, return_as_df=False):

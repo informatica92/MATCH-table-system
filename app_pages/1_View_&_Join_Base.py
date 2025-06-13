@@ -1,9 +1,10 @@
 import streamlit as st
 
 from time import time as time_time
+import datetime
 
 import utils.streamlit_utils as stu
-from utils.bgg_manager import get_bgg_game_info, get_bgg_url
+from utils.bgg_manager import get_bgg_url
 from utils.altair_manager import timeline_chart
 from utils.table_system_proposition import TableProposition, TablePropositionExpansion
 
@@ -15,10 +16,10 @@ def dialog_edit_table_proposition(old_table_proposition: TableProposition):
         with col1:
             game_name = st.text_input("Game Name", value=old_table_proposition.game_name, disabled=True)
             max_players = st.number_input("Max Players", value=old_table_proposition.max_players, step=1, min_value=old_table_proposition.joined_count)
-            date = st.date_input("Date", value=old_table_proposition.date, min_value="today")
+            date = st.date_input("Date", value=old_table_proposition.date, min_value=min(old_table_proposition.date, datetime.date.today()))
         with col2:
             bgg_game_id = st.text_input("BGG Game ID", value=old_table_proposition.bgg_game_id, help=stu.BGG_GAME_ID_HELP, disabled=True)
-            duration = st.number_input("Duration (hours)", value=old_table_proposition.duration, step=1)
+            duration = st.number_input(f"Duration (minutes, step: {stu.get_duration_step()}mins)", value=old_table_proposition.duration, step=stu.get_duration_step())
             time = st.time_input("Time", value=old_table_proposition.time, step=60*30)
 
         # locations
@@ -31,16 +32,20 @@ def dialog_edit_table_proposition(old_table_proposition: TableProposition):
         st.selectbox("Location", options=locations, index=location_old_index, key="location_edit", format_func=lambda x: x[1])
 
         # expansions
-        expansions_options = get_bgg_game_info(bgg_game_id)[4]
+        expansions_options = TablePropositionExpansion.to_list_of_dicts(old_table_proposition.available_expansions)
         expansions_default = TablePropositionExpansion.to_list_of_dicts(old_table_proposition.expansions)
         st.multiselect("Expansions", options=expansions_options, default=expansions_default, format_func=lambda x: x['value'], key="expansions_edit")
 
         # notes
         notes = st.text_area("Notes", value=old_table_proposition.notes)
 
+        # table proposition type
+        if st.session_state.user.is_admin:
+            st.selectbox("Proposition Type", options=stu.get_table_proposition_types(as_list_of_dicts=True), key="proposition_type_edit", format_func=lambda x: x["value"], index=old_table_proposition.proposition_type_id)
+
         submitted = st.form_submit_button("💾 Update")
         if submitted:
-            stu.update_table_propositions(old_table_proposition.table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, st.session_state.location_edit[0] if st.session_state.location_edit else None, st.session_state.expansions_edit)
+            stu.update_table_propositions(old_table_proposition, game_name, max_players, date, time, duration, notes, bgg_game_id, st.session_state.location_edit[0] if st.session_state.location_edit else None, st.session_state.expansions_edit, st.session_state.proposition_type_edit['id'])
             st.rerun()
 
 @st.dialog("⛔ Delete Proposition")
@@ -77,16 +82,14 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
 
     with col1:
         if table_proposition.bgg_game_id and int(table_proposition.bgg_game_id) >= 1:
-            image_url, game_description, categories, mechanics, _, _ = get_bgg_game_info(table_proposition.bgg_game_id)
+            # image_url, game_description, categories, mechanics, _, _ = get_bgg_game_info(table_proposition.bgg_game_id)
             image_width = 300 if not compact else 150
-            caption = f"{game_description[:120]}..." if not compact else None
-            if not image_url:
-                image_url = stu.DEFAULT_IMAGE_URL
-            st.image(image_url, width=image_width, caption=caption)
+            caption = f"{table_proposition.game_description[:120]}..." if not compact else None
+            st.image(table_proposition.image_url or stu.DEFAULT_IMAGE_URL, width=image_width, caption=caption)
             if not compact:
                 stu.st_write(
-                    f"<b>Categories:</b> {', '.join(categories)}<br>"
-                    f"<b>Mechanics:</b> {', '.join(mechanics)}"
+                    f"<b>Categories:</b> {', '.join(table_proposition.categories)}<br>"
+                    f"<b>Mechanics:</b> {', '.join(table_proposition.mechanics)}"
                 )
         else:
             st.image(stu.DEFAULT_IMAGE_URL)
@@ -101,7 +104,7 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
                 # f"🧑‍🤝‍🧑 {table_proposition.max_players} players",
                 f"⌚ **{table_proposition.time.strftime('%H:%M')}**",
                 f"📅 {table_proposition.date}",
-                f"⏳ {table_proposition.duration}h",
+                f"⏳ {'{:02d}:{:02d}'.format(*divmod(table_proposition.duration, 60))}h",
             ],
             key=f"table_info_{table_proposition.table_id}_{section_name}",
             on_change=reset_table_info, kwargs={"key": f"table_info_{table_proposition.table_id}_{section_name}"},
@@ -123,7 +126,7 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
         else:
             st.write(f"**Proposed By:**&nbsp;{table_proposition.proposed_by.username}")
             st.write(f"**Date Time:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{table_proposition.date} {table_proposition.time}")
-            st.write(f"**Duration:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{table_proposition.duration} hours")
+            st.write(f"**Duration:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{table_proposition.duration} mins")
 
     with col3:
         is_full = table_proposition.joined_count >= table_proposition.max_players
@@ -209,27 +212,24 @@ def timeline_table_propositions(compact=False):
 
 def dataframe_table_propositions(compact=False):
 
-    default_columns = ['image', 'time', 'game_name', 'duration', 'players', 'proposed_by_username', 'joined', 'bgg']
-    all_columns = ['table_id', 'image', 'time', 'game_name', 'duration', 'date', 'players', 'joined_players', 'proposed_by_username', 'joined', 'bgg']
-    st.multiselect("Columns", options=all_columns, default=default_columns, key="columns_order")
-
-    df = stu.table_propositions_to_df(add_image_url=True, add_bgg_url=True, add_players_fraction=True, add_joined=True)
+    df = stu.table_propositions_to_df(add_bgg_url=True, add_players_fraction=True, add_joined=True)
 
     column_config = {
         "table_id":  st.column_config.TextColumn("ID", width="small"),
-        "image": st.column_config.ImageColumn("Image", width="small"),
+        "image_url": st.column_config.ImageColumn("Image", width="small"),
         "bgg":  st.column_config.LinkColumn("BGG", display_text="link"),
         "date":  st.column_config.DateColumn("Date"),
         "time": st.column_config.TimeColumn("Time", format='HH:mm'),
-        "duration": st.column_config.NumberColumn("Duration", format="%dh", width="small"),
+        "duration": st.column_config.NumberColumn("Duration", format="%dmin", width="small"),
         "players": st.column_config.TextColumn("Players"),
         "joined_players": st.column_config.ListColumn("Joined Players"),
         "game_name": st.column_config.TextColumn("Name"),
         "proposed_by_username": st.column_config.TextColumn("Proposed By"),
         "joined": st.column_config.CheckboxColumn("Joined", width="small")
     }
-
-    selected_data = st.dataframe(df, hide_index=True, use_container_width=True, column_config=column_config, column_order=st.session_state.columns_order, on_select="rerun", selection_mode="single-row")
+    # 'table_id', 'image', 'time', 'game_name', 'duration', 'date', 'players', 'joined_players', 'proposed_by_username', 'joined', 'bgg'
+    columns_order =  ['table_id', 'image_url', 'date', 'time', 'game_name', 'duration', 'players', 'proposed_by_username', 'joined', 'bgg', 'joined_players']
+    selected_data = st.dataframe(df, hide_index=True, use_container_width=True, column_config=column_config, column_order=columns_order, on_select="rerun", selection_mode="single-row", row_height=50)
 
     st.subheader("Selected item")
 

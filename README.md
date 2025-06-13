@@ -53,6 +53,7 @@ In caso si voglia invece eseguire l'applicazione in locale è necessario seguire
 | # GENERAL SETTINGS    | ---                                  | ---                                                                                                                                                    | ---                   | ---          |
 |                       | TITLE                                | Titolo dell'applicazione                                                                                                                               | Board Game Proposals  | No           |
 |                       | REST_OF_THE_WORLD_PAGE_NAME          | Nome della pagina mostrato nella sidebar e in alcuni commenti. NB: il path rimane sempre "/restofthewrold"                                             | Rest of the World     | No           |
+|                       | DURATION_MINUTES_STEP                | Durante la creazione o la modifica di un tavolo, quale sia lo step in termini di minuti che è ammesso per la definizione della DURATA                  | 30 (mins)             | No           |
 |                       | LOGO                                 | URL del logo dell'applicazione                                                                                                                         |                       | Sì           |
 |                       | LOGO_LARGE                           | URL del logo grande dell'applicazione, se mancante viene usato come logo della sidebar il logo in LOGO                                                 |                       | No           |
 |                       | DEFAULT_DATE                         | Data predefinita per la creazione di un tavolo nel formato `YYYY-MM-DD`, se mancante o nel passato, viene usata la data odierna                        | *data odierna*        | No           |
@@ -85,6 +86,23 @@ Le "Section" che invece hanno forma `[nome]` sono obbligatorie e devono essere r
  ```
 ## Funzionalità
 
+### 🎉 Novità: Durata dei tavoli in minuti 
+<p><img src="https://github.com/user-attachments/assets/edfbc7b4-aa47-4373-a7d7-d58bd9f671ad" alt="duration_edit" height="40%", width="40%"/></p>
+L'unità minima per specificare ora la durata di un tavolo sono i minuti (precedentemente erano le ore).
+
+In questo modo sarà possibile specificare una durata più granulare.
+
+Cliccando sul "+/-" ci sarà un incremento in minuti determinato dalla ENV VAR DURATION_MINUTES_STEP che di default vale 30 (quindi 30min)
+
+
+### 🎉 Novità: Notifiche Telegram anche per le modifiche dei tavoli (oltre a quelle già presenti per la creazione)
+<p><img src="https://github.com/user-attachments/assets/bbd6c371-ee54-447d-9f5c-41c59031f362" alt="telegram_edit" height="40%", width="40%"/></p>
+Da questo momento anche in caso di modifica di un tavolo verrà inviata una notifica telegram che indicherà quale tavolo è stato modificato e COSA è stato modificato (nell'esempio fornito dall'immagine in alto è stata cambiata la durata del tavolo) riportando: 
+
+ - con un testa BARRATO il vecchio valore per numero di giocatori, ora e data
+ - con una dicitura NEW per i campi note ed espansioni (e in questo caso si vedrà solo il valore aggiornato)
+
+
 ### 🎉 Novità: Link a Ko-fi per donazioni
 <p><img src="https://github.com/user-attachments/assets/1472e494-813d-40e9-992b-92f71653a202" alt="kofi" max-height="400"/></p>
 
@@ -92,7 +110,7 @@ Ora è possibile accedere, tramite apposito bottone presente sempre nella sideba
 
 Minimo 1€ (che neanche un caffè, dai)
 
-### 🎉 Novità: Check delle sovrapposizioni (Overlaps)
+### Check delle sovrapposizioni (Overlaps)
 <p><img src="https://github.com/user-attachments/assets/7bd795d7-8c38-4cb4-b8a9-7a90cf3b53e5" alt="overlaps" max-height="400"/></p>
 
 Ora è disponibile un check in alto che permette di avere una panoramica su eventuali sovrapposizioni dei vari tavoli a cui ci si è uniti.
@@ -111,7 +129,7 @@ NB: Il "Go to Table" è disponibile solo nella modalità di visualizzazione "LIS
 <p><img src="https://github.com/user-attachments/assets/b9f50a7b-a7f7-417b-8484-96d452fb8380" alt="overlaps-ex" max-height="200"/></p>
 
 
-### 🎉 Novità: Aggiunta delle modalità Tournament e Demo
+### Aggiunta delle modalità Tournament e Demo
 <p><img src="https://github.com/user-attachments/assets/55f5a354-37f6-4958-98ce-5ded51f70e7d" alt="overlaps" max-height="400"/></p>
 
 E' disponibile ora il concetto di "Proposition Type". Un tavolo può essere dei seguenti tipi:
@@ -134,7 +152,7 @@ Tutte le variabili d'ambiente che riportano una destinazione Telegram possono av
  - **gruppo** - "-100123456789" -> "-100123456789_1" -> General
  - **gruppo + topic** - "-100123456789_4" 
 
-### 🎉 Novità: Visualizzazione dei tavoli migliorata
+### Visualizzazione dei tavoli migliorata
 <p><img src="https://github.com/user-attachments/assets/f8f9dd41-4af7-49b5-8c76-758fa57ee986" alt="expansions" height="400"/></p>
 
 Con lo scopo di incrementare la leggibilità e allo stesso tempo avere una maggiore compattezza della vista (non influenzata dalla lunghezza di Espansioni e Note), l'interfaccia è stata aggiornata con degli Expander che di default visualizzano una preview dell'informazione ma, se espansi, permettono di accedere ad ulteriori dettagli. 
@@ -342,7 +360,7 @@ NB: richiede l'inserimento dell'username, altrimenti il toggle è disattivato
 ![image](https://github.com/user-attachments/assets/bb1d99c0-9b30-4953-bec7-3dbf5261ff73)
 Usando il tasto "Edit" disponibile sotto ogni gioco, è possibile aprire una finestra per modificare alcune voci del gioco selezionato: 
  - Numero massimo di giocatori (Max Players)
- - Durata (in ore) (Duration)
+ - Durata (in minuti) (Duration)
  - Data (Date)
  - Ora (Time)
  - Note (Notes)

@@ -89,6 +89,10 @@ stu.st_write("Using <b>'Locations'</b> you automatically accept the "
              "<a href='https://github.com/informatica92/MATCH-table-system/tree/main/static/gdpr'>GDPR policy</a> "
              "of this application")
 
+st.write("The following locations are already in place and selectable in the **'➕ Create'** page by the user:")
+stu.st_write("ℹ️: the 'Pages' column shows the pages where once a table is created at that location will be displayed")
+stu.display_system_locations()
+
 st.divider()
 st.write("This is a open source project and is free to use. "
          "If you like it, please consider supporting the development of this application by donating or buying me a coffee.")
