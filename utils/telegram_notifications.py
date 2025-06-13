@@ -231,7 +231,7 @@ class TelegramNotifications(object):
         max_players = compare_and_format(new_max_players, old_max_players, str)
         date = compare_and_format(new_date, old_date, str)
         time = compare_and_format(new_time, old_time, str)
-        duration = compare_and_format(new_duration, old_duration, str)
+        duration = compare_and_format('{:02d}:{:02d}'.format(*divmod(new_duration, 60)), '{:02d}:{:02d}'.format(*divmod(old_duration, 60)), str)
         location_alias = compare_and_format(new_location_alias, old_location_alias, str)
         notes = new_notes if new_notes == old_notes else f"<b>NEW:</b> {new_notes}" if new_notes else "<b>NEW:</b> NO"
         expansions_len = str(len(new_expansions)) if set(new_expansions) == set(old_expansions) else f"<b>NEW:</b> {len(new_expansions)}"
@@ -297,7 +297,7 @@ class TelegramNotifications(object):
             max_players=max_players,
             date=date,
             time=time,
-            duration=duration,
+            duration='{:02d}:{:02d}'.format(*divmod(duration, 60)),
             proposed_by=proposed_by,
             table_id=table_id,
             row_page=page_name,

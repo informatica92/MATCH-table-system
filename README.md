@@ -53,6 +53,7 @@ In caso si voglia invece eseguire l'applicazione in locale è necessario seguire
 | # GENERAL SETTINGS    | ---                                  | ---                                                                                                                                                    | ---                   | ---          |
 |                       | TITLE                                | Titolo dell'applicazione                                                                                                                               | Board Game Proposals  | No           |
 |                       | REST_OF_THE_WORLD_PAGE_NAME          | Nome della pagina mostrato nella sidebar e in alcuni commenti. NB: il path rimane sempre "/restofthewrold"                                             | Rest of the World     | No           |
+|                       | DURATION_MINUTES_STEP                | Durante la creazione o la modifica di un tavolo, quale sia lo step in termini di minuti che è ammesso per la definizione della DURATA                  | 30 (mins)             | No           |
 |                       | LOGO                                 | URL del logo dell'applicazione                                                                                                                         |                       | Sì           |
 |                       | LOGO_LARGE                           | URL del logo grande dell'applicazione, se mancante viene usato come logo della sidebar il logo in LOGO                                                 |                       | No           |
 |                       | DEFAULT_DATE                         | Data predefinita per la creazione di un tavolo nel formato `YYYY-MM-DD`, se mancante o nel passato, viene usata la data odierna                        | *data odierna*        | No           |
@@ -359,7 +360,7 @@ NB: richiede l'inserimento dell'username, altrimenti il toggle è disattivato
 ![image](https://github.com/user-attachments/assets/bb1d99c0-9b30-4953-bec7-3dbf5261ff73)
 Usando il tasto "Edit" disponibile sotto ogni gioco, è possibile aprire una finestra per modificare alcune voci del gioco selezionato: 
  - Numero massimo di giocatori (Max Players)
- - Durata (in ore) (Duration)
+ - Durata (in minuti) (Duration)
  - Data (Date)
  - Ora (Time)
  - Note (Notes)

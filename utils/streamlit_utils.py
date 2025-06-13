@@ -49,6 +49,9 @@ sql_manager.create_tables()
 
 telegram_bot = TelegramNotifications()
 
+def get_duration_step():
+    return int(os.getenv("DURATION_MINUTES_STEP", 30))
+
 def get_title():
     return os.environ.get("TITLE") or "Board Game Proposals"
 
@@ -252,7 +255,7 @@ def table_propositions_to_df(
         # concat date and time columns to get the start datetime
         df['start_datetime'] = pd.to_datetime(df['date'].astype(str) + ' ' + df['time'].astype(str))
         # add 'duration' to 'start_datetime'
-        df['end_datetime'] = df['start_datetime'] + pd.to_timedelta(df['duration'], unit='hour')
+        df['end_datetime'] = df['start_datetime'] + pd.to_timedelta(df['duration'], unit='minute')
 
     if add_group:
         # 'Morning' if time.hour < 12 else 'Afternoon' if time.hour < 18 else 'Evening'
