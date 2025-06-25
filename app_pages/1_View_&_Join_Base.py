@@ -270,7 +270,7 @@ def create_view_and_join_page():
             st.toggle("Joined by me", key="joined_by_me", value=False, on_change=stu.refresh_table_propositions, kwargs={"reason": "Filtering joined_by_me"}, disabled=not st.session_state['username'])
             st.toggle("Proposed by me", key="proposed_by_me", value=False, on_change=stu.refresh_table_propositions, kwargs={"reason": "Filtering proposed_by_me"}, disabled=not st.session_state['username'])
     with errors_warnings_col:
-        errors, warnings = stu.check_overlaps_in_joined_tables(st.session_state.propositions, st.session_state.user.username)
+        errors, warnings = stu.check_overlaps_in_joined_tables(st.session_state.global_propositions, st.session_state.user.user_id)
         num_overlaps = len(errors) + len(warnings)
         if num_overlaps == 0:
             with st.popover("✅ No overlaps", use_container_width=True):
@@ -282,45 +282,13 @@ def create_view_and_join_page():
                     for error_left, error_right in errors:
                         st.write(f"Table **\"{error_left.game_name}\"** (ID {error_left.table_id}) :red[has the same start date] "
                                  f"time as **\"{error_right.game_name}\"** (ID {error_right.table_id})")
-                        col1, col2 = st.columns([1, 1])
-                        if col1.button(
-                                f"Go to table {error_left.table_id}",
-                                key=f"ov-err-{error_left.table_id}-{error_right.table_id}-{error_left.table_id}",
-                                use_container_width=True,
-                                disabled=True if st.session_state.get("view_mode") != "📜List" else False,
-                                help="Only available in the '📜List' view mode"
-                        ):
-                            stu.scroll_to(f"table-{error_left.table_id}")
-                        if col2.button(
-                                f"Go to table {error_right.table_id}",
-                                key=f"ov-err-{error_left.table_id}-{error_right.table_id}-{error_right.table_id}",
-                                use_container_width=True,
-                                disabled=True if st.session_state.get("view_mode") != "📜List" else False,
-                                help="Only available in the '📜List' view mode"
-                        ):
-                            stu.scroll_to(f"table-{error_right.table_id}")
+                        stu.render_overlaps_table_buttons(st.session_state.proposition_type_id_mode, error_left, error_right, "err")
                 if len(warnings):
                     st.write(f":warning: {len(warnings)} warnings:")
                     for warning_left, warning_right in warnings:
                         st.write(f"Table **\"{warning_left.game_name}\"** (ID {warning_left.table_id}) :orange[has a partial "
                                  f"overlap] with **\"{warning_right.game_name}\"** (ID {warning_right.table_id})")
-                        col1, col2 = st.columns([1, 1])
-                        if col1.button(
-                                f"Go to table {warning_left.table_id}",
-                                key=f"ov-warn-{warning_left.table_id}-{warning_right.table_id}-{warning_left.table_id}",
-                                use_container_width=True,
-                                disabled=True if st.session_state.get("view_mode") != "📜List" else False,
-                                help="Only available in the '📜List' view mode"
-                        ):
-                            stu.scroll_to(f"table-{warning_left.table_id}")
-                        if col2.button(
-                                f"Go to table {warning_right.table_id}",
-                                key=f"ov-warn-{warning_left.table_id}-{warning_right.table_id}-{warning_right.table_id}",
-                                use_container_width=True,
-                                disabled=True if st.session_state.get("view_mode") != "📜List" else False,
-                                help="Only available in the '📜List' view mode"
-                        ):
-                            stu.scroll_to(f"table-{warning_right.table_id}")
+                        stu.render_overlaps_table_buttons(st.session_state.proposition_type_id_mode, warning_left, warning_right, "warn")
 
     # show propositions
     if len(st.session_state.propositions) == 0:

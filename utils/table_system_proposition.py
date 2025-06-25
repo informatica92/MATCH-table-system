@@ -66,18 +66,21 @@ class TablePropositionLocation(object):
             self,
             location_alias: str,
             location_address: str,
-            location_is_system: bool
+            location_is_system: bool,
+            location_is_default: bool
     ):
         self.location_alias = location_alias
         self.location_address = location_address
         self.location_is_system = location_is_system
+        self.location_is_default = location_is_default
 
     @staticmethod
     def from_dict(dict_) -> 'TablePropositionLocation':
         return TablePropositionLocation(
             location_alias=dict_['location_alias'],
             location_address=dict_['location_address'],
-            location_is_system=dict_['location_is_system']
+            location_is_system=dict_['location_is_system'],
+            location_is_default=dict_.get('location_is_default')
         )
 
 class TableProposition(object):
@@ -100,6 +103,7 @@ class TableProposition(object):
             location_alias: str,
             location_address: str,
             location_is_system: bool,
+            location_is_default: bool,
             expansions: list[dict],
             proposition_type_id: int,
             **kwargs
@@ -114,7 +118,7 @@ class TableProposition(object):
         self.duration: int = duration
         self.notes: str = notes
         self.joined_players: list[JoinedPlayerOrProposer] = JoinedPlayerOrProposer.from_tuples(joined_players_ids, joined_players, joined_players_emails)
-        self.location: TablePropositionLocation = TablePropositionLocation(location_alias, location_address, location_is_system)
+        self.location: TablePropositionLocation = TablePropositionLocation(location_alias, location_address, location_is_system, location_is_default)
         self.expansions: list[TablePropositionExpansion] = TablePropositionExpansion.from_list_of_dicts(expansions)
         self.proposition_type_id: int = proposition_type_id or 0
         # BGG info:
@@ -146,6 +150,7 @@ class TableProposition(object):
                 'location_alias': self.location.location_alias,
                 'location_address': self.location.location_address,
                 'location_is_system': self.location.location_is_system,
+                'location_is_default': self.location.location_is_default,
                 'expansions': [expansion.to_dict() for expansion in self.expansions],
                 'proposition_type_id': self.proposition_type_id,
                 'image_url': self.image_url,
@@ -176,7 +181,8 @@ class TableProposition(object):
                 'location': {
                     'location_alias': self.location.location_alias,
                     'location_address': self.location.location_address,
-                    'location_is_system': self.location.location_is_system
+                    'location_is_system': self.location.location_is_system,
+                    'location_is_default': self.location.location_is_default
                 },
                 'expansions': [
                     {
@@ -190,6 +196,14 @@ class TableProposition(object):
 
     def get_joined_players_usernames(self):
         return [player.username for player in self.joined_players]
+
+    def joined(self, user_id: int) -> bool:
+        """
+        Check if a user is already joined to this table proposition.
+        :param user_id: The ID of the user to check.
+        :return: True if the user is joined, False otherwise.
+        """
+        return any(player.user_id == user_id for player in self.joined_players)
 
     # PROPERTIES
 
@@ -234,6 +248,7 @@ class TableProposition(object):
          - location_alias,
          - location_address,
          - location_is_system,
+         - location_is_default,
          - expansions
          - proposition_type_id
         :param tuple_:

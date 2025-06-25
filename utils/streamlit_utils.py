@@ -135,9 +135,19 @@ def refresh_table_propositions(reason, **kwargs):
 
     proposition_type_id_mode = st.session_state.get("proposition_type_id_mode", 0)  # 0 = Proposition, 1 = Tournament, 2 = Demo
 
-    st.session_state.propositions = TableProposition.from_list_of_tuples(
-        sql_manager.get_table_propositions(joined_by_me, filter_username, filter_default_location, proposition_type_id_mode, proposed_by_me),
-    )
+    st.session_state.global_propositions = TableProposition.from_list_of_tuples(sql_manager.get_table_propositions())
+
+    st.session_state.propositions = st.session_state.global_propositions.copy()
+
+    if joined_by_me:
+        st.session_state.propositions = [tp for tp in st.session_state.propositions if tp.joined(st.session_state.user.user_id)]
+
+    if proposed_by_me:
+        st.session_state.propositions = [tp for tp in st.session_state.propositions if tp.proposed_by.user_id == st.session_state.user.user_id]
+
+    st.session_state.propositions = [tp for tp in st.session_state.propositions if tp.location.location_is_default is filter_default_location]
+
+    st.session_state.propositions = [tp for tp in st.session_state.propositions if tp.proposition_type_id == proposition_type_id_mode]
 
     logging.info(f"[User: {st.session_state.user if st.session_state.get('user') else '(not instantiated)'}] "
           f"Table propositions QUERY [{reason}] refreshed in {(time_time() - query_start_time):.4f}s "
@@ -156,8 +166,9 @@ def scroll_to(element_id):
         sleep(0.5)
     tmp.empty()
 
-def check_overlaps_in_joined_tables(table_propositions:  list[TableProposition], current_username: str):
-    joined_tables = [tp for tp in table_propositions if current_username in tp.get_joined_players_usernames()]
+# TODO: evaluate chance to move it into TableProposition class
+def check_overlaps_in_joined_tables(table_propositions:  list[TableProposition], current_user_id: int) -> tuple[list[tuple[TableProposition, TableProposition]], list[tuple[TableProposition, TableProposition]]]:
+    joined_tables = [tp for tp in table_propositions if tp.joined(current_user_id)]
     # check if the start time and duration of the tables joined by the user (in joined_tables) contain any kind of
     # overlaps. In particular mark the cases in which the start date is exactly the same as ERROR and all the other
     # types of overlaps as warning
@@ -176,6 +187,32 @@ def check_overlaps_in_joined_tables(table_propositions:  list[TableProposition],
                 else:
                     warnings_overlaps.append((tp, tp2))
     return errors_overlaps, warnings_overlaps
+
+def render_overlaps_table_buttons(proposition_type_id_mode, table_left, table_right, prefix):
+    col1, col2 = st.columns([1, 1])
+    def _render_overlaps_table_buttons(table_target, col):
+        if proposition_type_id_mode == table_target.proposition_type_id:
+            if col.button(
+                    f"Go to table {table_target.table_id}",
+                    key=f"ov-{prefix}-{table_left.table_id}-{table_right.table_id}-{table_target.table_id}",
+                    use_container_width=True,
+                    disabled=True if st.session_state.get("view_mode") != "📜List" else False,
+                    help="Only available in the '📜List' view mode"
+            ):
+                scroll_to(f"table-{table_target.table_id}")
+        else:
+            if col.button(
+                    f"Go to table page",
+                    key=f"ov-{prefix}-{table_left.table_id}-{table_right.table_id}-{table_target.table_id}",
+                    use_container_width=True
+            ):
+                st.switch_page(
+                    "app_pages/1_View_&_Join_Default.py" if table_target.proposition_type_id == 0 else
+                    "app_pages/1_View_&_Join_Tournaments.py" if table_target.proposition_type_id == 1 else
+                    "app_pages/1_View_&_Join_Demos.py"
+                )
+    _render_overlaps_table_buttons(table_left, col1)
+    _render_overlaps_table_buttons(table_right, col2)
 
 # All game names start with 'TOURNAMENT | ' or 'DEMO | ' if old proposition_type_id is 1 or 2 respectively,
 # otherwise it's just the game name.
@@ -245,6 +282,7 @@ def update_table_propositions(
     )
     refresh_table_propositions("Table Update",table_id=table_id, game_name=game_name)
 
+# TODO: evaluate chance to move it into TableProposition class (NB: add table_propositions as parameter)
 def table_propositions_to_df(
         add_start_and_end_date=False, add_group=False, add_status=False,
         add_bgg_url=False, add_players_fraction=False, add_joined=False,
@@ -525,6 +563,7 @@ def get_default_location() -> dict:
 def is_default_location(location_id):
     return int(location_id) == int(get_default_location()["id"])
 
+# TODO: evaluate chance to move it into TableProposition class (NB: add table_propositions as parameter)
 def get_location_markdown_text(location: TablePropositionLocation, icon="🗺️"):
     if st.session_state.user.is_logged_in() or location.location_is_system:
         if location.location_alias:
@@ -536,7 +575,7 @@ def get_location_markdown_text(location: TablePropositionLocation, icon="🗺️
         location_md = "*Login to see the location*"
     return location_md
 
-
+# TODO: evaluate chance to move it into TableProposition class (NB: add table_propositions as parameter)
 def get_expansions_markdown_text(expansions: list[TablePropositionExpansion]):
 
     def _format_as_markdown_list(sub_list):
