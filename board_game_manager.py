@@ -105,7 +105,7 @@ with (st.sidebar):
 
     if st.session_state.user.is_admin:
         # GOD MODE section
-        with st.expander("🔒 God Mode"):
+        with st.expander(":lock_with_ink_pen: God Mode"):
             god_mode_is_active = st.toggle("God Mode", key="god_mode", value=False, disabled=not st.session_state.user.is_admin)
             if st.session_state.user.is_admin:
                 if god_mode_is_active:
