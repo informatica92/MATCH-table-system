@@ -39,8 +39,6 @@ if st.session_state.user.is_admin:
     st.divider()
 
     st.selectbox("Proposition Type", options=stu.get_table_proposition_types(as_list_of_dicts=True), key="proposition_type", format_func=lambda x: x["value"])
-    stu.st_write(f"Selecting a Type different from \"Proposition\" this will disable location selection")
-    # st.write(st.session_state.proposition_type)
 
     st.divider()
 
@@ -54,7 +52,7 @@ with st.form(key="create_new_proposition_form", border=False):
     with col1:
         st.number_input("Max Number of Players", min_value=1, max_value=100, step=1, key="max_players")
     with col2:
-        st.number_input(f"Duration (in minutes, step: {stu.get_duration_step()}mins)", min_value=30, max_value=24*60, step=stu.get_duration_step(), key="duration")
+        st.number_input(f"Duration (in minutes, step: {stu.get_duration_step()}mins)", min_value=30, max_value=24*60, step=stu.get_duration_step(), key="duration", value=60)
 
     # date and time
     col1, col2 = st.columns([1, 1])
@@ -72,7 +70,7 @@ with st.form(key="create_new_proposition_form", border=False):
 
     # locations
     can_users_set_location = stu.str_to_bool(os.getenv('CAN_USERS_SET_LOCATION', 'False'))
-    if can_users_set_location and st.session_state.get("proposition_type", {}).get("id", 0) == 0:
+    if can_users_set_location:
         locations = stu.get_available_locations(st.session_state.user.user_id, True, False)
     else:
         locations = [list(stu.get_default_location().values())]

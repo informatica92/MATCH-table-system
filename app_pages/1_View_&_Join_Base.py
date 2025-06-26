@@ -41,7 +41,10 @@ def dialog_edit_table_proposition(old_table_proposition: TableProposition):
 
         # table proposition type
         if st.session_state.user.is_admin:
-            st.selectbox("Proposition Type", options=stu.get_table_proposition_types(as_list_of_dicts=True), key="proposition_type_edit", format_func=lambda x: x["value"], index=old_table_proposition.proposition_type_id)
+            propositions_types = stu.get_table_proposition_types(as_list_of_dicts=True)
+            # in case the old proposition type is not in the list, we set it to 0 (default => Proposition) that is always present
+            index = old_table_proposition.proposition_type_id if old_table_proposition.proposition_type_id in [pt['id'] for pt in propositions_types] else 0
+            st.selectbox("Proposition Type", options=propositions_types, key="proposition_type_edit", format_func=lambda x: x["value"], index=index)
 
         submitted = st.form_submit_button("💾 Update")
         if submitted:
@@ -267,8 +270,40 @@ def create_view_and_join_page():
     with filter_col:
         filter_label_num_active_filters = stu.get_num_active_filters(as_str=True)
         with st.popover(f"🔍 {filter_label_num_active_filters}Filters:", use_container_width=True):
-            st.toggle("Joined by me", key="joined_by_me", value=False, on_change=stu.refresh_table_propositions, kwargs={"reason": "Filtering joined_by_me"}, disabled=not st.session_state['username'])
-            st.toggle("Proposed by me", key="proposed_by_me", value=False, on_change=stu.refresh_table_propositions, kwargs={"reason": "Filtering proposed_by_me"}, disabled=not st.session_state['username'])
+            st.toggle(
+                "Joined by me",
+                key="joined_by_me",
+                value=False,
+                on_change=stu.refresh_table_propositions, kwargs={"reason": "Filtering joined_by_me"},
+                disabled=not st.session_state['username']
+            )
+            st.toggle(
+                "Proposed by me",
+                key="proposed_by_me",
+                value=False,
+                on_change=stu.refresh_table_propositions, kwargs={"reason": "Filtering proposed_by_me"},
+                disabled=not st.session_state['username']
+            )
+            location_options = {'default': stu.get_default_location()['alias'], 'row': stu.get_rest_of_the_world_page_name()}
+            st.pills(
+                "Locations",
+                options=location_options.keys(),
+                default=st.session_state.location_mode,
+                format_func=lambda x: location_options[x],
+                key="location_mode_filter",
+                disabled=st.session_state.location_mode is not None,
+                on_change=stu.refresh_table_propositions, kwargs={"reason": "Filtering Location"}
+            )
+            proposition_options = stu.get_table_proposition_types(as_reversed_dict=True)
+            st.pills(
+                "Proposition Types",
+                options=proposition_options.keys(),
+                default=st.session_state.proposition_type_id_mode,
+                format_func=lambda x: proposition_options[x],
+                key="proposition_type_id_mode_filter",
+                disabled=st.session_state.proposition_type_id_mode is not None,
+                on_change=stu.refresh_table_propositions, kwargs={"reason": "Filtering Proposition Type"}
+            )
     with errors_warnings_col:
         errors, warnings = stu.check_overlaps_in_joined_tables(st.session_state.global_propositions, st.session_state.user.user_id)
         num_overlaps = len(errors) + len(warnings)

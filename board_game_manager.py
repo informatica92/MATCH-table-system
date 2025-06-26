@@ -34,17 +34,22 @@ if st.session_state['user'].is_banned:
 def_loc = stu.get_default_location()
 def_loc_alias = def_loc['alias']
 
-view_and_join_pages = [
-    st.Page("app_pages/1_View_&_Join_Default.py", icon="📜", default=True, title=def_loc_alias),
-    st.Page("app_pages/1_View_&_Join_RoW.py", icon="🌍", title=stu.get_rest_of_the_world_page_name(), url_path="restoftheworld"),
+view_and_join_loc_pages = [
+    st.Page("app_pages/1_View_&_Join_Loc_Default.py", icon="📜", default=True, title=def_loc_alias),
+    st.Page("app_pages/1_View_&_Join_Loc_RoW.py", icon="🌍", title=stu.get_rest_of_the_world_page_name(), url_path="restoftheworld"),
 ]
-if stu.str_to_bool(os.getenv('CAN_ADMIN_CREATE_TOURNAMENT')) is True:
-    view_and_join_pages.append(
-        st.Page("app_pages/1_View_&_Join_Tournaments.py", icon="⚔️", title="Tournaments", url_path="tournaments")
+
+view_and_join_prop_pages = [
+    st.Page("app_pages/1_View_&_Join_Prop_00_Propositions.py", icon="🎴", title="Propositions", url_path="propositions"),
+]
+
+if stu.str_to_bool(os.getenv('CAN_ADMIN_CREATE_TOURNAMENT')):
+    view_and_join_prop_pages.append(
+        st.Page("app_pages/1_View_&_Join_Prop_01_Tournaments.py", icon="⚔️", title="Tournaments", url_path="tournaments")
     )
-if stu.str_to_bool(os.getenv('CAN_ADMIN_CREATE_DEMO')) is True:
-    view_and_join_pages.append(
-        st.Page("app_pages/1_View_&_Join_Demos.py", icon="🎁", title="Demos", url_path="demos")
+if stu.str_to_bool(os.getenv('CAN_ADMIN_CREATE_DEMO')):
+    view_and_join_prop_pages.append(
+        st.Page("app_pages/1_View_&_Join_Prop_02_Demos.py", icon="🎁", title="Demos", url_path="demos")
     )
 
 other_pages = [
@@ -55,7 +60,8 @@ other_pages = [
 
 pg = st.navigation(
     {
-        "View & Join": view_and_join_pages,
+        "Locations": view_and_join_loc_pages,
+        "Propositions": view_and_join_prop_pages,
         "Other": other_pages
     }
 )
@@ -64,10 +70,10 @@ st.markdown(stu.BOUNCE_SIDEBAR_ICON, unsafe_allow_html=True)
 
 # Initialize location_mode in session state
 if "location_mode" not in st.session_state:
-    st.session_state['location_mode'] = "default"
+    st.session_state['location_mode'] = None
 
 if "proposition_type_id_mode" not in st.session_state:
-    st.session_state['proposition_type_id_mode'] = 0  # 0 = Proposition, 1 = Tournament, 2 = Demo
+    st.session_state['proposition_type_id_mode'] = None  # 0 = Proposition, 1 = Tournament, 2 = Demo
 
 # Initialize propositions in session state
 if "propositions" not in st.session_state:
