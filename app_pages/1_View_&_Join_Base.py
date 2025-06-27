@@ -285,16 +285,19 @@ def create_view_and_join_page():
                 disabled=not st.session_state['username']
             )
             location_options = {'default': stu.get_default_location()['alias'], 'row': stu.get_rest_of_the_world_page_name()}
+            location_filter_disabled = st.session_state.location_mode is not None
             st.pills(
                 "Locations",
                 options=location_options.keys(),
                 default=st.session_state.location_mode,
                 format_func=lambda x: location_options[x],
                 key="location_mode_filter",
-                disabled=st.session_state.location_mode is not None,
+                disabled=location_filter_disabled,
+                help="You can't use this filter in this page" if location_filter_disabled else "Select a location to filter tables by location.",
                 on_change=stu.refresh_table_propositions, kwargs={"reason": "Filtering Location"}
             )
             proposition_options = stu.get_table_proposition_types(as_reversed_dict=True)
+            proposition_filter_disabled = st.session_state.proposition_type_id_mode is not None
             st.pills(
                 "Proposition Types",
                 options=proposition_options.keys(),
@@ -302,6 +305,7 @@ def create_view_and_join_page():
                 format_func=lambda x: proposition_options[x],
                 key="proposition_type_id_mode_filter",
                 disabled=st.session_state.proposition_type_id_mode is not None,
+                help="You can't use this filter in this page" if proposition_filter_disabled else "Select a proposition type to filter tables by type.",
                 on_change=stu.refresh_table_propositions, kwargs={"reason": "Filtering Proposition Type"}
             )
     with errors_warnings_col:
