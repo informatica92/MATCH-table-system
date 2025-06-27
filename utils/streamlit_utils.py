@@ -218,9 +218,9 @@ def render_overlaps_table_buttons(proposition_type_id_mode, table_left, table_ri
                     use_container_width=True
             ):
                 st.switch_page(
-                    "app_pages/1_View_&_Join_Prop_00_Propositions.py" if table_target.proposition_type_id == 0 else
-                    "app_pages/1_View_&_Join_Prop_01_Tournaments.py" if table_target.proposition_type_id == 1 else
-                    "app_pages/1_View_&_Join_Prop_02_Demos.py"
+                    VIEW_JOIN_PROPOSITIONS_PAGE if table_target.proposition_type_id == 0 else
+                    VIEW_JOIN_TOURNAMENTS_PAGE if table_target.proposition_type_id == 1 else
+                    VIEW_JOIN_DEMOS_PAGE
                 )
     _render_overlaps_table_buttons(table_left, col1)
     _render_overlaps_table_buttons(table_right, col2)
