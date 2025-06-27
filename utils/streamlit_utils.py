@@ -128,8 +128,8 @@ def refresh_table_propositions(reason, **kwargs):
     location_mode = st.session_state.get("location_mode") or st.session_state.get("location_mode_filter")
     filter_default_location = {"default": True, "row": False}
 
-    # 0 = Proposition, 1 = Tournament, 2 = Demo
-    proposition_type_id_mode = st.session_state.get("proposition_type_id_mode") or st.session_state.get("proposition_type_id_mode_filter")
+    # 0 = Proposition, 1 = Tournament, 2 = Demo (the var1 or var2 syntax can not be used here since 0 is a valid value)
+    proposition_type_id_mode = st.session_state.get("proposition_type_id_mode") if st.session_state.get("proposition_type_id_mode") is not None else st.session_state.get("proposition_type_id_mode_filter")
 
     st.session_state.global_propositions = TableProposition.from_list_of_tuples(sql_manager.get_table_propositions())
     st.session_state.propositions = st.session_state.global_propositions.copy()
