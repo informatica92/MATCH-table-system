@@ -35,27 +35,27 @@ def_loc = stu.get_default_location()
 def_loc_alias = def_loc['alias']
 
 view_and_join_loc_pages = [
-    st.Page("app_pages/1_View_&_Join_Loc_Default.py", icon="📜", default=True, title=def_loc_alias),
-    st.Page("app_pages/1_View_&_Join_Loc_RoW.py", icon="🌍", title=stu.get_rest_of_the_world_page_name(), url_path="restoftheworld"),
+    st.Page(stu.VIEW_JOIN_LOC_DEFAULT_PAGE, icon="📜", default=True, title=def_loc_alias),
+    st.Page(stu.VIEW_JOIN_LOC_ROW_PAGE, icon="🌍", title=stu.get_rest_of_the_world_page_name(), url_path="restoftheworld"),
 ]
 
 view_and_join_prop_pages = [
-    st.Page("app_pages/1_View_&_Join_Prop_00_Propositions.py", icon="🎴", title="Propositions", url_path="propositions"),
+    st.Page(stu.VIEW_JOIN_PROPOSITIONS_PAGE, icon="🎴", title="Propositions", url_path="propositions"),
 ]
 
 if stu.str_to_bool(os.getenv('CAN_ADMIN_CREATE_TOURNAMENT')):
     view_and_join_prop_pages.append(
-        st.Page("app_pages/1_View_&_Join_Prop_01_Tournaments.py", icon="⚔️", title="Tournaments", url_path="tournaments")
+        st.Page(stu.VIEW_JOIN_TOURNAMENTS_PAGE, icon="⚔️", title="Tournaments", url_path="tournaments")
     )
 if stu.str_to_bool(os.getenv('CAN_ADMIN_CREATE_DEMO')):
     view_and_join_prop_pages.append(
-        st.Page("app_pages/1_View_&_Join_Prop_02_Demos.py", icon="🎁", title="Demos", url_path="demos")
+        st.Page(stu.VIEW_JOIN_DEMOS_PAGE, icon="🎁", title="Demos", url_path="demos")
     )
 
 other_pages = [
-    st.Page("app_pages/2_Create.py", icon="➕"),
-    st.Page("app_pages/3_Map.py", icon="🗺️"),
-    st.Page("app_pages/4_User.py", icon="👦🏻")
+    st.Page(stu.CREATE_PAGE, icon="➕"),
+    st.Page(stu.MAP_PAGE, icon="🗺️"),
+    st.Page(stu.USER_PAGE, icon="👦🏻")
 ]
 
 pg = st.navigation(

@@ -20,6 +20,18 @@ DEFAULT_IMAGE_URL = "static/images/no_image.jpg"
 BGG_GAME_ID_HELP = ("It's the id in the BGG URL. EX: for Wingspan the URL is "
                     "https://boardgamegeek.com/boardgame/266192/wingspan, hence the BGG game id is 266192")
 
+# PAGES
+VIEW_JOIN_BASE_MODULE = "app_pages.1_View_&_Join_Base"
+VIEW_JOIN_LOC_DEFAULT_PAGE = "app_pages/1_View_&_Join_Loc_Default.py"
+VIEW_JOIN_LOC_ROW_PAGE = "app_pages/1_View_&_Join_Loc_RoW.py"
+VIEW_JOIN_PROPOSITIONS_PAGE = "app_pages/1_View_&_Join_Prop_00_Propositions.py"
+VIEW_JOIN_TOURNAMENTS_PAGE = "app_pages/1_View_&_Join_Prop_01_Tournaments.py"
+VIEW_JOIN_DEMOS_PAGE = "app_pages/1_View_&_Join_Prop_02_Demos.py"
+CREATE_PAGE = "app_pages/2_Create.py"
+MAP_PAGE = "app_pages/3_Map.py"
+USER_PAGE = "app_pages/4_User.py"
+
+
 CUSTOM_TEXT_WITH_LABEL_AND_SIZE = "<p style='font-size:{size}px;'>{label}</p>"
 
 BOUNCE_SIDEBAR_ICON = r"""
