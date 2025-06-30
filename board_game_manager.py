@@ -33,16 +33,17 @@ if st.session_state['user'].is_banned:
 # ...alternatively, show the normal pages
 def_loc = stu.get_default_location()
 def_loc_alias = def_loc['alias']
+pages_dict = {}
 
+# TABLES BY LOCATION
 view_and_join_loc_pages = [
     st.Page(stu.VIEW_JOIN_LOC_DEFAULT_PAGE, icon="📜", default=True, title=def_loc_alias),
     st.Page(stu.VIEW_JOIN_LOC_ROW_PAGE, icon="🌍", title=stu.get_rest_of_the_world_page_name(), url_path="restoftheworld"),
 ]
+pages_dict["Tables by Locations"] = view_and_join_loc_pages
 
-view_and_join_prop_pages = [
-    st.Page(stu.VIEW_JOIN_PROPOSITIONS_PAGE, icon="🎴", title="Propositions", url_path="propositions"),
-]
-
+# TABLES BY TYPE
+view_and_join_prop_pages = []
 if stu.str_to_bool(os.getenv('CAN_ADMIN_CREATE_TOURNAMENT')):
     view_and_join_prop_pages.append(
         st.Page(stu.VIEW_JOIN_TOURNAMENTS_PAGE, icon="⚔️", title="Tournaments", url_path="tournaments")
@@ -51,20 +52,20 @@ if stu.str_to_bool(os.getenv('CAN_ADMIN_CREATE_DEMO')):
     view_and_join_prop_pages.append(
         st.Page(stu.VIEW_JOIN_DEMOS_PAGE, icon="🎁", title="Demos", url_path="demos")
     )
+if len(view_and_join_prop_pages)>0:
+    proposition_page = st.Page(stu.VIEW_JOIN_PROPOSITIONS_PAGE, icon="🎴", title="Propositions", url_path="propositions")
+    pages_dict["Tables by Type"] = [proposition_page] + view_and_join_prop_pages
 
+# OTHER PAGES
 other_pages = [
     st.Page(stu.CREATE_PAGE, icon="➕"),
     st.Page(stu.MAP_PAGE, icon="🗺️"),
     st.Page(stu.USER_PAGE, icon="👦🏻")
 ]
+pages_dict["Other"] = other_pages
 
-pg = st.navigation(
-    {
-        "Locations": view_and_join_loc_pages,
-        "Propositions": view_and_join_prop_pages,
-        "Other": other_pages
-    }
-)
+# ST NAVIGATION CREATION
+pg = st.navigation(pages_dict)
 
 st.markdown(stu.BOUNCE_SIDEBAR_ICON, unsafe_allow_html=True)
 
