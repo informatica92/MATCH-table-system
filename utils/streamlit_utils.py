@@ -74,7 +74,7 @@ def add_help_button(col: st.delta_generator.DeltaGenerator):
     col.write("")
     with col.popover("", icon="ℹ️", use_container_width=True):
         st.write(f"Expanding the sidebar on the left ◀️ you can navigate among pages:\n\n"
-         f"- **📜 View & Join**: view the table propositions, join, leave or edit them\n"
+         f"- **📜 Tables by ...**: view the table propositions, join, leave or edit them\n"
          f"   - **List**: view the table propositions as a list\n"
          f"   - **Timeline**: view the table propositions as a timeline\n"
          f"   - **Table**: view the table propositions as a table\n"
@@ -105,7 +105,7 @@ def username_in_joined_players(joined_players: list[JoinedPlayerOrProposer]):
         return False
 
 
-def st_write(label, size=12):
+def st_write(label: str, size: int = 12) -> None:
     st.write(CUSTOM_TEXT_WITH_LABEL_AND_SIZE.format(label=label, size=size), unsafe_allow_html=True)
 
 def str_to_bool(s: str) -> bool:

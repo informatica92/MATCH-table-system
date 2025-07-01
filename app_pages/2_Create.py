@@ -25,7 +25,7 @@ except AttributeError as e:
     matching_games = []
 
 selected_game = st.selectbox("Select the matching game", matching_games, format_func=lambda x: x[1])
-stu.st_write("Select the matching game from BGG for auto detecting information like the board game image")
+stu.st_write("Now, select the matching game from BGG for auto detecting information like the board game image")
 if selected_game:
     bgg_game_id = selected_game[0]
 
@@ -80,8 +80,8 @@ with st.form(key="create_new_proposition_form", border=False):
     def_loc_alias = stu.get_default_location()['alias']
     code_html_style = "style='color: black; background-color: #f0f0f0;font-weight: bold;'"
     stu.st_write(f"Selecting <b>{def_loc_alias}</b> as location, the table will be displayed into the "
-                 f"<b>''View & Join/📜{def_loc_alias}''</b> page, otherwise you'll find it into the "
-                 f"<b>''View & Join/🌍{stu.get_rest_of_the_world_page_name()}''</b> page")
+                 f"<b>''📜{def_loc_alias}''</b> page, otherwise you'll find it into the "
+                 f"<b>''🌍{stu.get_rest_of_the_world_page_name()}''</b> page")
     if not can_users_set_location:
         stu.st_write("ℹ️ User locations are not displayed at the moment. <i>(CAN_USERS_SET_LOCATION set to False)</i>")
 
