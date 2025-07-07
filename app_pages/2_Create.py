@@ -31,8 +31,13 @@ if selected_game:
 
 image_url, game_description, categories, mechanics, available_expansions = None, None, [], [], []
 if bgg_game_id:
-    st.write(f"Selected BGG Game ID: {bgg_game_id}")
     image_url, game_description, categories, mechanics, available_expansions, _ = get_bgg_game_info(bgg_game_id)
+    # col1, col2 = st.columns([1, 4])
+    # col1.image(image_url,use_container_width=True)
+    # col2.caption(f"**Description**: {game_description[:300]}...")
+    # with col2:
+    #     stu.st_write(f"<b>BGG URL</b>: <a href='{stu.get_bgg_url(bgg_game_id)}'>{stu.get_bgg_url(bgg_game_id)}</a>")
+    #     stu.st_write(f"<b>Categories:</b> {', '.join(categories)}<br><b>Mechanics:</b> {', '.join(mechanics)}")
 
 if st.session_state.user.is_admin:
     # Selection of the Proposition Type
