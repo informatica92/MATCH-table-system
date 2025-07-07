@@ -51,7 +51,9 @@ def get_bgg_game_info(game_id):
         # Find the image tag and extract the URL
         image_url = root.find('item/image').text if root.find('item/image') is not None else None
 
-        game_description = root.find('item/description').text
+        game_description = root.find('item/description').text or ""
+        game_description = html.unescape(game_description)
+        game_description = '\n'.join([s.strip() for s in game_description.splitlines()])
 
         categories = []
         for category in root.findall('item/link[@type="boardgamecategory"]'):
@@ -65,7 +67,7 @@ def get_bgg_game_info(game_id):
         for expansion in root.findall('item/link[@type="boardgameexpansion"]'):
             expansions.append({'id': expansion.get('id'), 'value': expansion.get('value')})
 
-        return image_url, html.unescape(game_description), categories, mechanics, expansions, game_name_with_year
+        return image_url, game_description, categories, mechanics, expansions, game_name_with_year
     except Exception as e:
         logging.error(f"Error fetching game image: {e}")
         return None, "", [], [], [], ""

@@ -25,22 +25,25 @@ except AttributeError as e:
     matching_games = []
 
 selected_game = st.selectbox("Select the matching game", matching_games, format_func=lambda x: x[1])
-stu.st_write("Select the matching game from BGG for auto detecting information like the board game image")
+stu.st_write("Now, select the matching game from BGG for auto detecting information like the board game image")
 if selected_game:
     bgg_game_id = selected_game[0]
 
 image_url, game_description, categories, mechanics, available_expansions = None, None, [], [], []
 if bgg_game_id:
-    st.write(f"Selected BGG Game ID: {bgg_game_id}")
     image_url, game_description, categories, mechanics, available_expansions, _ = get_bgg_game_info(bgg_game_id)
+    # col1, col2 = st.columns([1, 4])
+    # col1.image(image_url,use_container_width=True)
+    # col2.caption(f"**Description**: {game_description[:300]}...")
+    # with col2:
+    #     stu.st_write(f"<b>BGG URL</b>: <a href='{stu.get_bgg_url(bgg_game_id)}'>{stu.get_bgg_url(bgg_game_id)}</a>")
+    #     stu.st_write(f"<b>Categories:</b> {', '.join(categories)}<br><b>Mechanics:</b> {', '.join(mechanics)}")
 
 if st.session_state.user.is_admin:
     # Selection of the Proposition Type
     st.divider()
 
     st.selectbox("Proposition Type", options=stu.get_table_proposition_types(as_list_of_dicts=True), key="proposition_type", format_func=lambda x: x["value"])
-    stu.st_write(f"Selecting a Type different from \"Proposition\" this will disable location selection")
-    # st.write(st.session_state.proposition_type)
 
     st.divider()
 
@@ -54,7 +57,7 @@ with st.form(key="create_new_proposition_form", border=False):
     with col1:
         st.number_input("Max Number of Players", min_value=1, max_value=100, step=1, key="max_players")
     with col2:
-        st.number_input(f"Duration (in minutes, step: {stu.get_duration_step()}mins)", min_value=30, max_value=24*60, step=stu.get_duration_step(), key="duration")
+        st.number_input(f"Duration (in minutes, step: {stu.get_duration_step()}mins)", min_value=30, max_value=24*60, step=stu.get_duration_step(), key="duration", value=60)
 
     # date and time
     col1, col2 = st.columns([1, 1])
@@ -72,7 +75,7 @@ with st.form(key="create_new_proposition_form", border=False):
 
     # locations
     can_users_set_location = stu.str_to_bool(os.getenv('CAN_USERS_SET_LOCATION', 'False'))
-    if can_users_set_location and st.session_state.get("proposition_type", {}).get("id", 0) == 0:
+    if can_users_set_location:
         locations = stu.get_available_locations(st.session_state.user.user_id, True, False)
     else:
         locations = [list(stu.get_default_location().values())]
@@ -82,8 +85,8 @@ with st.form(key="create_new_proposition_form", border=False):
     def_loc_alias = stu.get_default_location()['alias']
     code_html_style = "style='color: black; background-color: #f0f0f0;font-weight: bold;'"
     stu.st_write(f"Selecting <b>{def_loc_alias}</b> as location, the table will be displayed into the "
-                 f"<b>''View & Join/📜{def_loc_alias}''</b> page, otherwise you'll find it into the "
-                 f"<b>''View & Join/🌍{stu.get_rest_of_the_world_page_name()}''</b> page")
+                 f"<b>''📜{def_loc_alias}''</b> page, otherwise you'll find it into the "
+                 f"<b>''🌍{stu.get_rest_of_the_world_page_name()}''</b> page")
     if not can_users_set_location:
         stu.st_write("ℹ️ User locations are not displayed at the moment. <i>(CAN_USERS_SET_LOCATION set to False)</i>")
 

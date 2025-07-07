@@ -125,16 +125,10 @@ class TelegramNotifications(object):
         :return: page name
         """
         # no '/' at the end of the page name
-        if proposition_type_id == 0 and is_default_location:
+        if is_default_location:
             return ""  # homepage
-        elif proposition_type_id == 0 and not is_default_location:
-            return "restoftheworld"
-        elif proposition_type_id == 1:
-            return "tournaments"
-        elif proposition_type_id == 2:
-            return "demos"
         else:
-            return ""
+            return "restoftheworld"
 
     def _send_text_message(self, text: str, chat_id: str, message_thread_id: int) -> TelegramNotificationsOutput:
         if self._bot and chat_id:

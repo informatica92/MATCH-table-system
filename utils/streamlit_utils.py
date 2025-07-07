@@ -20,6 +20,18 @@ DEFAULT_IMAGE_URL = "static/images/no_image.jpg"
 BGG_GAME_ID_HELP = ("It's the id in the BGG URL. EX: for Wingspan the URL is "
                     "https://boardgamegeek.com/boardgame/266192/wingspan, hence the BGG game id is 266192")
 
+# PAGES
+VIEW_JOIN_BASE_MODULE = "app_pages.1_View_&_Join_Base"
+VIEW_JOIN_LOC_DEFAULT_PAGE = "app_pages/1_View_&_Join_Loc_Default.py"
+VIEW_JOIN_LOC_ROW_PAGE = "app_pages/1_View_&_Join_Loc_RoW.py"
+VIEW_JOIN_PROPOSITIONS_PAGE = "app_pages/1_View_&_Join_Prop_00_Propositions.py"
+VIEW_JOIN_TOURNAMENTS_PAGE = "app_pages/1_View_&_Join_Prop_01_Tournaments.py"
+VIEW_JOIN_DEMOS_PAGE = "app_pages/1_View_&_Join_Prop_02_Demos.py"
+CREATE_PAGE = "app_pages/2_Create.py"
+MAP_PAGE = "app_pages/3_Map.py"
+USER_PAGE = "app_pages/4_User.py"
+
+
 CUSTOM_TEXT_WITH_LABEL_AND_SIZE = "<p style='font-size:{size}px;'>{label}</p>"
 
 BOUNCE_SIDEBAR_ICON = r"""
@@ -62,7 +74,7 @@ def add_help_button(col: st.delta_generator.DeltaGenerator):
     col.write("")
     with col.popover("", icon="ℹ️", use_container_width=True):
         st.write(f"Expanding the sidebar on the left ◀️ you can navigate among pages:\n\n"
-         f"- **📜 View & Join**: view the table propositions, join, leave or edit them\n"
+         f"- **📜 Tables by ...**: view the table propositions, join, leave or edit them\n"
          f"   - **List**: view the table propositions as a list\n"
          f"   - **Timeline**: view the table propositions as a timeline\n"
          f"   - **Table**: view the table propositions as a table\n"
@@ -86,6 +98,8 @@ def get_go_to_user_page_link_button(use_container_width: bool = True):
         use_container_width=use_container_width
     )
 
+# TODO: replace username with user_id
+# TODO: evaluate chance to move it into TableProposition class
 def username_in_joined_players(joined_players: list[JoinedPlayerOrProposer]):
     if st.session_state.username:
         return st.session_state.username.lower() in [player.username.lower() for player in joined_players if player.username]
@@ -93,7 +107,7 @@ def username_in_joined_players(joined_players: list[JoinedPlayerOrProposer]):
         return False
 
 
-def st_write(label, size=12):
+def st_write(label: str, size: int = 12) -> None:
     st.write(CUSTOM_TEXT_WITH_LABEL_AND_SIZE.format(label=label, size=size), unsafe_allow_html=True)
 
 def str_to_bool(s: str) -> bool:
@@ -124,19 +138,14 @@ def refresh_table_propositions(reason, **kwargs):
     else:
         proposed_by_me = False
 
-    filter_username = st.session_state.username
+    # default, row
+    location_mode = st.session_state.get("location_mode") or st.session_state.get("location_mode_filter")
+    filter_default_location = {"default": True, "row": False}
 
-    mode = str(st.session_state.get("location_mode", "default")).lower()
-    match mode:
-        case "default": filter_default_location = True  # only default location
-        case "none": filter_default_location = True  # only default location
-        case "row": filter_default_location = False  # Rest of the World or REST_OF_THE_WORLD_PAGE_NAME
-        case _: raise ValueError(f"Invalid mode: {mode}")
-
-    proposition_type_id_mode = st.session_state.get("proposition_type_id_mode", 0)  # 0 = Proposition, 1 = Tournament, 2 = Demo
+    # 0 = Proposition, 1 = Tournament, 2 = Demo (the var1 or var2 syntax can not be used here since 0 is a valid value)
+    proposition_type_id_mode = st.session_state.get("proposition_type_id_mode") if st.session_state.get("proposition_type_id_mode") is not None else st.session_state.get("proposition_type_id_mode_filter")
 
     st.session_state.global_propositions = TableProposition.from_list_of_tuples(sql_manager.get_table_propositions())
-
     st.session_state.propositions = st.session_state.global_propositions.copy()
 
     if joined_by_me:
@@ -145,9 +154,13 @@ def refresh_table_propositions(reason, **kwargs):
     if proposed_by_me:
         st.session_state.propositions = [tp for tp in st.session_state.propositions if tp.proposed_by.user_id == st.session_state.user.user_id]
 
-    st.session_state.propositions = [tp for tp in st.session_state.propositions if tp.location.location_is_default is filter_default_location]
+    # FILTER BY LOCATION
+    if location_mode is not None:
+        st.session_state.propositions = [tp for tp in st.session_state.propositions if tp.location.location_is_default is filter_default_location[location_mode]]
 
-    st.session_state.propositions = [tp for tp in st.session_state.propositions if tp.proposition_type_id == proposition_type_id_mode]
+    # FILTER BY PROPOSITION TYPE
+    if proposition_type_id_mode is not None:
+        st.session_state.propositions = [tp for tp in st.session_state.propositions if tp.proposition_type_id == proposition_type_id_mode]
 
     logging.info(f"[User: {st.session_state.user if st.session_state.get('user') else '(not instantiated)'}] "
           f"Table propositions QUERY [{reason}] refreshed in {(time_time() - query_start_time):.4f}s "
@@ -191,7 +204,7 @@ def check_overlaps_in_joined_tables(table_propositions:  list[TableProposition],
 def render_overlaps_table_buttons(proposition_type_id_mode, table_left, table_right, prefix):
     col1, col2 = st.columns([1, 1])
     def _render_overlaps_table_buttons(table_target, col):
-        if proposition_type_id_mode == table_target.proposition_type_id:
+        if table_target.table_id in [p.table_id for p in st.session_state.propositions]:
             if col.button(
                     f"Go to table {table_target.table_id}",
                     key=f"ov-{prefix}-{table_left.table_id}-{table_right.table_id}-{table_target.table_id}",
@@ -202,14 +215,14 @@ def render_overlaps_table_buttons(proposition_type_id_mode, table_left, table_ri
                 scroll_to(f"table-{table_target.table_id}")
         else:
             if col.button(
-                    f"Go to table page",
+                    f"Go to {'Propositions' if table_target.proposition_type_id == 0 else 'Tournaments' if table_target.proposition_type_id == 1 else 'Demos'} page",
                     key=f"ov-{prefix}-{table_left.table_id}-{table_right.table_id}-{table_target.table_id}",
                     use_container_width=True
             ):
                 st.switch_page(
-                    "app_pages/1_View_&_Join_Default.py" if table_target.proposition_type_id == 0 else
-                    "app_pages/1_View_&_Join_Tournaments.py" if table_target.proposition_type_id == 1 else
-                    "app_pages/1_View_&_Join_Demos.py"
+                    VIEW_JOIN_PROPOSITIONS_PAGE if table_target.proposition_type_id == 0 else
+                    VIEW_JOIN_TOURNAMENTS_PAGE if table_target.proposition_type_id == 1 else
+                    VIEW_JOIN_DEMOS_PAGE
                 )
     _render_overlaps_table_buttons(table_left, col1)
     _render_overlaps_table_buttons(table_right, col2)
@@ -415,6 +428,10 @@ def get_num_active_filters(as_str=True):
         number_of_active_filters += 1
     if st.session_state.get('proposed_by_me', False):
         number_of_active_filters += 1
+    if st.session_state.get('location_mode_filter') is not None or st.session_state.get('location_mode') is not None:
+        number_of_active_filters += 1
+    if st.session_state.get('proposition_type_id_mode_filter') is not None or st.session_state.get('proposition_type_id_mode') is not None:
+        number_of_active_filters += 1
     filter_label_num_active_filters = "" if number_of_active_filters == 0 else f" ({number_of_active_filters}) "
     return filter_label_num_active_filters if as_str else number_of_active_filters
 
@@ -587,7 +604,11 @@ def get_expansions_markdown_text(expansions: list[TablePropositionExpansion]):
 
     return expansions_markdown
 
-def get_table_proposition_types(as_list_of_dicts: bool = False):
+def get_table_proposition_types(as_list_of_dicts: bool = False, as_reversed_dict: bool = False):
+    # check if only one of the parameter is True
+    if as_list_of_dicts and as_reversed_dict:
+        raise ValueError("Only one of the parameters 'as_list_of_dicts' or 'as_reversed_dict' can be True")
+
     table_proposition_types = SQLManager.TABLE_PROPOSITION_TYPES
 
     if not str_to_bool(os.getenv("CAN_ADMIN_CREATE_TOURNAMENT")):
@@ -598,6 +619,8 @@ def get_table_proposition_types(as_list_of_dicts: bool = False):
 
     if as_list_of_dicts:
         return [{"id": v, "value": k} for k, v in table_proposition_types.items()]
+    elif as_reversed_dict:
+        return {v: k for k, v in table_proposition_types.items()}
     else:
         return table_proposition_types
 
