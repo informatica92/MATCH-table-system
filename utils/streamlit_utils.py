@@ -98,6 +98,8 @@ def get_go_to_user_page_link_button(use_container_width: bool = True):
         use_container_width=use_container_width
     )
 
+# TODO: replace username with user_id
+# TODO: evaluate chance to move it into TableProposition class
 def username_in_joined_players(joined_players: list[JoinedPlayerOrProposer]):
     if st.session_state.username:
         return st.session_state.username.lower() in [player.username.lower() for player in joined_players if player.username]
