@@ -116,7 +116,7 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
             with st.expander(f"🧔🏻 **Proposed By**: {table_proposition.proposed_by.username}"):
                 st.write(f"**BGG**: *coming soon* **Telegram**: *coming soon*")
             with st.expander(f"🗺️ **Location**: {table_proposition.location.location_alias}"):
-                location_markdown = stu.get_location_markdown_text(table_proposition.location, icon="🔗")
+                location_markdown = table_proposition.location.to_markdown(st.session_state.user, icon="🔗")
                 # location_markdown includes address + link to google maps IF default location or logged users
                 # otherwise it is equal to "*Unknown*"
                 st.write(location_markdown)
@@ -157,10 +157,10 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
             if st.session_state['username']:
                 st.button(
                     # JOIN
-                    f"✅ Join Table {table_proposition.table_id}" if not stu.username_in_joined_players(table_proposition.joined_players) else "✅ *Already joined*",
+                    f"✅ Join Table {table_proposition.table_id}" if not table_proposition.joined(st.session_state.user.user_id) else "✅ *Already joined*",
                     key=f"join_{table_proposition.table_id}_{section_name}",
                     use_container_width=True,
-                    disabled=stu.username_in_joined_players(table_proposition.joined_players),
+                    disabled=table_proposition.joined(st.session_state.user.user_id),
                     on_click=stu.join_callback, args=[table_proposition.table_id, st.session_state['username'], st.session_state.user.user_id]
                 )
             else:
@@ -321,13 +321,13 @@ def create_view_and_join_page():
                     for error_left, error_right in errors:
                         st.write(f"Table **\"{error_left.game_name}\"** (ID {error_left.table_id}) :red[has the same start date] "
                                  f"time as **\"{error_right.game_name}\"** (ID {error_right.table_id})")
-                        stu.render_overlaps_table_buttons(st.session_state.proposition_type_id_mode, error_left, error_right, "err")
+                        stu.render_overlaps_table_buttons(error_left, error_right, "err")
                 if len(warnings):
                     st.write(f":warning: {len(warnings)} warnings:")
                     for warning_left, warning_right in warnings:
                         st.write(f"Table **\"{warning_left.game_name}\"** (ID {warning_left.table_id}) :orange[has a partial "
                                  f"overlap] with **\"{warning_right.game_name}\"** (ID {warning_right.table_id})")
-                        stu.render_overlaps_table_buttons(st.session_state.proposition_type_id_mode, warning_left, warning_right, "warn")
+                        stu.render_overlaps_table_buttons(warning_left, warning_right, "warn")
 
     # show propositions
     if len(st.session_state.propositions) == 0:

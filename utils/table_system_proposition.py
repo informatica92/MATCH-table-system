@@ -1,6 +1,7 @@
 import datetime
 import time as time_module
 from utils.bgg_manager import get_bgg_game_info
+from utils.table_system_user import StreamlitTableSystemUser
 
 class TablePropositionExpansion(object):
     def __init__(
@@ -82,6 +83,17 @@ class TablePropositionLocation(object):
             location_is_system=dict_['location_is_system'],
             location_is_default=dict_.get('location_is_default')
         )
+
+    def to_markdown(self, user: StreamlitTableSystemUser, icon="🗺️"):
+        if user.is_logged_in() or self.location_is_system:
+            if self.location_alias:
+                location_md = f"{self.location_address}\n\n"
+                location_md += f"{icon} [{self.location_alias}](https://maps.google.com/?q={self.location_address.replace(' ', '+')})"
+            else:
+                location_md = "*Unknown*"
+        else:
+            location_md = "*Login to see the location*"
+        return location_md
 
 class TableProposition(object):
     def __init__(

@@ -98,15 +98,6 @@ def get_go_to_user_page_link_button(use_container_width: bool = True):
         use_container_width=use_container_width
     )
 
-# TODO: replace username with user_id
-# TODO: evaluate chance to move it into TableProposition class
-def username_in_joined_players(joined_players: list[JoinedPlayerOrProposer]):
-    if st.session_state.username:
-        return st.session_state.username.lower() in [player.username.lower() for player in joined_players if player.username]
-    else:
-        return False
-
-
 def st_write(label: str, size: int = 12) -> None:
     st.write(CUSTOM_TEXT_WITH_LABEL_AND_SIZE.format(label=label, size=size), unsafe_allow_html=True)
 
@@ -201,7 +192,7 @@ def check_overlaps_in_joined_tables(table_propositions:  list[TableProposition],
                     warnings_overlaps.append((tp, tp2))
     return errors_overlaps, warnings_overlaps
 
-def render_overlaps_table_buttons(proposition_type_id_mode, table_left, table_right, prefix):
+def render_overlaps_table_buttons(table_left, table_right, prefix):
     col1, col2 = st.columns([1, 1])
     def _render_overlaps_table_buttons(table_target, col):
         if table_target.table_id in [p.table_id for p in st.session_state.propositions]:
@@ -266,7 +257,7 @@ def update_table_propositions(
     game_name = edit_game_name(game_name, old_table.proposition_type_id, proposition_type_id or 0)
     sql_manager.update_table_proposition(table_id, game_name, max_players, date, time, duration, notes, bgg_game_id, location_id, expansions, proposition_type_id)
 
-    location_alias = get_available_locations(user_id=None, include_system_ones=True, return_as_df=True).set_index("id").loc[location_id, "alias"]
+    location_alias = get_available_locations(user_id=st.session_state.user.user_id, include_system_ones=True, return_as_df=True).set_index("id").loc[location_id, "alias"]
     location_is_default = is_default_location(location_id)
     expansions_name_list = [expansion['value'] for expansion in expansions] if expansions else []
     old_expansions_name_list = [expansion.expansion_name for expansion in old_table.expansions] if old_table.expansions else []
