@@ -10,8 +10,7 @@ from datetime import datetime
 from utils.telegram_notifications import TelegramNotifications
 from utils.sql_manager import SQLManager
 from utils.bgg_manager import get_bgg_url
-from utils.table_system_proposition import TableProposition, TablePropositionLocation, JoinedPlayerOrProposer, \
-    TablePropositionExpansion
+from utils.table_system_proposition import TableProposition
 from utils.table_system_logging import logging
 
 
