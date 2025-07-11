@@ -1,6 +1,6 @@
 import datetime
 import time as time_module
-from utils.bgg_manager import get_bgg_game_info
+from utils.bgg_manager import get_bgg_game_info, get_bgg_url
 from utils.table_system_user import StreamlitTableSystemUser
 
 class TablePropositionExpansion(object):
@@ -32,6 +32,19 @@ class TablePropositionExpansion(object):
     @staticmethod
     def to_list_of_dicts(list_) -> list[dict]:
         return [expansion.to_dict() for expansion in list_]
+
+    def to_markdown(self) -> str:
+        """
+        Format the expansion as a markdown link.
+        :return: Markdown formatted string for the expansion.
+        """
+        return f"[{self.expansion_name}]({get_bgg_url(self.expansion_id)})"
+
+    @staticmethod
+    def to_markdown_list(expansions: list['TablePropositionExpansion']) -> str:
+        return ', '.join(
+            [f"\n - {expansion.to_markdown()}" for expansion in expansions]
+        )
 
 
 class JoinedPlayerOrProposer(object):

@@ -121,7 +121,7 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
                 # otherwise it is equal to "*Unknown*"
                 st.write(location_markdown)
             with st.expander(f"📦 **Expansions** ({len(table_proposition.expansions)}):"):
-                expansions_markdown = stu.get_expansions_markdown_text(table_proposition.expansions)
+                expansions_markdown = TablePropositionExpansion.to_markdown_list(table_proposition.expansions)
                 st.write(expansions_markdown)
             notes_preview = f"*{table_proposition.notes[:30]}...*" if len(str(table_proposition.notes)) > 30 else table_proposition.notes
             with st.expander(f"📒 **Notes**: {notes_preview}"):
