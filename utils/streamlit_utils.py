@@ -546,8 +546,11 @@ def display_system_locations():
         }
     )
 
+    system_locations = system_locations[["alias", "pages", "address"]]
+    system_locations = system_locations.style.map(lambda _: "font-weight: bold", subset=['alias'])
+
     st.dataframe(
-        system_locations[['alias', 'pages', 'address']],
+        system_locations,  # this is a pandas Style object, can not be used to filter columns anymore, that's why we filtered them before
         hide_index=True,
         row_height=25,
         use_container_width=False,
