@@ -141,6 +141,15 @@ class SQLManager(object):
                         UNIQUE(table_id, user_id)
                     )''')
 
+        c.execute(f'''CREATE TABLE IF NOT EXISTS custom_bgg_games (
+                        id INTEGER PRIMARY KEY REFERENCES table_propositions(id) ON DELETE CASCADE,
+                        image_url TEXT,
+                        description TEXT,
+                        categories TEXT,
+                        mechanics TEXT
+                    )''')
+
+
         c.execute('''CREATE OR REPLACE FUNCTION check_max_players()
                      RETURNS trigger
                      LANGUAGE plpgsql
