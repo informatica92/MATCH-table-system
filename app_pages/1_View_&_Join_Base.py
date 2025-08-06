@@ -136,17 +136,16 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
         st.write(f":{'red' if is_full else 'green'}[**Joined Players ({table_proposition.joined_count}/{table_proposition.max_players}):**]")
         for joined_player_obj in table_proposition.joined_players or []:
             if joined_player_obj.username is not None:
-                player_col1, player_col2 = st.columns([1, 1])
-                with player_col1:
+                with st.container(horizontal=True, vertical_alignment="center"):
                     st.write(f"- {joined_player_obj.username}")
-                with player_col2:
                     # LEAVE
                     st.button(
-                        "⛔ Leave",
+                        "Leave",
                         key=f"leave_{table_proposition.table_id}_{joined_player_obj.username}_{section_name}",
                         on_click=stu.leave_callback, args=[table_proposition.table_id, joined_player_obj.username, joined_player_obj.user_id],
                         disabled=not stu.can_current_user_leave(joined_player_obj.username, table_proposition.proposed_by.username),
-                        help="Only the table owner or the player himself can leave a table."
+                        help="Only the table owner or the player himself can leave a table.",
+                        icon="⛔"
                     )
 
     # Create four columns for action buttons
