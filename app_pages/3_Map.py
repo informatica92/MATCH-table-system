@@ -13,7 +13,7 @@ st.header("🗺️ Map")
 
 gmap_url = os.environ.get('GMAP_MAP_URL')
 if gmap_url:
-    iframe(gmap_url, height=500, width=500)
+    iframe(gmap_url, height=500)
 else:
     st.warning("GMAP_MAP_URL environment variable not set")
 

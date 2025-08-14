@@ -1,6 +1,5 @@
 import streamlit as st
 
-from time import time as time_time
 import datetime
 
 import utils.streamlit_utils as stu
@@ -136,7 +135,7 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
         st.write(f":{'red' if is_full else 'green'}[**Joined Players ({table_proposition.joined_count}/{table_proposition.max_players}):**]")
         for joined_player_obj in table_proposition.joined_players or []:
             if joined_player_obj.username is not None:
-                with st.container(horizontal=True, vertical_alignment="center"):
+                with st.container(horizontal=True, vertical_alignment="center"):  # NEW in Streamlit 1.48.0
                     st.write(f"- {joined_player_obj.username}")
                     # LEAVE
                     st.button(
@@ -149,9 +148,8 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
                     )
 
     # Create four columns for action buttons
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
-
-    with col1:
+    with st.container(horizontal=True, vertical_alignment="center"):
+        # JOIN
         if not is_full:
             if st.session_state['username']:
                 st.button(
@@ -168,19 +166,17 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
                 else:
                     st.warning("**Log in** to join a table.")
         else:
-            st.warning(f"Table {table_proposition.table_id} is full.", )
-
-    with col2:
+            st.warning(f"🟧 Table {table_proposition.table_id} is full", )
         # DELETE
         if st.button(
-            "⛔ Delete proposition",
+            "⛔ Delete",
             key=f"delete_{table_proposition.table_id}_{section_name}",
             use_container_width=True,
             disabled=not stu.can_current_user_delete_and_edit(table_proposition.proposed_by.username),
             help="Only the table owner can delete their tables."
         ):
             dialog_delete_table_proposition(table_proposition)
-    with col3:
+        # EDIT
         if st.button(
             "🖋️ Edit",
             key=f"edit_{table_proposition.table_id}_{section_name}",
@@ -189,9 +185,8 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
             help="Only the table owner can edit their tables."
         ):
             dialog_edit_table_proposition(table_proposition)
-
-    with col4:
-        pass
+        # FAKE SPACE ON THE RIGHT
+        stu.fake_space_for_horizontal_container()
 
 def view_table_propositions(compact=False):
     for proposition in st.session_state.propositions:
@@ -261,12 +256,12 @@ def create_view_and_join_page():
         stu.add_donation_button()
 
     # refresh and filter buttons
-    refresh_col, filter_col, errors_warnings_col, fake_col = st.columns([1, 1, 1, 3])
-    with refresh_col:
+    with st.container(horizontal=True):
+        # REFRESH
         refresh_button = st.button("🔄️ Refresh", key="refresh", use_container_width=True)
         if refresh_button:
             stu.refresh_table_propositions("Refresh")
-    with filter_col:
+        # FILTERS
         filter_label_num_active_filters = stu.get_num_active_filters(as_str=True)
         with st.popover(f"🔍 {filter_label_num_active_filters}Filters:", use_container_width=True):
             st.toggle(
@@ -307,7 +302,7 @@ def create_view_and_join_page():
                 help="You can't use this filter in this page" if proposition_filter_disabled else "Select a proposition type to filter tables by type.",
                 on_change=stu.refresh_table_propositions, kwargs={"reason": "Filtering Proposition Type"}
             )
-    with errors_warnings_col:
+        # OVERLAPS
         errors, warnings = stu.check_overlaps_in_joined_tables(st.session_state.global_propositions, st.session_state.user.user_id)
         num_overlaps = len(errors) + len(warnings)
         if num_overlaps == 0:
@@ -327,6 +322,8 @@ def create_view_and_join_page():
                         st.write(f"Table **\"{warning_left.game_name}\"** (ID {warning_left.table_id}) :orange[has a partial "
                                  f"overlap] with **\"{warning_right.game_name}\"** (ID {warning_right.table_id})")
                         stu.render_overlaps_table_buttons(warning_left, warning_right, "warn")
+        # FAKE SPACE ON THE RIGHT
+        stu.fake_space_for_horizontal_container(number=2)
 
     # show propositions
     if len(st.session_state.propositions) == 0:

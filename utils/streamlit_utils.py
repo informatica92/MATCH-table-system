@@ -108,6 +108,10 @@ def str_to_bool(s: str) -> bool:
     """
     return str(s).lower() == 'true'
 
+def fake_space_for_horizontal_container(number=1):
+    for _ in range(number):
+        with st.container():
+            st.empty()
 
 def refresh_table_propositions(reason, **kwargs):
     """
