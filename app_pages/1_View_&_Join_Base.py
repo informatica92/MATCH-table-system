@@ -39,15 +39,29 @@ def dialog_edit_table_proposition(old_table_proposition: TableProposition):
         notes = st.text_area("Notes", value=old_table_proposition.notes)
 
         # table proposition type
+        propositions_types = stu.get_table_proposition_types(as_list_of_dicts=True)
+        # in case the old proposition type is not in the list, we set it to 0 (default => Proposition) that is always present
+        index = old_table_proposition.proposition_type_id if old_table_proposition.proposition_type_id in [pt['id'] for pt in propositions_types] else 0
         if st.session_state.user.is_admin:
-            propositions_types = stu.get_table_proposition_types(as_list_of_dicts=True)
-            # in case the old proposition type is not in the list, we set it to 0 (default => Proposition) that is always present
-            index = old_table_proposition.proposition_type_id if old_table_proposition.proposition_type_id in [pt['id'] for pt in propositions_types] else 0
             st.selectbox("Proposition Type", options=propositions_types, key="proposition_type_edit", format_func=lambda x: x["value"], index=index)
+        else:
+            st.session_state['proposition_type_edit'] = propositions_types[index]
 
-        submitted = st.form_submit_button("💾 Update")
+        submitted = st.form_submit_button("💾 Update", width="stretch")
         if submitted:
-            stu.update_table_propositions(old_table_proposition, game_name, max_players, date, time, duration, notes, bgg_game_id, st.session_state.location_edit[0] if st.session_state.location_edit else None, st.session_state.expansions_edit, st.session_state.proposition_type_edit['id'])
+            stu.update_table_propositions(
+                old_table_proposition,
+                game_name,
+                max_players,
+                date,
+                time,
+                duration,
+                notes,
+                bgg_game_id,
+                st.session_state.location_edit[0] if st.session_state.location_edit else None,
+                st.session_state.expansions_edit,
+                st.session_state.proposition_type_edit['id']
+            )
             st.rerun()
 
 @st.dialog("⛔ Delete Proposition")
