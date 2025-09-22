@@ -71,7 +71,7 @@ def add_title_text(col, frmt="{title}"):
 
 def add_help_button(col: st.delta_generator.DeltaGenerator):
     col.write("")
-    with col.popover("", icon="ℹ️", use_container_width=True):
+    with col.popover("", icon="ℹ️", width='stretch'):
         st.write(f"Expanding the sidebar on the left ◀️ you can navigate among pages:\n\n"
          f"- **📜 Tables by ...**: view the table propositions, join, leave or edit them\n"
          f"   - **List**: view the table propositions as a list\n"
@@ -94,7 +94,7 @@ def get_go_to_user_page_link_button(use_container_width: bool = True):
         "app_pages/4_User.py",
         label="Go to \"**User**\" page",
         icon="🔗",
-        use_container_width=use_container_width
+        width='content' if use_container_width is False else 'stretch',
     )
 
 def st_write(label: str, size: int = 12) -> None:
@@ -202,7 +202,7 @@ def render_overlaps_table_buttons(table_left, table_right, prefix):
             if col.button(
                     f"Go to table {table_target.table_id}",
                     key=f"ov-{prefix}-{table_left.table_id}-{table_right.table_id}-{table_target.table_id}",
-                    use_container_width=True,
+                    width='stretch',
                     disabled=True if st.session_state.get("view_mode") != "📜List" else False,
                     help="Only available in the '📜List' view mode"
             ):
@@ -211,7 +211,7 @@ def render_overlaps_table_buttons(table_left, table_right, prefix):
             if col.button(
                     f"Go to {'Propositions' if table_target.proposition_type_id == 0 else 'Tournaments' if table_target.proposition_type_id == 1 else 'Demos'} page",
                     key=f"ov-{prefix}-{table_left.table_id}-{table_right.table_id}-{table_target.table_id}",
-                    use_container_width=True
+                    width='stretch'
             ):
                 st.switch_page(
                     VIEW_JOIN_PROPOSITIONS_PAGE if table_target.proposition_type_id == 0 else
@@ -528,7 +528,7 @@ def manage_user_locations(user_id: int|None):
     st.data_editor(
         df,
         hide_index=True,
-        use_container_width=True,
+        width='stretch',
         disabled=["id"],
         num_rows="dynamic",
         key=f"data_editor_locations_df_{user_id}",
@@ -557,7 +557,7 @@ def display_system_locations():
         system_locations,  # this is a pandas Style object, can not be used to filter columns anymore, that's why we filtered them before
         hide_index=True,
         row_height=25,
-        use_container_width=False,
+        width='content',
         column_config={
             'alias': st.column_config.TextColumn("Alias", help="Alias of the location, used to identify the location"),
             'pages': st.column_config.ListColumn("Pages", help="Pages in which tables at this location are displayed"),

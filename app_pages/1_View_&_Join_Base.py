@@ -170,7 +170,7 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
                     # JOIN
                     f"✅ Join Table {table_proposition.table_id}" if not table_proposition.joined(st.session_state.user.user_id) else "✅ *Already joined*",
                     key=f"join_{table_proposition.table_id}_{section_name}",
-                    use_container_width=True,
+                    width='stretch',
                     disabled=table_proposition.joined(st.session_state.user.user_id),
                     on_click=stu.join_callback, args=[table_proposition.table_id, st.session_state['username'], st.session_state.user.user_id]
                 )
@@ -185,7 +185,7 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
         if st.button(
             "⛔ Delete",
             key=f"delete_{table_proposition.table_id}_{section_name}",
-            use_container_width=True,
+            width='stretch',
             disabled=not stu.can_current_user_delete_and_edit(table_proposition.proposed_by.username),
             help="Only the table owner can delete their tables."
         ):
@@ -194,7 +194,7 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
         if st.button(
             "🖋️ Edit",
             key=f"edit_{table_proposition.table_id}_{section_name}",
-            use_container_width=True,
+            width='stretch',
             disabled=not stu.can_current_user_delete_and_edit(table_proposition.proposed_by.username),
             help="Only the table owner can edit their tables."
         ):
@@ -240,7 +240,7 @@ def dataframe_table_propositions(compact=False):
     }
     # 'table_id', 'image', 'time', 'game_name', 'duration', 'date', 'players', 'joined_players', 'proposed_by_username', 'joined', 'bgg'
     columns_order =  ['table_id', 'image_url', 'date', 'time', 'game_name', 'duration', 'players', 'proposed_by_username', 'joined', 'bgg', 'joined_players']
-    selected_data = st.dataframe(df, hide_index=True, use_container_width=True, column_config=column_config, column_order=columns_order, on_select="rerun", selection_mode="single-row", row_height=50)
+    selected_data = st.dataframe(df, hide_index=True, width='stretch', column_config=column_config, column_order=columns_order, on_select="rerun", selection_mode="single-row", row_height=50)
 
     st.subheader("Selected item")
 
@@ -272,12 +272,12 @@ def create_view_and_join_page():
     # refresh and filter buttons
     with st.container(horizontal=True):
         # REFRESH
-        refresh_button = st.button("🔄️ Refresh", key="refresh", use_container_width=True)
+        refresh_button = st.button("🔄️ Refresh", key="refresh", width='stretch')
         if refresh_button:
             stu.refresh_table_propositions("Refresh")
         # FILTERS
         filter_label_num_active_filters = stu.get_num_active_filters(as_str=True)
-        with st.popover(f"🔍 {filter_label_num_active_filters}Filters:", use_container_width=True):
+        with st.popover(f"🔍 {filter_label_num_active_filters}Filters:", width='stretch'):
             st.toggle(
                 "Joined by me",
                 key="joined_by_me",
@@ -320,10 +320,10 @@ def create_view_and_join_page():
         errors, warnings = stu.check_overlaps_in_joined_tables(st.session_state.global_propositions, st.session_state.user.user_id)
         num_overlaps = len(errors) + len(warnings)
         if num_overlaps == 0:
-            with st.popover("✅ No overlaps", use_container_width=True):
+            with st.popover("✅ No overlaps", width='stretch'):
                 st.write("No overlaps found")
         else:
-            with st.popover(f"{':exclamation:' if len(errors) else ':warning:'} {num_overlaps} overlaps", use_container_width=True):
+            with st.popover(f"{':exclamation:' if len(errors) else ':warning:'} {num_overlaps} overlaps", width='stretch'):
                 if len(errors):
                     st.write(f":exclamation: {len(errors)} important:")
                     for error_left, error_right in errors:

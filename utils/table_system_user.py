@@ -4,11 +4,11 @@ import streamlit as st
 from utils.table_system_logging import logging
 
 def login_button():
-    if st.button("🔐 Login", use_container_width=True, disabled=st.session_state.user.is_logged_in()):
+    if st.button("🔐 Login", width='stretch', disabled=st.session_state.user.is_logged_in()):
         st.login(provider="auth0")
 
 def logout_button():
-    if st.button("❌ Logout", use_container_width=True, disabled=not st.session_state.user.is_logged_in()):
+    if st.button("❌ Logout", width='stretch', disabled=not st.session_state.user.is_logged_in()):
         st.logout()
 
 @st.cache_data(ttl="1h")  # cache user_id, username, is_admin from email but only for 1h
