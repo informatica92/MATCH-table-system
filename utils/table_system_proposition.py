@@ -3,6 +3,20 @@ import time as time_module
 from utils.bgg_manager import get_bgg_game_info, get_bgg_url
 from utils.table_system_user import StreamlitTableSystemUser
 
+# create a function that accepts an object in input and a number of chars for its preview, check if it is a string, if
+# not returns it as it is, otherwise checks the sting len, if it is smaller than the number of chars for the preview,
+# return it as it is, otherwise return the first n chars and append the '...' to highlight the truncation
+
+def _str_preview(obj: str, n_chars: int):
+    # if obj is not a string...
+    if not isinstance(obj, str):
+        return obj
+    # if it is a string...
+    if len(obj) <= n_chars:
+        return obj
+    else:
+        return obj[:n_chars] + '...'
+
 class TablePropositionExpansion(object):
     def __init__(
             self,
@@ -35,7 +49,7 @@ class TablePropositionExpansion(object):
 
     def to_markdown(self) -> str:
         """
-        Format the expansion as a markdown link.
+        Format the expansion as a Markdown link.
         :return: Markdown formatted string for the expansion.
         """
         return f"[{self.expansion_name}]({get_bgg_url(self.expansion_id)})"
@@ -229,6 +243,12 @@ class TableProposition(object):
         :return: True if the user is joined, False otherwise.
         """
         return any(player.user_id == user_id for player in self.joined_players)
+
+    def get_notes_preview(self, n_chars=20):
+        return _str_preview(self.notes, n_chars)
+
+    def get_description_preview(self, n_chars=120):
+        return _str_preview(self.game_description, n_chars)
 
     # PROPERTIES
 

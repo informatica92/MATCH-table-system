@@ -97,8 +97,7 @@ def display_table_proposition(section_name, table_proposition: TableProposition)
     col1, col2, col3 = st.columns([1, 1, 1])
 
     with col1:
-        caption = f"{table_proposition.game_description[:120]}..."
-        st.image(table_proposition.image_url or stu.DEFAULT_IMAGE_URL, caption=caption)
+        st.image(table_proposition.image_url or stu.DEFAULT_IMAGE_URL, caption=table_proposition.get_description_preview())
         stu.st_write(
             f"<b>Categories:</b> {', '.join(table_proposition.categories)}<br>"
             f"<b>Mechanics:</b> {', '.join(table_proposition.mechanics)}"
@@ -118,8 +117,7 @@ def display_table_proposition(section_name, table_proposition: TableProposition)
         with st.expander(f"📦 **Expansions** ({len(table_proposition.expansions)}):"):
             expansions_markdown = TablePropositionExpansion.to_markdown_list(table_proposition.expansions)
             st.write(expansions_markdown)
-        notes_preview = f"*{table_proposition.notes[:30]}...*" if len(str(table_proposition.notes)) > 30 else table_proposition.notes
-        with st.expander(f"📒 **Notes**: {notes_preview}"):
+        with st.expander(f"📒 **Notes**: {table_proposition.get_notes_preview()}"):
             st.write(table_proposition.notes)
 
     with col3:
