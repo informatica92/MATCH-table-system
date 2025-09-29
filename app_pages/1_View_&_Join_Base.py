@@ -85,7 +85,7 @@ def dialog_delete_table_proposition(table_proposition: TableProposition):
             stu.delete_callback(table_proposition.table_id)
             st.rerun()
 
-def display_table_proposition(section_name, compact, table_proposition: TableProposition):
+def display_table_proposition(section_name, table_proposition: TableProposition):
     # Check if the BGG game ID is valid and set the BGG URL
     if table_proposition.bgg_game_id and int(table_proposition.bgg_game_id) >= 1:
         bgg_url = get_bgg_url(table_proposition.bgg_game_id)
@@ -97,42 +97,30 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
     col1, col2, col3 = st.columns([1, 1, 1])
 
     with col1:
-        if table_proposition.bgg_game_id and int(table_proposition.bgg_game_id) >= 1:
-            # image_url, game_description, categories, mechanics, _, _ = get_bgg_game_info(table_proposition.bgg_game_id)
-            image_width = 300 if not compact else 150
-            caption = f"{table_proposition.game_description[:120]}..." if not compact else None
-            st.image(table_proposition.image_url or stu.DEFAULT_IMAGE_URL, width=image_width, caption=caption)
-            if not compact:
-                stu.st_write(
-                    f"<b>Categories:</b> {', '.join(table_proposition.categories)}<br>"
-                    f"<b>Mechanics:</b> {', '.join(table_proposition.mechanics)}"
-                )
-        else:
-            st.image(stu.DEFAULT_IMAGE_URL)
+        caption = f"{table_proposition.game_description[:120]}..."
+        st.image(table_proposition.image_url or stu.DEFAULT_IMAGE_URL, caption=caption)
+        stu.st_write(
+            f"<b>Categories:</b> {', '.join(table_proposition.categories)}<br>"
+            f"<b>Mechanics:</b> {', '.join(table_proposition.mechanics)}"
+        )
 
     with col2:
         with st.container(horizontal=True):
             st.badge(f"**{table_proposition.time.strftime('%H:%M')}**", icon="⌚", color="violet")
             st.badge(f"{table_proposition.date}", icon="📅", color="blue")
             st.badge(f"{'{:02d}:{:02d}'.format(*divmod(table_proposition.duration, 60))}h", icon="⏳", color="orange")
-
-        if not compact:
-            stu.create_user_info(user=table_proposition.proposed_by, icon="🧔🏻", label=" **Proposed by** ")
-            with st.expander(f"🗺️ **Location**: {table_proposition.location.location_alias}"):
-                location_markdown = table_proposition.location.to_markdown(st.session_state.user, icon="🔗")
-                # location_markdown includes address + link to google maps IF default location or logged users
-                # otherwise it is equal to "*Unknown*"
-                st.write(location_markdown)
-            with st.expander(f"📦 **Expansions** ({len(table_proposition.expansions)}):"):
-                expansions_markdown = TablePropositionExpansion.to_markdown_list(table_proposition.expansions)
-                st.write(expansions_markdown)
-            notes_preview = f"*{table_proposition.notes[:30]}...*" if len(str(table_proposition.notes)) > 30 else table_proposition.notes
-            with st.expander(f"📒 **Notes**: {notes_preview}"):
-                st.write(table_proposition.notes)
-        else:
-            st.write(f"**Proposed By:**&nbsp;{table_proposition.proposed_by.username}")
-            st.write(f"**Date Time:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{table_proposition.date} {table_proposition.time}")
-            st.write(f"**Duration:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{table_proposition.duration} mins")
+        stu.create_user_info(user=table_proposition.proposed_by, icon="🧔🏻", label=" **Proposed by** ")
+        with st.expander(f"🗺️ **Location**: {table_proposition.location.location_alias}"):
+            location_markdown = table_proposition.location.to_markdown(st.session_state.user, icon="🔗")
+            # location_markdown includes address + link to google maps IF default location or logged users
+            # otherwise it is equal to "*Unknown*"
+            st.write(location_markdown)
+        with st.expander(f"📦 **Expansions** ({len(table_proposition.expansions)}):"):
+            expansions_markdown = TablePropositionExpansion.to_markdown_list(table_proposition.expansions)
+            st.write(expansions_markdown)
+        notes_preview = f"*{table_proposition.notes[:30]}...*" if len(str(table_proposition.notes)) > 30 else table_proposition.notes
+        with st.expander(f"📒 **Notes**: {notes_preview}"):
+            st.write(table_proposition.notes)
 
     with col3:
         is_full = table_proposition.joined_count >= table_proposition.max_players
@@ -192,12 +180,12 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
         # FAKE SPACE ON THE RIGHT
         stu.fake_space_for_horizontal_container()
 
-def view_table_propositions(compact=False):
+def view_table_propositions():
     for proposition in st.session_state.propositions:
         proposition: TableProposition
-        display_table_proposition(section_name="list", compact=compact, table_proposition=proposition)
+        display_table_proposition(section_name="list", table_proposition=proposition)
 
-def timeline_table_propositions(compact=False):
+def timeline_table_propositions():
     df = stu.table_propositions_to_df(add_group=True, add_status=True, add_start_and_end_date=True)
 
     chart = timeline_chart(df)
@@ -209,9 +197,9 @@ def timeline_table_propositions(compact=False):
         if selected_data.get("selection", {}).get("param_1", {}) and len(selected_data["selection"]["param_1"]) != 0:
             _id = selected_data["selection"]["param_1"][0]['table_id']
             selected_row = df[df['table_id'] == _id].iloc[0]
-            display_table_proposition(section_name="timeline", compact=compact, table_proposition=TableProposition.from_dict(selected_row))
+            display_table_proposition(section_name="timeline", table_proposition=TableProposition.from_dict(selected_row))
 
-def dataframe_table_propositions(compact=False):
+def dataframe_table_propositions():
 
     df = stu.table_propositions_to_df(add_bgg_url=True, add_players_fraction=True, add_joined=True)
 
@@ -238,7 +226,7 @@ def dataframe_table_propositions(compact=False):
         if selected_data.get("selection", {}).get("rows", {}) and len(selected_data["selection"]["rows"]) != 0:
             _id = selected_data["selection"]["rows"][0]
             selected_row = df.iloc[_id]
-            display_table_proposition(section_name="timeline", compact=compact, table_proposition=TableProposition.from_dict(selected_row))
+            display_table_proposition(section_name="timeline", table_proposition=TableProposition.from_dict(selected_row))
 
 def create_view_and_join_page():
 
@@ -256,7 +244,6 @@ def create_view_and_join_page():
     with st.sidebar:
         with st.container(border=True):
             st.selectbox("View mode", options=["📜List", "📊Timeline", "◻️Table"], key="view_mode")
-            st.toggle("Compact view", key="compact_view")
         stu.add_donation_button()
 
     # refresh and filter buttons
@@ -335,8 +322,8 @@ def create_view_and_join_page():
                 "\n\n*NB: tables are automatically hidden after 1 day*")
     else:
         if st.session_state['view_mode'] == "📜List":
-            view_table_propositions(st.session_state['compact_view'])
+            view_table_propositions()
         elif st.session_state['view_mode'] == "📊Timeline":
-            timeline_table_propositions(st.session_state['compact_view'])
+            timeline_table_propositions()
         else:
-            dataframe_table_propositions(st.session_state['compact_view'])
+            dataframe_table_propositions()
