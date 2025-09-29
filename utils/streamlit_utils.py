@@ -10,7 +10,7 @@ from datetime import datetime
 from utils.telegram_notifications import TelegramNotifications
 from utils.sql_manager import SQLManager
 from utils.bgg_manager import get_bgg_url
-from utils.table_system_proposition import TableProposition
+from utils.table_system_proposition import TableProposition, JoinedPlayerOrProposer
 from utils.table_system_logging import logging
 
 
@@ -607,3 +607,7 @@ def add_donation_button(label='Support me on Ko-fi', color='#29abe0'):
     <script type='text/javascript'>kofiwidget2.init('{label}', '{color}', '{user}');kofiwidget2.draw();</script>
     """
     components.v1.html(script)
+
+def create_user_info(user: JoinedPlayerOrProposer, label=None, icon=None):
+    with st.expander(f"{icon or ''}{label or ''}{user.username}"):
+        st.write(f"**BGG**: *coming soon* **Telegram**: *coming soon*")

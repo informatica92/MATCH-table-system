@@ -111,23 +111,13 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
             st.image(stu.DEFAULT_IMAGE_URL)
 
     with col2:
-        def reset_table_info(key: str):
-            st.session_state[key] = None
+        with st.container(horizontal=True):
+            st.badge(f"**{table_proposition.time.strftime('%H:%M')}**", icon="⌚", color="violet")
+            st.badge(f"{table_proposition.date}", icon="📅", color="blue")
+            st.badge(f"{'{:02d}:{:02d}'.format(*divmod(table_proposition.duration, 60))}h", icon="⏳", color="orange")
 
-        st.pills(
-            label="table_info", label_visibility="collapsed",
-            options=[
-                # f"🧑‍🤝‍🧑 {table_proposition.max_players} players",
-                f"⌚ **{table_proposition.time.strftime('%H:%M')}**",
-                f"📅 {table_proposition.date}",
-                f"⏳ {'{:02d}:{:02d}'.format(*divmod(table_proposition.duration, 60))}h",
-            ],
-            key=f"table_info_{table_proposition.table_id}_{section_name}",
-            on_change=reset_table_info, kwargs={"key": f"table_info_{table_proposition.table_id}_{section_name}"},
-        )
         if not compact:
-            with st.expander(f"🧔🏻 **Proposed By**: {table_proposition.proposed_by.username}"):
-                st.write(f"**BGG**: *coming soon* **Telegram**: *coming soon*")
+            stu.create_user_info(user=table_proposition.proposed_by, icon="🧔🏻", label=" **Proposed by** ")
             with st.expander(f"🗺️ **Location**: {table_proposition.location.location_alias}"):
                 location_markdown = table_proposition.location.to_markdown(st.session_state.user, icon="🔗")
                 # location_markdown includes address + link to google maps IF default location or logged users
@@ -150,7 +140,7 @@ def display_table_proposition(section_name, compact, table_proposition: TablePro
         for joined_player_obj in table_proposition.joined_players or []:
             if joined_player_obj.username is not None:
                 with st.container(horizontal=True, vertical_alignment="center"):  # NEW in Streamlit 1.48.0
-                    st.write(f"- {joined_player_obj.username}")
+                    stu.create_user_info(user=joined_player_obj)
                     # LEAVE
                     st.button(
                         "Leave",
