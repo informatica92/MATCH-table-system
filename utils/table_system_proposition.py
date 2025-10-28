@@ -1,6 +1,21 @@
 import datetime
 import time as time_module
-from utils.bgg_manager import get_bgg_game_info
+from utils.bgg_manager import get_bgg_game_info, get_bgg_url
+from utils.table_system_user import StreamlitTableSystemUser
+
+# create a function that accepts an object in input and a number of chars for its preview, check if it is a string, if
+# not returns it as it is, otherwise checks the sting len, if it is smaller than the number of chars for the preview,
+# return it as it is, otherwise return the first n chars and append the '...' to highlight the truncation
+
+def _str_preview(obj: str, n_chars: int):
+    # if obj is not a string...
+    if not isinstance(obj, str):
+        return obj
+    # if it is a string...
+    if len(obj) <= n_chars:
+        return obj
+    else:
+        return obj[:n_chars] + '...'
 
 class TablePropositionExpansion(object):
     def __init__(
@@ -31,6 +46,19 @@ class TablePropositionExpansion(object):
     @staticmethod
     def to_list_of_dicts(list_) -> list[dict]:
         return [expansion.to_dict() for expansion in list_]
+
+    def to_markdown(self) -> str:
+        """
+        Format the expansion as a Markdown link.
+        :return: Markdown formatted string for the expansion.
+        """
+        return f"[{self.expansion_name}]({get_bgg_url(self.expansion_id)})"
+
+    @staticmethod
+    def to_markdown_list(expansions: list['TablePropositionExpansion']) -> str:
+        return ', '.join(
+            [f"\n - {expansion.to_markdown()}" for expansion in expansions]
+        )
 
 
 class JoinedPlayerOrProposer(object):
@@ -66,19 +94,33 @@ class TablePropositionLocation(object):
             self,
             location_alias: str,
             location_address: str,
-            location_is_system: bool
+            location_is_system: bool,
+            location_is_default: bool
     ):
         self.location_alias = location_alias
         self.location_address = location_address
         self.location_is_system = location_is_system
+        self.location_is_default = location_is_default
 
     @staticmethod
     def from_dict(dict_) -> 'TablePropositionLocation':
         return TablePropositionLocation(
             location_alias=dict_['location_alias'],
             location_address=dict_['location_address'],
-            location_is_system=dict_['location_is_system']
+            location_is_system=dict_['location_is_system'],
+            location_is_default=dict_.get('location_is_default')
         )
+
+    def to_markdown(self, user: StreamlitTableSystemUser, icon="🗺️"):
+        if user.is_logged_in() or self.location_is_system:
+            if self.location_alias:
+                location_md = f"{self.location_address}\n\n"
+                location_md += f"{icon} [{self.location_alias}](https://maps.google.com/?q={self.location_address.replace(' ', '+')})"
+            else:
+                location_md = "*Unknown*"
+        else:
+            location_md = "*Login to see the location*"
+        return location_md
 
 class TableProposition(object):
     def __init__(
@@ -100,6 +142,7 @@ class TableProposition(object):
             location_alias: str,
             location_address: str,
             location_is_system: bool,
+            location_is_default: bool,
             expansions: list[dict],
             proposition_type_id: int,
             **kwargs
@@ -114,7 +157,7 @@ class TableProposition(object):
         self.duration: int = duration
         self.notes: str = notes
         self.joined_players: list[JoinedPlayerOrProposer] = JoinedPlayerOrProposer.from_tuples(joined_players_ids, joined_players, joined_players_emails)
-        self.location: TablePropositionLocation = TablePropositionLocation(location_alias, location_address, location_is_system)
+        self.location: TablePropositionLocation = TablePropositionLocation(location_alias, location_address, location_is_system, location_is_default)
         self.expansions: list[TablePropositionExpansion] = TablePropositionExpansion.from_list_of_dicts(expansions)
         self.proposition_type_id: int = proposition_type_id or 0
         # BGG info:
@@ -146,6 +189,7 @@ class TableProposition(object):
                 'location_alias': self.location.location_alias,
                 'location_address': self.location.location_address,
                 'location_is_system': self.location.location_is_system,
+                'location_is_default': self.location.location_is_default,
                 'expansions': [expansion.to_dict() for expansion in self.expansions],
                 'proposition_type_id': self.proposition_type_id,
                 'image_url': self.image_url,
@@ -176,7 +220,8 @@ class TableProposition(object):
                 'location': {
                     'location_alias': self.location.location_alias,
                     'location_address': self.location.location_address,
-                    'location_is_system': self.location.location_is_system
+                    'location_is_system': self.location.location_is_system,
+                    'location_is_default': self.location.location_is_default
                 },
                 'expansions': [
                     {
@@ -190,6 +235,20 @@ class TableProposition(object):
 
     def get_joined_players_usernames(self):
         return [player.username for player in self.joined_players]
+
+    def joined(self, user_id: int) -> bool:
+        """
+        Check if a user is already joined to this table proposition.
+        :param user_id: The ID of the user to check.
+        :return: True if the user is joined, False otherwise.
+        """
+        return any(player.user_id == user_id for player in self.joined_players)
+
+    def get_notes_preview(self, n_chars=20):
+        return _str_preview(self.notes, n_chars)
+
+    def get_description_preview(self, n_chars=120):
+        return _str_preview(self.game_description, n_chars)
 
     # PROPERTIES
 
@@ -234,6 +293,7 @@ class TableProposition(object):
          - location_alias,
          - location_address,
          - location_is_system,
+         - location_is_default,
          - expansions
          - proposition_type_id
         :param tuple_:

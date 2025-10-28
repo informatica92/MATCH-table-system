@@ -407,20 +407,20 @@ class SQLManager(object):
         conn.close()
 
     # TABLES
-    def get_table_propositions(self, joined_by_me: bool, filter_username: str, filter_default_location: bool, proposition_type_id_mode: int, proposed_by_me: bool = False):
+    def get_table_propositions(self):
 
-        _vars = []
-        if joined_by_me:
-            joined_by_me_clause = "and tp.id in (SELECT table_id FROM joined_players jp1 join users ju1 on (jp1.user_id = ju1.id) WHERE LOWER(ju1.username) = LOWER(%s))"
-            _vars.append(filter_username)
-        else:
-            joined_by_me_clause = "and TRUE"
-
-        if proposed_by_me:
-            proposed_by_me_clause = " and LOWER(proposing_user.username) = LOWER(%s)"
-            _vars.append(filter_username)
-        else:
-            proposed_by_me_clause = "and TRUE"
+        # _vars = []
+        # if joined_by_me:
+        #     joined_by_me_clause = "and tp.id in (SELECT table_id FROM joined_players jp1 join users ju1 on (jp1.user_id = ju1.id) WHERE LOWER(ju1.username) = LOWER(%s))"
+        #     _vars.append(filter_username)
+        # else:
+        #     joined_by_me_clause = "and TRUE"
+        #
+        # if proposed_by_me:
+        #     proposed_by_me_clause = " and LOWER(proposing_user.username) = LOWER(%s)"
+        #     _vars.append(filter_username)
+        # else:
+        #     proposed_by_me_clause = "and TRUE"
 
         conn = self.get_db_connection()
         c = conn.cursor()
@@ -443,6 +443,7 @@ class SQLManager(object):
                     loc.alias as location_alias,                    
                     concat_ws(' ', loc.country, loc.city, loc.street_name, loc.house_number) as location_full_address,   
                     CASE WHEN loc.user_id IS NULL THEN TRUE ELSE FALSE END as is_system_location,
+                    coalesce(loc.is_default, FALSE) as is_default_location,
                     expansions,
                     tp.type_id
                 FROM 
@@ -453,12 +454,8 @@ class SQLManager(object):
                     left join locations loc on loc.id = tp.location_id
                 WHERE
                     TRUE
-                    {joined_by_me_clause}
-                    {proposed_by_me_clause}
                     -- check if date is in the future with 1 day of margin
                     and tp.date >= current_date - INTERVAL '1 day'
-                    and coalesce(loc.is_default, FALSE) = {filter_default_location}  --if is_default is NULL (original location has been removed) assume it is a non default location
-                    and tp.type_id = {proposition_type_id_mode}
                 group by 
                     tp.id,
                     tp.game_name,
@@ -472,9 +469,10 @@ class SQLManager(object):
                     proposing_user.email,
                     loc.alias,
                     loc.country, loc.city, loc.street_name, loc.house_number,
+                    coalesce(loc.is_default, FALSE),
                     loc.user_id
                 order by tp.date, tp.time, tp.id
-            ''', _vars
+            '''
         )
         propositions = c.fetchall()
         c.close()
