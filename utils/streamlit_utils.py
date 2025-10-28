@@ -602,11 +602,13 @@ def get_rest_of_the_world_page_name():
 
 def add_donation_button(label='Support me on Ko-fi', color='#29abe0'):
     user = os.environ.get("DONATION_USER", "informatica92")
-    script = f"""
-    <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
-    <script type='text/javascript'>kofiwidget2.init('{label}', '{color}', '{user}');kofiwidget2.draw();</script>
-    """
-    components.v1.html(script)
+    donations_are_active = str_to_bool(os.environ.get("DONATIONS_ARE_ACTIVE", default="False"))
+    if donations_are_active:
+        script = f"""
+        <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+        <script type='text/javascript'>kofiwidget2.init('{label}', '{color}', '{user}');kofiwidget2.draw();</script>
+        """
+        components.v1.html(script)
 
 def create_user_info(user: JoinedPlayerOrProposer, label=None, icon=None):
     with st.expander(f"{icon or ''}{label or ''}{user.username}"):
