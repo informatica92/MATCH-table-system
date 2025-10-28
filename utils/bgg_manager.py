@@ -1,3 +1,4 @@
+import os
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
@@ -7,6 +8,9 @@ import xml.etree.ElementTree as et
 from streamlit import cache_data
 
 from utils.table_system_logging import logging
+
+BGG_API_BEARER_TOKEN = os.getenv("BGG_API_BEARER_TOKEN")
+HEADERS = {"Authorization": f"Bearer {BGG_API_BEARER_TOKEN}"}
 
 
 @cache_data(ttl=None, max_entries=1000, persist="disk")
@@ -32,7 +36,7 @@ def get_bgg_game_info(game_id):
 
     try:
         # Make a GET request to fetch the game data
-        response = session.get(url)
+        response = session.get(url, headers=HEADERS)
 
         # Raise an HTTPError for bad responses
         response.raise_for_status()
@@ -87,7 +91,7 @@ def get_bgg_profile_page_url(username, as_html_link=False):
 def search_bgg_games(game_name):
     url = f"https://boardgamegeek.com/xmlapi2/search?query={game_name}&type=boardgame"
     try:
-        response = requests.get(url)
+        response = requests.get(url, headers=HEADERS)
         response.raise_for_status()
         root = et.fromstring(response.content)
 

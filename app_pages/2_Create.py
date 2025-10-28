@@ -112,5 +112,7 @@ with st.form(key="create_new_proposition_form", border=False):
         else:
             st.warning("**Log in** to create a proposition.")
 
+stu.add_powered_by_bgg_image()
+
 with st.sidebar:
     stu.add_donation_button()

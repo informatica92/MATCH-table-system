@@ -325,3 +325,5 @@ def create_view_and_join_page():
             timeline_table_propositions()
         else:
             dataframe_table_propositions()
+
+    stu.add_powered_by_bgg_image()
