@@ -600,13 +600,21 @@ def get_table_proposition_types(as_list_of_dicts: bool = False, as_reversed_dict
 def get_rest_of_the_world_page_name():
     return os.environ.get("REST_OF_THE_WORLD_PAGE_NAME") or "Rest of the World"
 
+def add_powered_by_bgg_image():
+    bgg_url = os.getenv("BGG_URL", "https://boardgamegeek.com/")
+    bgg_powered_by_img = os.getenv("BGG_POWERED_BY_IMAGE", "https://cf.geekdo-images.com/HZy35cmzmmyV9BarSuk6ug__small/img/gbE7sulIurZE_Tx8EQJXnZSKI6w=/fit-in/200x150/filters:strip_icc()/pic7779581.png")
+    st.markdown(f"[![Powered by BGG]({bgg_powered_by_img})]({bgg_url})")
+
+
 def add_donation_button(label='Support me on Ko-fi', color='#29abe0'):
     user = os.environ.get("DONATION_USER", "informatica92")
-    script = f"""
-    <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
-    <script type='text/javascript'>kofiwidget2.init('{label}', '{color}', '{user}');kofiwidget2.draw();</script>
-    """
-    components.v1.html(script)
+    donations_are_active = str_to_bool(os.environ.get("DONATIONS_ARE_ACTIVE", default="False"))
+    if donations_are_active:
+        script = f"""
+        <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+        <script type='text/javascript'>kofiwidget2.init('{label}', '{color}', '{user}');kofiwidget2.draw();</script>
+        """
+        components.v1.html(script)
 
 def create_user_info(user: JoinedPlayerOrProposer, label=None, icon=None):
     with st.expander(f"{icon or ''}{label or ''}{user.username}"):
