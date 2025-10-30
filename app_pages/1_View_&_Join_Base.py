@@ -176,7 +176,7 @@ def display_table_proposition(section_name, table_proposition: TableProposition)
         ):
             dialog_edit_table_proposition(table_proposition)
         # FAKE SPACE ON THE RIGHT
-        stu.fake_space_for_horizontal_container()
+        st.space("stretch")
 
 def view_table_propositions():
     for proposition in st.session_state.propositions:
@@ -312,7 +312,7 @@ def create_view_and_join_page():
                                  f"overlap] with **\"{warning_right.game_name}\"** (ID {warning_right.table_id})")
                         stu.render_overlaps_table_buttons(warning_left, warning_right, "warn")
         # FAKE SPACE ON THE RIGHT
-        stu.fake_space_for_horizontal_container(number=2)
+        st.space("stretch")
 
     # show propositions
     if len(st.session_state.propositions) == 0:
@@ -326,4 +326,5 @@ def create_view_and_join_page():
         else:
             dataframe_table_propositions()
 
+    st.divider()
     stu.add_powered_by_bgg_image()
