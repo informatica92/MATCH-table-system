@@ -187,7 +187,7 @@ def timeline_table_propositions():
     df = stu.table_propositions_to_df(add_group=True, add_status=True, add_start_and_end_date=True)
 
     chart = timeline_chart(df)
-    selected_data = st.altair_chart(chart, use_container_width=True, on_select="rerun", theme=None)
+    selected_data = st.altair_chart(chart, width='stretch', on_select="rerun", theme=None)
 
     st.subheader("Selected item")
 
