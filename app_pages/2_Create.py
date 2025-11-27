@@ -33,7 +33,7 @@ image_url, game_description, categories, mechanics, available_expansions = None,
 if bgg_game_id:
     image_url, game_description, categories, mechanics, available_expansions, _ = get_bgg_game_info(bgg_game_id)
     col1, col2 = st.columns([1, 4])
-    col1.image(image_url, width='stretch')
+    col1.image(image_url or stu.DEFAULT_IMAGE_URL, width='stretch')
     col2.caption(f"**Description**: {game_description[:300]}...")
     with col2:
         stu.st_write(f"<b>BGG URL</b>: <a href='{stu.get_bgg_url(bgg_game_id)}'>{stu.get_bgg_url(bgg_game_id)}</a>")
