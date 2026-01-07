@@ -91,8 +91,13 @@ with st.form(key="create_new_proposition_form", border=False):
     # notes
     st.text_area(":black_nib: Notes", key="notes")
 
-    st.checkbox("Join me by default to this table once created", key="join_me_by_default", value=True)
-    stu.st_write("By default, you'll be added to this table once created. To avoid this, disable the above option")
+    with st.container(border=True):
+        st.checkbox("✅ Join me to this table once created", key="join_me_by_default", value=True)
+        stu.st_write("Once the table is created, <b>you'll be added to this table as a player</b>. To avoid this, disable the above option")
+
+    with st.container(border=True):
+        st.checkbox("➡️ Bring me to this table once created", key="bring_me_to_table", value=True)
+        stu.st_write("Once the table is created, <b>you'll be redirected to it</b>. To avoid this, disable the above option")
 
     if st.session_state['username']:
         if bgg_game_id:
@@ -100,6 +105,12 @@ with st.form(key="create_new_proposition_form", border=False):
                 st.success(f"Table proposition created successfully: {selected_game[1]} - {date_time} {time.strftime('%H:%M')}")
                 if st.session_state.join_me_by_default:
                     st.success(f"You have also joined this table by default as {st.session_state.username}.")
+                if st.session_state.bring_me_to_table:
+                    last_created_table = st.session_state.last_created_table_id
+                    if stu.is_default_location(st.session_state.location):
+                        st.switch_page(stu.VIEW_JOIN_LOC_DEFAULT_PAGE, query_params={"navigate_to": last_created_table})
+                    else:
+                        st.switch_page(stu.VIEW_JOIN_LOC_ROW_PAGE, query_params={"navigate_to": last_created_table})
         else:
             st.form_submit_button("Create Proposition", disabled=True)
             st.warning("Select a game from the list to create a proposition.")

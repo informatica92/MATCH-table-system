@@ -406,6 +406,7 @@ def create_callback(game_name, bgg_game_id, image_url):
                 st.toast(f"✅ Telegram notification sent successfully!")
             else:
                 st.toast(f"🚫 Telegram notification failed: **{telegram_output.error}**")
+        st.session_state.last_created_table_id = last_row_id
 
 def get_num_active_filters(as_str=True):
     number_of_active_filters = 0
