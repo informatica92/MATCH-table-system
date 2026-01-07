@@ -389,7 +389,7 @@ def create_callback(game_name, bgg_game_id, image_url):
             st.session_state.duration,
             st.session_state.username,
             last_row_id,
-            is_default_location(st.session_state.location[0]) if st.session_state.location else True,
+            is_default_location(st.session_state.location),
             st.session_state.location[1] if st.session_state.location else None,  # location alias
             image_url,
             proposition_type_id,
@@ -567,6 +567,10 @@ def get_default_location() -> dict:
     return sql_manager.get_default_location()
 
 def is_default_location(location_id):
+    if not location_id:
+        return True
+    if isinstance(location_id, tuple) or isinstance(location_id, list):
+        location_id = location_id[0]
     return int(location_id) == int(get_default_location()["id"])
 
 def get_table_proposition_types(as_list_of_dicts: bool = False, as_reversed_dict: bool = False):
