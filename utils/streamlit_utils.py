@@ -30,6 +30,15 @@ CREATE_PAGE = "app_pages/2_Create.py"
 MAP_PAGE = "app_pages/3_Map.py"
 USER_PAGE = "app_pages/4_User.py"
 
+HELP_TEXT = "Expanding the sidebar on the left ◀️ you can navigate among pages:\n\n"\
+"- **📜 Tables by ...**: view the table propositions, join, leave or edit them\n"\
+"   - **List**: view the table propositions as a list\n"\
+"   - **Timeline**: view the table propositions as a timeline\n"\
+"   - **Table**: view the table propositions as a table\n"\
+" - **➕ Create**: create a new table proposition\n"\
+" - **🗺️ Map**: view where the main location is and what is around there for food and drinks\n"\
+" - **👦🏻 User**: view the user profile (name, surname, username...) and manage locations\n\n"\
+"NB: *you have to set a **username** into the **\"User\"** page to join, create or edit tables*"\
 
 CUSTOM_TEXT_WITH_LABEL_AND_SIZE = "<p style='font-size:{size}px;'>{label}</p>"
 
@@ -67,20 +76,7 @@ def get_title():
     return os.environ.get("TITLE") or "Board Game Proposals"
 
 def add_title_text(col, frmt="{title}"):
-    col.title(frmt.format(title=get_title()))
-
-def add_help_button(col: st.delta_generator.DeltaGenerator):
-    col.write("")
-    with col.popover("", icon="ℹ️", width='stretch'):
-        st.write(f"Expanding the sidebar on the left ◀️ you can navigate among pages:\n\n"
-         f"- **📜 Tables by ...**: view the table propositions, join, leave or edit them\n"
-         f"   - **List**: view the table propositions as a list\n"
-         f"   - **Timeline**: view the table propositions as a timeline\n"
-         f"   - **Table**: view the table propositions as a table\n"
-         f" - **➕ Create**: create a new table proposition\n"
-         f" - **🗺️ Map**: view where the main location is and what is around there for food and drinks\n"
-         f" - **👦🏻 User**: view the user profile (name, surname, username...) and manage locations\n\n"
-         f"NB: *you have to set a **username** into the **\"User\"** page to join, create or edit tables*")
+    col.title(frmt.format(title=get_title()), text_alignment="center", help=HELP_TEXT)
 
 def get_logo():
     return os.environ.get("LOGO") or "images/logo.jpg"

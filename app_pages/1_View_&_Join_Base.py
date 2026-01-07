@@ -232,9 +232,7 @@ def create_view_and_join_page():
     stu.redirect_to_user_page_if_username_not_set()
 
     # title and help button
-    col_title, col_help = st.columns([9, 1])
-    stu.add_title_text(col_title, frmt="{title}")
-    stu.add_help_button(col_help)
+    stu.add_title_text(st, frmt="{title}")
 
     # print(f"Location mode [View Page]: {st.session_state.location_mode}")
 

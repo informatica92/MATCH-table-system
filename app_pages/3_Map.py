@@ -5,9 +5,7 @@ import os
 
 import utils.streamlit_utils as stu
 
-col_title, col_help = st.columns([9, 1])
-stu.add_title_text(col_title, frmt="{title}")
-stu.add_help_button(col_help)
+stu.add_title_text(st, frmt="{title}")
 
 st.header("🗺️ Map")
 
