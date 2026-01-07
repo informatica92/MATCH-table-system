@@ -92,12 +92,18 @@ with st.form(key="create_new_proposition_form", border=False):
     st.text_area(":black_nib: Notes", key="notes")
 
     with st.container(border=True):
-        st.checkbox("✅ Join me to this table once created", key="join_me_by_default", value=True)
-        stu.st_write("Once the table is created, <b>you'll be added to this table as a player</b>. To avoid this, disable the above option")
+        st.checkbox(":material/person_add: Join me to this table once created", key="join_me_by_default", value=True)
+        stu.st_write(
+            "Once the table is created, <b>you'll be added to this table as a player</b>. To avoid this, disable the above option",
+            color="gray"
+        )
 
     with st.container(border=True):
-        st.checkbox("➡️ Bring me to this table once created", key="bring_me_to_table", value=True)
-        stu.st_write("Once the table is created, <b>you'll be redirected to it</b>. To avoid this, disable the above option")
+        st.checkbox(":material/open_in_new: Bring me to this table once created", key="bring_me_to_table", value=True)
+        stu.st_write(
+            "Once the table is created, <b>you'll be redirected to it</b>. To avoid this, disable the above option",
+            color="gray"
+        )
 
     if st.session_state['username']:
         if bgg_game_id:

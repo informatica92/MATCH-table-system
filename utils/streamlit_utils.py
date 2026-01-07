@@ -40,7 +40,7 @@ HELP_TEXT = "Expanding the sidebar on the left ◀️ you can navigate among pag
 " - **👦🏻 User**: view the user profile (name, surname, username...) and manage locations\n\n"\
 "NB: *you have to set a **username** into the **\"User\"** page to join, create or edit tables*"\
 
-CUSTOM_TEXT_WITH_LABEL_AND_SIZE = "<p style='font-size:{size}px;'>{label}</p>"
+CUSTOM_TEXT_WITH_LABEL_AND_SIZE = "<p style='font-size:{size}px;color:{color}'>{label}</p>"
 
 BOUNCE_SIDEBAR_ICON = r"""
     <style>
@@ -93,8 +93,9 @@ def get_go_to_user_page_link_button(use_container_width: bool = True):
         width='content' if use_container_width is False else 'stretch',
     )
 
-def st_write(label: str, size: int = 12) -> None:
-    st.write(CUSTOM_TEXT_WITH_LABEL_AND_SIZE.format(label=label, size=size), unsafe_allow_html=True)
+def st_write(label: str, size: int = 12, color: str = "black") -> None:
+    txt = CUSTOM_TEXT_WITH_LABEL_AND_SIZE.format(label=label, size=size, color=color)
+    st.write(txt, unsafe_allow_html=True)
 
 def str_to_bool(s: str) -> bool:
     """
