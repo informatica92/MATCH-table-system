@@ -11,58 +11,59 @@ from utils.table_system_proposition import TableProposition, TablePropositionExp
 @st.dialog("🖋️ Edit Table")
 def dialog_edit_table_proposition(old_table_proposition: TableProposition):
     with st.form(key=f"form-edit-{old_table_proposition.table_id}"):
-        col1, col2 = st.columns([1, 1])
-        with col1:
-            game_name = st.text_input("Game Name", value=old_table_proposition.game_name, disabled=True)
-            max_players = st.number_input("Max Players", value=old_table_proposition.max_players, step=1, min_value=old_table_proposition.joined_count)
-            date = st.date_input("Date", value=old_table_proposition.date, min_value=min(old_table_proposition.date, datetime.date.today()))
-        with col2:
-            bgg_game_id = st.text_input("BGG Game ID", value=old_table_proposition.bgg_game_id, help=stu.BGG_GAME_ID_HELP, disabled=True)
-            duration = st.number_input(f"Duration (minutes, step: {stu.get_duration_step()}mins)", value=old_table_proposition.duration, step=stu.get_duration_step())
-            time = st.time_input("Time", value=old_table_proposition.time, step=60*30)
+        with st.container(gap=stu.SPACE_BETWEEN_VERTICAL_COMPONENTS):
+            col1, col2 = st.columns([1, 1])
+            with col1:
+                game_name = st.text_input("Game Name", value=old_table_proposition.game_name, disabled=True)
+                max_players = st.number_input("Max Players", value=old_table_proposition.max_players, step=1, min_value=old_table_proposition.joined_count)
+                date = st.date_input("Date", value=old_table_proposition.date, min_value=min(old_table_proposition.date, datetime.date.today()))
+            with col2:
+                bgg_game_id = st.text_input("BGG Game ID", value=old_table_proposition.bgg_game_id, help=stu.BGG_GAME_ID_HELP, disabled=True)
+                duration = st.number_input(f"Duration (minutes, step: {stu.get_duration_step()}mins)", value=old_table_proposition.duration, step=stu.get_duration_step())
+                time = st.time_input("Time", value=old_table_proposition.time, step=60*30)
 
-        # locations
-        locations = stu.get_available_locations(st.session_state.user.user_id, True, False)  # 'id', 'street_name', 'city', 'house_number', 'country', 'alias', 'user_id'
-        locations = [(loc[0], loc[5]) for loc in locations]
-        location_old_index = None
-        for i, (_, alias) in enumerate(locations):
-            if alias == old_table_proposition.location.location_alias:
-                location_old_index = i
-        st.selectbox("Location", options=locations, index=location_old_index, key="location_edit", format_func=lambda x: x[1])
+            # locations
+            locations = stu.get_available_locations(st.session_state.user.user_id, True, False)  # 'id', 'street_name', 'city', 'house_number', 'country', 'alias', 'user_id'
+            locations = [(loc[0], loc[5]) for loc in locations]
+            location_old_index = None
+            for i, (_, alias) in enumerate(locations):
+                if alias == old_table_proposition.location.location_alias:
+                    location_old_index = i
+            st.selectbox("Location", options=locations, index=location_old_index, key="location_edit", format_func=lambda x: x[1])
 
-        # expansions
-        expansions_options = TablePropositionExpansion.to_list_of_dicts(old_table_proposition.available_expansions)
-        expansions_default = TablePropositionExpansion.to_list_of_dicts(old_table_proposition.expansions)
-        st.multiselect("Expansions", options=expansions_options, default=expansions_default, format_func=lambda x: x['value'], key="expansions_edit")
+            # expansions
+            expansions_options = TablePropositionExpansion.to_list_of_dicts(old_table_proposition.available_expansions)
+            expansions_default = TablePropositionExpansion.to_list_of_dicts(old_table_proposition.expansions)
+            st.multiselect("Expansions", options=expansions_options, default=expansions_default, format_func=lambda x: x['value'], key="expansions_edit")
 
-        # notes
-        notes = st.text_area("Notes", value=old_table_proposition.notes)
+            # notes
+            notes = st.text_area("Notes", value=old_table_proposition.notes)
 
-        # table proposition type
-        propositions_types = stu.get_table_proposition_types(as_list_of_dicts=True)
-        # in case the old proposition type is not in the list, we set it to 0 (default => Proposition) that is always present
-        index = old_table_proposition.proposition_type_id if old_table_proposition.proposition_type_id in [pt['id'] for pt in propositions_types] else 0
-        if st.session_state.user.is_admin:
-            st.selectbox("Proposition Type", options=propositions_types, key="proposition_type_edit", format_func=lambda x: x["value"], index=index)
-        else:
-            st.session_state['proposition_type_edit'] = propositions_types[index]
+            # table proposition type
+            propositions_types = stu.get_table_proposition_types(as_list_of_dicts=True)
+            # in case the old proposition type is not in the list, we set it to 0 (default => Proposition) that is always present
+            index = old_table_proposition.proposition_type_id if old_table_proposition.proposition_type_id in [pt['id'] for pt in propositions_types] else 0
+            if st.session_state.user.is_admin:
+                st.selectbox("Proposition Type", options=propositions_types, key="proposition_type_edit", format_func=lambda x: x["value"], index=index)
+            else:
+                st.session_state['proposition_type_edit'] = propositions_types[index]
 
-        submitted = st.form_submit_button("💾 Update", width="stretch")
-        if submitted:
-            stu.update_table_propositions(
-                old_table_proposition,
-                game_name,
-                max_players,
-                date,
-                time,
-                duration,
-                notes,
-                bgg_game_id,
-                st.session_state.location_edit[0] if st.session_state.location_edit else None,
-                st.session_state.expansions_edit,
-                st.session_state.proposition_type_edit['id']
-            )
-            st.rerun()
+            submitted = st.form_submit_button("💾 Update", width="stretch")
+            if submitted:
+                stu.update_table_propositions(
+                    old_table_proposition,
+                    game_name,
+                    max_players,
+                    date,
+                    time,
+                    duration,
+                    notes,
+                    bgg_game_id,
+                    st.session_state.location_edit[0] if st.session_state.location_edit else None,
+                    st.session_state.expansions_edit,
+                    st.session_state.proposition_type_edit['id']
+                )
+                st.rerun()
 
 @st.dialog("⛔ Delete Proposition")
 def dialog_delete_table_proposition(table_proposition: TableProposition):
@@ -96,46 +97,49 @@ def display_table_proposition(section_name, table_proposition: TableProposition)
     # Create three columns
     col1, col2, col3 = st.columns([1, 1, 1])
 
-    with col1:
-        st.image(table_proposition.image_url or stu.DEFAULT_IMAGE_URL, caption=table_proposition.get_description_preview())
-        stu.st_write(
-            f"<b>Categories:</b> {', '.join(table_proposition.categories)}<br>"
-            f"<b>Mechanics:</b> {', '.join(table_proposition.mechanics)}"
-        )
+    with col1:  # image, description, categories, mechanics
+        with st.container(horizontal=False, gap=stu.SPACE_BETWEEN_VERTICAL_COMPONENTS):
+            st.image(table_proposition.image_url or stu.DEFAULT_IMAGE_URL, caption=table_proposition.get_description_preview())
+            stu.st_write(
+                f"<b>Categories:</b> {', '.join(table_proposition.categories)}<br>"
+                f"<b>Mechanics:</b> {', '.join(table_proposition.mechanics)}"
+            )
 
-    with col2:
-        with st.container(horizontal=True):
-            st.badge(f"**{table_proposition.time.strftime('%H:%M')}**", icon="⌚", color="violet")
-            st.badge(f"{table_proposition.date}", icon="📅", color="blue")
-            st.badge(f"{'{:02d}:{:02d}'.format(*divmod(table_proposition.duration, 60))}h", icon="⏳", color="orange")
-        stu.create_user_info(user=table_proposition.proposed_by, icon="🧔🏻", label=" **Proposed by** ")
-        with st.expander(f"🗺️ **Location**: {table_proposition.location.location_alias}"):
-            location_markdown = table_proposition.location.to_markdown(st.session_state.user, icon="🔗")
-            # location_markdown includes address + link to google maps IF default location or logged users
-            # otherwise it is equal to "*Unknown*"
-            st.write(location_markdown)
-        with st.expander(f"📦 **Expansions** ({len(table_proposition.expansions)}):"):
-            expansions_markdown = TablePropositionExpansion.to_markdown_list(table_proposition.expansions)
-            st.write(expansions_markdown)
-        with st.expander(f"📒 **Notes**: {table_proposition.get_notes_preview()}"):
-            st.write(table_proposition.notes)
+    with col2:  # time, date, duration, proposed by, location, expansions, notes
+        with st.container(horizontal=False, gap=stu.SPACE_BETWEEN_VERTICAL_COMPONENTS):
+            with st.container(horizontal=True):
+                st.badge(f"**{table_proposition.time.strftime('%H:%M')}**", icon="⌚", color="violet")
+                st.badge(f"{table_proposition.date}", icon="📅", color="blue")
+                st.badge(f"{'{:02d}:{:02d}'.format(*divmod(table_proposition.duration, 60))}h", icon="⏳", color="orange")
+            stu.create_user_info(user=table_proposition.proposed_by, icon="🧔🏻", label=" **Proposed by** ")
+            with st.expander(f"🗺️ **Location**: {table_proposition.location.location_alias}"):
+                location_markdown = table_proposition.location.to_markdown(st.session_state.user, icon="🔗")
+                # location_markdown includes address + link to google maps IF default location or logged users
+                # otherwise it is equal to "*Unknown*"
+                st.write(location_markdown)
+            with st.expander(f"📦 **Expansions** ({len(table_proposition.expansions)}):"):
+                expansions_markdown = TablePropositionExpansion.to_markdown_list(table_proposition.expansions)
+                st.write(expansions_markdown)
+            with st.expander(f"📒 **Notes**: {table_proposition.get_notes_preview()}"):
+                st.write(table_proposition.notes)
 
-    with col3:
-        is_full = table_proposition.joined_count >= table_proposition.max_players
-        st.write(f":{'red' if is_full else 'green'}[**Joined Players ({table_proposition.joined_count}/{table_proposition.max_players}):**]")
-        for joined_player_obj in table_proposition.joined_players or []:
-            if joined_player_obj.username is not None:
-                with st.container(horizontal=True, vertical_alignment="center"):  # NEW in Streamlit 1.48.0
-                    stu.create_user_info(user=joined_player_obj)
-                    # LEAVE
-                    st.button(
-                        "Leave",
-                        key=f"leave_{table_proposition.table_id}_{joined_player_obj.username}_{section_name}",
-                        on_click=stu.leave_callback, args=[table_proposition.table_id, joined_player_obj.username, joined_player_obj.user_id],
-                        disabled=not stu.can_current_user_leave(joined_player_obj.username, table_proposition.proposed_by.username),
-                        help="Only the table owner or the player himself can leave a table.",
-                        icon="⛔"
-                    )
+    with col3:  # players joined
+        with st.container(horizontal=False, gap=stu.SPACE_BETWEEN_VERTICAL_COMPONENTS):
+            is_full = table_proposition.joined_count >= table_proposition.max_players
+            st.write(f":{'red' if is_full else 'green'}[**Joined Players ({table_proposition.joined_count}/{table_proposition.max_players}):**]")
+            for joined_player_obj in table_proposition.joined_players or []:
+                if joined_player_obj.username is not None:
+                    with st.container(horizontal=True, vertical_alignment="center"):  # NEW in Streamlit 1.48.0
+                        stu.create_user_info(user=joined_player_obj)
+                        # LEAVE
+                        st.button(
+                            "Leave",
+                            key=f"leave_{table_proposition.table_id}_{joined_player_obj.username}_{section_name}",
+                            on_click=stu.leave_callback, args=[table_proposition.table_id, joined_player_obj.username, joined_player_obj.user_id],
+                            disabled=not stu.can_current_user_leave(joined_player_obj.username, table_proposition.proposed_by.username),
+                            help="Only the table owner or the player himself can leave a table.",
+                            icon="⛔"
+                        )
 
     # Create four columns for action buttons
     with st.container(horizontal=True, vertical_alignment="center"):

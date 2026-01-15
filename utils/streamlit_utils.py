@@ -1,4 +1,5 @@
 import os
+from typing import Literal
 
 import streamlit as st
 from streamlit import components
@@ -63,6 +64,9 @@ BOUNCE_SIDEBAR_ICON = r"""
     
     </style>
 """
+
+SPACE_BETWEEN_VERTICAL_COMPONENTS: Literal["xxsmall", "xsmall", "small", "medium", "large", "xlarge", "xxlarge"] = "xsmall"
+
 
 sql_manager = SQLManager()
 sql_manager.create_tables()
