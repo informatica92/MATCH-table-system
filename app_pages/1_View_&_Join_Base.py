@@ -6,6 +6,7 @@ import utils.streamlit_utils as stu
 from utils.bgg_manager import get_bgg_url
 from utils.altair_manager import timeline_chart
 from utils.table_system_proposition import TableProposition, TablePropositionExpansion
+from utils.table_system_overlaps import check_overlaps_in_joined_tables, render_overlaps_table_buttons
 
 
 @st.dialog("🖋️ Edit Table")
@@ -188,7 +189,11 @@ def view_table_propositions():
         display_table_proposition(section_name="list", table_proposition=proposition)
 
 def timeline_table_propositions():
-    df = stu.table_propositions_to_df(add_group=True, add_status=True, add_start_and_end_date=True)
+    df = TableProposition.table_propositions_to_df(
+        list_=st.session_state.propositions,
+        username=st.session_state.user.username,
+        add_group=True, add_status=True, add_start_and_end_date=True
+    )
 
     chart = timeline_chart(df)
     selected_data = st.altair_chart(chart, width='stretch', on_select="rerun", theme=None)
@@ -203,7 +208,11 @@ def timeline_table_propositions():
 
 def dataframe_table_propositions():
 
-    df = stu.table_propositions_to_df(add_bgg_url=True, add_players_fraction=True, add_joined=True)
+    df = TableProposition.table_propositions_to_df(
+        list_=st.session_state.propositions,
+        username=st.session_state.user.username,
+        add_bgg_url=True, add_players_fraction=True, add_joined=True
+    )
 
     column_config = {
         "table_id":  st.column_config.TextColumn("ID", width="small"),
@@ -294,7 +303,7 @@ def create_view_and_join_page():
                 on_change=stu.refresh_table_propositions, kwargs={"reason": "Filtering Proposition Type"}
             )
         # OVERLAPS
-        errors, warnings = stu.check_overlaps_in_joined_tables(st.session_state.global_propositions, st.session_state.user.user_id)
+        errors, warnings = check_overlaps_in_joined_tables(st.session_state.global_propositions, st.session_state.user.user_id)
         num_overlaps = len(errors) + len(warnings)
         if num_overlaps == 0:
             with st.popover("✅ No overlaps", width='stretch'):
@@ -306,13 +315,13 @@ def create_view_and_join_page():
                     for error_left, error_right in errors:
                         st.write(f"Table **\"{error_left.game_name}\"** (ID {error_left.table_id}) :red[has the same start date] "
                                  f"time as **\"{error_right.game_name}\"** (ID {error_right.table_id})")
-                        stu.render_overlaps_table_buttons(error_left, error_right, "err")
+                        render_overlaps_table_buttons(error_left, error_right, "err")
                 if len(warnings):
                     st.write(f":warning: {len(warnings)} warnings:")
                     for warning_left, warning_right in warnings:
                         st.write(f"Table **\"{warning_left.game_name}\"** (ID {warning_left.table_id}) :orange[has a partial "
                                  f"overlap] with **\"{warning_right.game_name}\"** (ID {warning_right.table_id})")
-                        stu.render_overlaps_table_buttons(warning_left, warning_right, "warn")
+                        render_overlaps_table_buttons(warning_left, warning_right, "warn")
         # FAKE SPACE ON THE RIGHT
         st.space("stretch")
 

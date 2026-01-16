@@ -10,13 +10,13 @@ from datetime import datetime
 
 from utils.telegram_notifications import TelegramNotifications
 from utils.sql_manager import SQLManager
-from utils.bgg_manager import get_bgg_url
 from utils.table_system_proposition import TableProposition, JoinedPlayerOrProposer
 from utils.table_system_logging import logging
 
 
 DEFAULT_IMAGE_URL = "static/images/no_image.jpg"
 
+BGG_POWERED_BY_IMAGE_DEFAULT = "https://cf.geekdo-images.com/HZy35cmzmmyV9BarSuk6ug__small/img/gbE7sulIurZE_Tx8EQJXnZSKI6w=/fit-in/200x150/filters:strip_icc()/pic7779581.png"
 BGG_GAME_ID_HELP = ("It's the id in the BGG URL. EX: for Wingspan the URL is "
                     "https://boardgamegeek.com/boardgame/266192/wingspan, hence the BGG game id is 266192")
 
@@ -169,53 +169,7 @@ def scroll_to(element_id):
         sleep(0.5)
     tmp.empty()
 
-# TODO: evaluate chance to move it into TableProposition class
-def check_overlaps_in_joined_tables(table_propositions:  list[TableProposition], current_user_id: int) -> tuple[list[tuple[TableProposition, TableProposition]], list[tuple[TableProposition, TableProposition]]]:
-    joined_tables = [tp for tp in table_propositions if tp.joined(current_user_id)]
-    # check if the start time and duration of the tables joined by the user (in joined_tables) contain any kind of
-    # overlaps. In particular mark the cases in which the start date is exactly the same as ERROR and all the other
-    # types of overlaps as warning
-    # TableProposition fields: table_id, proposed_by_id, proposed_by_username, proposed_by_email, date, time, duration (h)
-    # JoinedPlayerOrProposer fields: username, email
-    errors_overlaps = []
-    warnings_overlaps = []
-    n = len(joined_tables)
-    for i in range(n):
-        tp = joined_tables[i]
-        for j in range(i+1, n):
-            tp2 = joined_tables[j]
-            if tp.start_datetime <= tp2.start_datetime < tp.end_datetime or tp.start_datetime < tp2.end_datetime <= tp.end_datetime:
-                if tp.start_datetime == tp2.start_datetime:
-                    errors_overlaps.append((tp, tp2))
-                else:
-                    warnings_overlaps.append((tp, tp2))
-    return errors_overlaps, warnings_overlaps
 
-def render_overlaps_table_buttons(table_left, table_right, prefix):
-    col1, col2 = st.columns([1, 1])
-    def _render_overlaps_table_buttons(table_target, col):
-        if table_target.table_id in [p.table_id for p in st.session_state.propositions]:
-            if col.button(
-                    f"Go to table {table_target.table_id}",
-                    key=f"ov-{prefix}-{table_left.table_id}-{table_right.table_id}-{table_target.table_id}",
-                    width='stretch',
-                    disabled=True if st.session_state.get("view_mode") != "📜List" else False,
-                    help="Only available in the '📜List' view mode"
-            ):
-                scroll_to(f"table-{table_target.table_id}")
-        else:
-            if col.button(
-                    f"Go to {'Propositions' if table_target.proposition_type_id == 0 else 'Tournaments' if table_target.proposition_type_id == 1 else 'Demos'} page",
-                    key=f"ov-{prefix}-{table_left.table_id}-{table_right.table_id}-{table_target.table_id}",
-                    width='stretch'
-            ):
-                st.switch_page(
-                    VIEW_JOIN_PROPOSITIONS_PAGE if table_target.proposition_type_id == 0 else
-                    VIEW_JOIN_TOURNAMENTS_PAGE if table_target.proposition_type_id == 1 else
-                    VIEW_JOIN_DEMOS_PAGE
-                )
-    _render_overlaps_table_buttons(table_left, col1)
-    _render_overlaps_table_buttons(table_right, col2)
 
 # All game names start with 'TOURNAMENT | ' or 'DEMO | ' if old proposition_type_id is 1 or 2 respectively,
 # otherwise it's just the game name.
@@ -247,7 +201,7 @@ def update_table_propositions(
         time: datetime.time,
         duration: int,
         notes: str,
-        bgg_game_id: int,
+        bgg_game_id: int|str,
         location_id: int,
         expansions: list[dict] = None,
         proposition_type_id: int = None
@@ -285,41 +239,6 @@ def update_table_propositions(
     )
     refresh_table_propositions("Table Update",table_id=table_id, game_name=game_name)
 
-# TODO: evaluate chance to move it into TableProposition class (NB: add table_propositions as parameter)
-def table_propositions_to_df(
-        add_start_and_end_date=False, add_group=False, add_status=False,
-        add_bgg_url=False, add_players_fraction=False, add_joined=False,
-):
-    df = pd.DataFrame(TableProposition.to_list_of_dicts(st.session_state.propositions, simple=True))
-
-    if add_start_and_end_date:
-        # concat date and time columns to get the start datetime
-        df['start_datetime'] = pd.to_datetime(df['date'].astype(str) + ' ' + df['time'].astype(str))
-        # add 'duration' to 'start_datetime'
-        df['end_datetime'] = df['start_datetime'] + pd.to_timedelta(df['duration'], unit='minute')
-
-    if add_group:
-        # 'Morning' if time.hour < 12 else 'Afternoon' if time.hour < 18 else 'Evening'
-        df['group'] = df['time'].apply(lambda x: 'Morning' if x.hour < 12 else 'Afternoon' if x.hour < 18 else 'Evening')
-
-    if add_status:
-        df['status'] = df.apply(lambda x: 'Full' if x['joined_count'] == x['max_players'] else 'Available', axis=1)
-
-    if add_bgg_url:
-        df['bgg'] = df['bgg_game_id'].apply(get_bgg_url)
-
-    if add_players_fraction:
-        df['players'] = df['joined_count'].astype(str) + "/" + df['max_players'].astype(str)
-
-    if add_joined:
-        # check if st.session_state.username (str) is in the joined_players field (list[str])
-        if st.session_state.username:
-            df['joined'] = df['joined_players'].apply(lambda x: st.session_state.username.lower() in [player.lower() for player in x])
-        else:
-            df['joined'] = False
-
-    return df.sort_values(["date", "time"])
-
 # CAN THIS USER LEAVE / DELETE?
 
 def can_current_user_leave(player_to_remove, proposed_by):
@@ -332,6 +251,13 @@ def can_current_user_leave(player_to_remove, proposed_by):
     else:
         return False
 
+def time_option_to_time(time_option):
+    # time_option is a string with the following format "HH:MM - Morning|Afternoon|Evening|Night"
+    time = datetime.strptime(time_option.split(" - ")[0], "%H:%M").time()
+    return time
+
+# CALLBACKS
+
 def can_current_user_delete_and_edit(proposed_by):
     if st.session_state.god_mode:
         return True  # god mode can delete anything
@@ -339,13 +265,6 @@ def can_current_user_delete_and_edit(proposed_by):
         return True  # table owner can remove their own tables
     else:
         return False
-
-# CALLBACKS
-
-def time_option_to_time(time_option):
-    # time_option is a string with the following format "HH:MM - Morning|Afternoon|Evening|Night"
-    time = datetime.strptime(time_option.split(" - ")[0], "%H:%M").time()
-    return time
 
 def join_callback(table_id, joining_username, joining_user_id):
     try:
@@ -603,7 +522,7 @@ def get_rest_of_the_world_page_name():
 
 def add_powered_by_bgg_image():
     bgg_url = os.getenv("BGG_URL", "https://boardgamegeek.com/")
-    bgg_powered_by_img = os.getenv("BGG_POWERED_BY_IMAGE", "https://cf.geekdo-images.com/HZy35cmzmmyV9BarSuk6ug__small/img/gbE7sulIurZE_Tx8EQJXnZSKI6w=/fit-in/200x150/filters:strip_icc()/pic7779581.png")
+    bgg_powered_by_img = os.getenv("BGG_POWERED_BY_IMAGE", BGG_POWERED_BY_IMAGE_DEFAULT)
     st.markdown(f"[![Powered by BGG]({bgg_powered_by_img})]({bgg_url})")
 
 

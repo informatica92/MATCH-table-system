@@ -1,5 +1,6 @@
 import datetime
 import time as time_module
+import pandas as pd
 from utils.bgg_manager import get_bgg_game_info, get_bgg_url
 from utils.table_system_user import StreamlitTableSystemUser
 
@@ -305,4 +306,43 @@ class TableProposition(object):
     @staticmethod
     def to_list_of_dicts(list_: list['TableProposition'], simple=False) -> list[dict]:
         return [proposition.to_dict(simple=simple) for proposition in list_]
+
+    @staticmethod
+    def table_propositions_to_df(
+            list_: list['TableProposition'],
+            username: str = None,
+            add_start_and_end_date=False, add_group=False, add_status=False,
+            add_bgg_url=False, add_players_fraction=False, add_joined=False,
+    ):
+        df = pd.DataFrame(TableProposition.to_list_of_dicts(list_, simple=True))
+
+        if add_start_and_end_date:
+            # concat date and time columns to get the start datetime
+            df['start_datetime'] = pd.to_datetime(df['date'].astype(str) + ' ' + df['time'].astype(str))
+            # add 'duration' to 'start_datetime'
+            df['end_datetime'] = df['start_datetime'] + pd.to_timedelta(df['duration'], unit='minute')
+
+        if add_group:
+            # 'Morning' if time.hour < 12 else 'Afternoon' if time.hour < 18 else 'Evening'
+            df['group'] = df['time'].apply(
+                lambda x: 'Morning' if x.hour < 12 else 'Afternoon' if x.hour < 18 else 'Evening')
+
+        if add_status:
+            df['status'] = df.apply(lambda x: 'Full' if x['joined_count'] == x['max_players'] else 'Available', axis=1)
+
+        if add_bgg_url:
+            df['bgg'] = df['bgg_game_id'].apply(get_bgg_url)
+
+        if add_players_fraction:
+            df['players'] = df['joined_count'].astype(str) + "/" + df['max_players'].astype(str)
+
+        if add_joined:
+            # check if st.session_state.username (str) is in the joined_players field (list[str])
+            if username:
+                df['joined'] = df['joined_players'].apply(
+                    lambda x: username.lower() in [player.lower() for player in x])
+            else:
+                df['joined'] = False
+
+        return df.sort_values(["date", "time"])
 
