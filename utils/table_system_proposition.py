@@ -133,7 +133,7 @@ class TableProposition(object):
             game_name: str,
             max_players: int,
             date: datetime.date,
-            time: time_module.time,
+            time: datetime.time,
             duration: int,
             notes: str,
             bgg_game_id: int,
@@ -157,7 +157,7 @@ class TableProposition(object):
         self.proposed_by: JoinedPlayerOrProposer = JoinedPlayerOrProposer(proposed_by_id, proposed_by_username, proposed_by_email)
         self.max_players: int = max_players
         self.date: datetime.date = date
-        self.time: time_module.time = time
+        self.time: datetime.time = time
         self.duration: int = duration
         self.notes: str = notes
         self.joined_players: list[JoinedPlayerOrProposer] = JoinedPlayerOrProposer.from_tuples(joined_players_ids, joined_players, joined_players_emails)
