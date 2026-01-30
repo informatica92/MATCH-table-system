@@ -226,7 +226,6 @@ def join_callback(table_id, joining_username, joining_user_id):
         st.toast(f"🚫 {e}")
         StreamlitTablePropositions.refresh_table_propositions(reason="Error joining")
 
-
 def leave_callback(table_id, leaving_username, leaving_user_id):
     sql_manager.leave_table(int(table_id), int(leaving_user_id))
     StreamlitTablePropositions.refresh_table_propositions("Leave", leaving_user=f"{leaving_username}({leaving_user_id})", table_id=table_id)
@@ -475,7 +474,6 @@ def add_powered_by_bgg_image():
     bgg_url = os.getenv("BGG_URL", "https://boardgamegeek.com/")
     bgg_powered_by_img = os.getenv("BGG_POWERED_BY_IMAGE", BGG_POWERED_BY_IMAGE_DEFAULT)
     st.markdown(f"[![Powered by BGG]({bgg_powered_by_img})]({bgg_url})")
-
 
 def add_donation_button(label='Support me on Ko-fi', color='#29abe0'):
     user = os.environ.get("DONATION_USER", "informatica92")
