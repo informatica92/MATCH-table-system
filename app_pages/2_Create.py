@@ -3,7 +3,7 @@ from datetime import datetime
 import os
 
 import utils.streamlit_utils as stu
-from utils.bgg_manager import search_bgg_games, get_bgg_game_info
+from utils.bgg_manager import search_bgg_games, get_bgg_game_info, get_bgg_url
 
 # redirect to "User" page if username is not set
 stu.redirect_to_user_page_if_username_not_set()
@@ -34,7 +34,7 @@ if bgg_game_id:
     col1.image(image_url or stu.DEFAULT_IMAGE_URL, width='stretch')
     col2.caption(f"**Description**: {game_description[:300]}...")
     with col2:
-        stu.st_write(f"<b>BGG URL</b>: <a href='{stu.get_bgg_url(bgg_game_id)}'>{stu.get_bgg_url(bgg_game_id)}</a>")
+        stu.st_write(f"<b>BGG URL</b>: <a href='{get_bgg_url(bgg_game_id)}'>{get_bgg_url(bgg_game_id)}</a>")
         stu.st_write(f"<b>Categories:</b> {', '.join(categories)}<br><b>Mechanics:</b> {', '.join(mechanics)}")
 
 if st.session_state.user.is_admin:

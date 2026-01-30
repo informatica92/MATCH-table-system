@@ -3,6 +3,7 @@ import os
 
 import utils.streamlit_utils as stu
 from utils.table_system_user import StreamlitTableSystemUser, login_button, logout_button
+from utils.table_system_proposition import StreamlitTablePropositions
 
 # # FEATURES
 # TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (requires no streamlit_extras => no cookies)
@@ -79,7 +80,7 @@ if "proposition_type_id_mode" not in st.session_state:
 # Initialize propositions in session state
 if "propositions" not in st.session_state:
     # print("Initializing st.session_state.propositions")
-    stu.refresh_table_propositions("Init")
+    StreamlitTablePropositions.refresh_table_propositions("Init")
 
 # Initialize god_mode in session state
 if "god_mode" not in st.session_state:

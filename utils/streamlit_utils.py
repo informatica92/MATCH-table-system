@@ -5,13 +5,12 @@ import streamlit as st
 from streamlit import components
 
 import pandas as pd
-from time import time as time_time, sleep
-from datetime import datetime
+from time import sleep
+import datetime
 
 from utils.telegram_notifications import TelegramNotifications
 from utils.sql_manager import SQLManager
-from utils.table_system_proposition import TableProposition, JoinedPlayerOrProposer
-from utils.table_system_logging import logging
+from utils.table_system_proposition import TableProposition, JoinedPlayerOrProposer, StreamlitTablePropositions
 
 
 DEFAULT_IMAGE_URL = "static/images/no_image.jpg"
@@ -109,54 +108,6 @@ def str_to_bool(s: str) -> bool:
     """
     return str(s).lower() == 'true'
 
-def refresh_table_propositions(reason, **kwargs):
-    """
-    Refresh the table propositions in the session state
-    :param reason: the reason why the refresh is needed (Init, Delete, Join...)
-    :param kwargs: contextual information for the given reason (Delete: the deleted table id, Create: game name, table id...)
-    :return:
-    """
-    query_start_time = time_time()
-
-    if "joined_by_me" in st.session_state:
-        joined_by_me = st.session_state.joined_by_me
-    else:
-        joined_by_me = False
-
-    if "proposed_by_me" in st.session_state:
-        proposed_by_me = st.session_state.proposed_by_me
-    else:
-        proposed_by_me = False
-
-    # default, row
-    location_mode = st.session_state.get("location_mode") or st.session_state.get("location_mode_filter")
-    filter_default_location = {"default": True, "row": False}
-
-    # 0 = Proposition, 1 = Tournament, 2 = Demo (the var1 or var2 syntax can not be used here since 0 is a valid value)
-    proposition_type_id_mode = st.session_state.get("proposition_type_id_mode") if st.session_state.get("proposition_type_id_mode") is not None else st.session_state.get("proposition_type_id_mode_filter")
-
-    st.session_state.global_propositions = TableProposition.from_list_of_tuples(sql_manager.get_table_propositions())
-    st.session_state.propositions = st.session_state.global_propositions.copy()
-
-    if joined_by_me:
-        st.session_state.propositions = [tp for tp in st.session_state.propositions if tp.joined(st.session_state.user.user_id)]
-
-    if proposed_by_me:
-        st.session_state.propositions = [tp for tp in st.session_state.propositions if tp.proposed_by.user_id == st.session_state.user.user_id]
-
-    # FILTER BY LOCATION
-    if location_mode is not None:
-        st.session_state.propositions = [tp for tp in st.session_state.propositions if tp.location.location_is_default is filter_default_location[location_mode]]
-
-    # FILTER BY PROPOSITION TYPE
-    if proposition_type_id_mode is not None:
-        st.session_state.propositions = [tp for tp in st.session_state.propositions if tp.proposition_type_id == proposition_type_id_mode]
-
-    logging.info(f"[User: {st.session_state.user if st.session_state.get('user') else '(not instantiated)'}] "
-          f"Table propositions QUERY [{reason}] refreshed in {(time_time() - query_start_time):.4f}s "
-          f"({len(st.session_state.propositions)} rows) "
-          f"(context: {kwargs})")
-
 def scroll_to(element_id):
     tmp = st.empty()
     with tmp:
@@ -237,7 +188,7 @@ def update_table_propositions(
         old_expansions=old_expansions_name_list,
         new_expansions=expansions_name_list if expansions_name_list else [],
     )
-    refresh_table_propositions("Table Update",table_id=table_id, game_name=game_name)
+    StreamlitTablePropositions.refresh_table_propositions("Table Update",table_id=table_id, game_name=game_name)
 
 # CAN THIS USER LEAVE / DELETE?
 
@@ -253,7 +204,7 @@ def can_current_user_leave(player_to_remove, proposed_by):
 
 def time_option_to_time(time_option):
     # time_option is a string with the following format "HH:MM - Morning|Afternoon|Evening|Night"
-    time = datetime.strptime(time_option.split(" - ")[0], "%H:%M").time()
+    time = datetime.datetime.strptime(time_option.split(" - ")[0], "%H:%M").time()
     return time
 
 # CALLBACKS
@@ -269,21 +220,21 @@ def can_current_user_delete_and_edit(proposed_by):
 def join_callback(table_id, joining_username, joining_user_id):
     try:
         sql_manager.join_table(int(table_id), int(joining_user_id))
-        refresh_table_propositions("Join", table_id=table_id)
+        StreamlitTablePropositions.refresh_table_propositions("Join", table_id=table_id)
         st.toast(f"✅ Joined Table {table_id} as {joining_username}!")
     except AttributeError as e :
         st.toast(f"🚫 {e}")
-        refresh_table_propositions(reason="Error joining")
+        StreamlitTablePropositions.refresh_table_propositions(reason="Error joining")
 
 
 def leave_callback(table_id, leaving_username, leaving_user_id):
     sql_manager.leave_table(int(table_id), int(leaving_user_id))
-    refresh_table_propositions("Leave", leaving_user=f"{leaving_username}({leaving_user_id})", table_id=table_id)
+    StreamlitTablePropositions.refresh_table_propositions("Leave", leaving_user=f"{leaving_username}({leaving_user_id})", table_id=table_id)
     st.toast(f"⛔ {leaving_username} left Table {table_id}")
 
 def delete_callback(table_id):
     sql_manager.delete_proposition(int(table_id))
-    refresh_table_propositions("Delete", table_id=table_id)
+    StreamlitTablePropositions.refresh_table_propositions("Delete", table_id=table_id)
     st.toast(f"⛔ Deleted Table {table_id}")
 
 def create_callback(game_name, bgg_game_id, image_url):
@@ -321,7 +272,7 @@ def create_callback(game_name, bgg_game_id, image_url):
             [e['value'] for e in st.session_state.expansions] if st.session_state.expansions else []
         )
 
-        refresh_table_propositions("Created", table_id=last_row_id, game_name=f"{game_prefix}{game_name}", bgg_game_id=bgg_game_id)
+        StreamlitTablePropositions.refresh_table_propositions("Created", table_id=last_row_id, game_name=f"{game_prefix}{game_name}", bgg_game_id=bgg_game_id)
         if st.session_state.join_me_by_default:
             st.toast(f"✅ Joined Table {last_row_id} as {st.session_state.username}!")
         st.toast(f"➕ Table proposition created successfully!\nTable ID: {last_row_id} - {game_name}")
@@ -372,7 +323,7 @@ def _on_location_df_change(entire_locations_df: pd.DataFrame, user_id: int|None)
         ids_to_delete.append(int(entire_locations_df.loc[row]["id"]))
     sql_manager.delete_locations(ids_to_delete)
 
-    refresh_table_propositions("Location Update")
+    StreamlitTablePropositions.refresh_table_propositions("Location Update")
 
     if user_id:
         # clear user cache

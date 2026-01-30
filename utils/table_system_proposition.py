@@ -3,6 +3,9 @@ import time as time_module
 import pandas as pd
 from utils.bgg_manager import get_bgg_game_info, get_bgg_url
 from utils.table_system_user import StreamlitTableSystemUser
+from utils.table_system_logging import logging
+from utils.sql_manager import SQLManager
+import streamlit as st
 
 # create a function that accepts an object in input and a number of chars for its preview, check if it is a string, if
 # not returns it as it is, otherwise checks the sting len, if it is smaller than the number of chars for the preview,
@@ -266,15 +269,11 @@ class TableProposition(object):
         return self.start_datetime + datetime.timedelta(minutes=self.duration)
 
     # STATIC METHODS
-    # # FROMS
+    # # FROMs
 
     @staticmethod
     def from_dict(dict_) -> 'TableProposition':
         return TableProposition(**dict_)
-
-    @staticmethod
-    def from_list_of_tuples(list_: list[tuple]) -> list['TableProposition']:
-        return [TableProposition.from_tuple(proposition) for proposition in list_]
 
     @staticmethod
     def from_tuple(tuple_) -> 'TableProposition':
@@ -302,28 +301,108 @@ class TableProposition(object):
         """
         return TableProposition(*tuple_)
 
-    # # TOS
-    @staticmethod
-    def to_list_of_dicts(list_: list['TableProposition'], simple=False) -> list[dict]:
-        return [proposition.to_dict(simple=simple) for proposition in list_]
+
+class StreamlitTablePropositions(list[TableProposition]):
+    """A list-like container for TableProposition with helpers for creation, conversion and DataFrame export."""
 
     @staticmethod
-    def table_propositions_to_df(
-            list_: list['TableProposition'],
-            username: str = None,
-            add_start_and_end_date=False, add_group=False, add_status=False,
-            add_bgg_url=False, add_players_fraction=False, add_joined=False,
+    def refresh_table_propositions(reason, **kwargs):
+        """
+        Refresh the table propositions in the session state
+        :param reason: the reason why the refresh is needed (Init, Delete, Join...)
+        :param kwargs: contextual information for the given reason (Delete: the deleted table id, Create: game name, table id...)
+        :return:
+        """
+        query_start_time = time_module.time()
+
+        if "joined_by_me" in st.session_state:
+            joined_by_me = st.session_state.joined_by_me
+        else:
+            joined_by_me = False
+
+        if "proposed_by_me" in st.session_state:
+            proposed_by_me = st.session_state.proposed_by_me
+        else:
+            proposed_by_me = False
+
+        # default, row
+        location_mode = st.session_state.get("location_mode") or st.session_state.get("location_mode_filter")
+        filter_default_location = {"default": True, "row": False}
+
+        # 0 = Proposition, 1 = Tournament, 2 = Demo (the var1 or var2 syntax can not be used here since 0 is a valid value)
+        proposition_type_id_mode = st.session_state.get("proposition_type_id_mode") if st.session_state.get(
+            "proposition_type_id_mode") is not None else st.session_state.get("proposition_type_id_mode_filter")
+
+        st.session_state.global_propositions = StreamlitTablePropositions.from_list_of_tuples(SQLManager().get_table_propositions())
+        st.session_state.propositions = st.session_state.global_propositions.copy()
+
+        if joined_by_me:
+            st.session_state.propositions = [tp for tp in st.session_state.propositions if tp.joined(st.session_state.user.user_id)]
+
+        if proposed_by_me:
+            st.session_state.propositions = [tp for tp in st.session_state.propositions if tp.proposed_by.user_id == st.session_state.user.user_id]
+
+        # FILTER BY LOCATION
+        if location_mode is not None:
+            st.session_state.propositions = [tp for tp in st.session_state.propositions if tp.location.location_is_default is filter_default_location[location_mode]]
+
+        # FILTER BY PROPOSITION TYPE
+        if proposition_type_id_mode is not None:
+            st.session_state.propositions = [tp for tp in st.session_state.propositions if
+                                             tp.proposition_type_id == proposition_type_id_mode]
+
+        logging.info(f"[User: {st.session_state.user if st.session_state.get('user') else '(not instantiated)'}] "
+                     f"Table propositions QUERY [{reason}] refreshed in {(time_module.time() - query_start_time):.4f}s "
+                     f"({len(st.session_state.propositions)} rows) "
+                     f"(context: {kwargs})")
+
+    # Construction helpers
+    @classmethod
+    def from_list_of_tuples(cls, list_of_tuples: list[tuple]) -> "StreamlitTablePropositions":
+        return cls([TableProposition.from_tuple(t) for t in list_of_tuples])
+
+    def add_from_dict(self, dict_: dict) -> None:
+        """Create a TableProposition from a dict and append it."""
+        self.append(TableProposition.from_dict(dict_))
+
+    def add_from_tuple(self, tuple_: tuple) -> None:
+        """Create a TableProposition from a tuple and append it."""
+        self.append(TableProposition.from_tuple(tuple_))
+
+    def append_proposition(self, proposition: TableProposition) -> None:
+        """Append an existing TableProposition instance (type-checked)."""
+        if not isinstance(proposition, TableProposition):
+            raise TypeError("proposition must be a TableProposition")
+        self.append(proposition)
+
+    def extend_from_dicts(self, list_of_dicts: list[dict]) -> None:
+        """Extend the list by creating TableProposition objects from a list of dicts."""
+        for d in list_of_dicts:
+            self.add_from_dict(d)
+
+    # Conversion helpers
+    def to_list_of_dicts(self, simple: bool = False) -> list[dict]:
+        """Return list of dict representations for contained TableProposition objects."""
+        return [p.to_dict(simple=simple) for p in self]
+
+    # DataFrame export (moved from TableProposition.table_propositions_to_df)
+    def to_df(
+        self,
+        username: str = None,
+        add_start_and_end_date: bool = False,
+        add_group: bool = False,
+        add_status: bool = False,
+        add_bgg_url: bool = False,
+        add_players_fraction: bool = False,
+        add_joined: bool = False,
     ):
-        df = pd.DataFrame(TableProposition.to_list_of_dicts(list_, simple=True))
+        df = pd.DataFrame(self.to_list_of_dicts(simple=True))
 
         if add_start_and_end_date:
-            # concat date and time columns to get the start datetime
             df['start_datetime'] = pd.to_datetime(df['date'].astype(str) + ' ' + df['time'].astype(str))
-            # add 'duration' to 'start_datetime'
             df['end_datetime'] = df['start_datetime'] + pd.to_timedelta(df['duration'], unit='minute')
 
         if add_group:
-            # 'Morning' if time.hour < 12 else 'Afternoon' if time.hour < 18 else 'Evening'
             df['group'] = df['time'].apply(
                 lambda x: 'Morning' if x.hour < 12 else 'Afternoon' if x.hour < 18 else 'Evening')
 
@@ -337,7 +416,6 @@ class TableProposition(object):
             df['players'] = df['joined_count'].astype(str) + "/" + df['max_players'].astype(str)
 
         if add_joined:
-            # check if st.session_state.username (str) is in the joined_players field (list[str])
             if username:
                 df['joined'] = df['joined_players'].apply(
                     lambda x: username.lower() in [player.lower() for player in x])

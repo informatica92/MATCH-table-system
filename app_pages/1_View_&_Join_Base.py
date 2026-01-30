@@ -5,7 +5,7 @@ import datetime
 import utils.streamlit_utils as stu
 from utils.bgg_manager import get_bgg_url
 from utils.altair_manager import timeline_chart
-from utils.table_system_proposition import TableProposition, TablePropositionExpansion
+from utils.table_system_proposition import TableProposition, TablePropositionExpansion, StreamlitTablePropositions
 from utils.table_system_overlaps import check_overlaps_in_joined_tables, render_overlaps_table_buttons
 
 
@@ -189,8 +189,7 @@ def view_table_propositions():
         display_table_proposition(section_name="list", table_proposition=proposition)
 
 def timeline_table_propositions():
-    df = TableProposition.table_propositions_to_df(
-        list_=st.session_state.propositions,
+    df = st.session_state.propositions.to_df(
         username=st.session_state.user.username,
         add_group=True, add_status=True, add_start_and_end_date=True
     )
@@ -208,8 +207,7 @@ def timeline_table_propositions():
 
 def dataframe_table_propositions():
 
-    df = TableProposition.table_propositions_to_df(
-        list_=st.session_state.propositions,
+    df = st.session_state.propositions.to_df(
         username=st.session_state.user.username,
         add_bgg_url=True, add_players_fraction=True, add_joined=True
     )
@@ -260,7 +258,7 @@ def create_view_and_join_page():
         # REFRESH
         refresh_button = st.button("🔄️ Refresh", key="refresh", width='stretch')
         if refresh_button:
-            stu.refresh_table_propositions("Refresh")
+            StreamlitTablePropositions.refresh_table_propositions("Refresh")
         # FILTERS
         filter_label_num_active_filters = stu.get_num_active_filters(as_str=True)
         with st.popover(f"🔍 {filter_label_num_active_filters}Filters:", width='stretch'):
@@ -268,14 +266,14 @@ def create_view_and_join_page():
                 "Joined by me",
                 key="joined_by_me",
                 value=False,
-                on_change=stu.refresh_table_propositions, kwargs={"reason": "Filtering joined_by_me"},
+                on_change=StreamlitTablePropositions.refresh_table_propositions, kwargs={"reason": "Filtering joined_by_me"},
                 disabled=not st.session_state['username']
             )
             st.toggle(
                 "Proposed by me",
                 key="proposed_by_me",
                 value=False,
-                on_change=stu.refresh_table_propositions, kwargs={"reason": "Filtering proposed_by_me"},
+                on_change=StreamlitTablePropositions.refresh_table_propositions, kwargs={"reason": "Filtering proposed_by_me"},
                 disabled=not st.session_state['username']
             )
             location_options = {'default': stu.get_default_location()['alias'], 'row': stu.get_rest_of_the_world_page_name()}
@@ -288,7 +286,7 @@ def create_view_and_join_page():
                 key="location_mode_filter",
                 disabled=location_filter_disabled,
                 help="You can't use this filter in this page" if location_filter_disabled else "Select a location to filter tables by location.",
-                on_change=stu.refresh_table_propositions, kwargs={"reason": "Filtering Location"}
+                on_change=StreamlitTablePropositions.refresh_table_propositions, kwargs={"reason": "Filtering Location"}
             )
             proposition_options = stu.get_table_proposition_types(as_reversed_dict=True)
             proposition_filter_disabled = st.session_state.proposition_type_id_mode is not None
@@ -300,7 +298,7 @@ def create_view_and_join_page():
                 key="proposition_type_id_mode_filter",
                 disabled=st.session_state.proposition_type_id_mode is not None,
                 help="You can't use this filter in this page" if proposition_filter_disabled else "Select a proposition type to filter tables by type.",
-                on_change=stu.refresh_table_propositions, kwargs={"reason": "Filtering Proposition Type"}
+                on_change=StreamlitTablePropositions.refresh_table_propositions, kwargs={"reason": "Filtering Proposition Type"}
             )
         # OVERLAPS
         errors, warnings = check_overlaps_in_joined_tables(st.session_state.global_propositions, st.session_state.user.user_id)
