@@ -337,19 +337,26 @@ class StreamlitTablePropositions(list[TableProposition]):
         st.session_state.propositions = st.session_state.global_propositions.copy()
 
         if joined_by_me:
-            st.session_state.propositions = [tp for tp in st.session_state.propositions if tp.joined(st.session_state.user.user_id)]
+            st.session_state.propositions = StreamlitTablePropositions.from_list_of_objects(
+                [tp for tp in st.session_state.propositions if tp.joined(st.session_state.user.user_id)]
+            )
 
         if proposed_by_me:
-            st.session_state.propositions = [tp for tp in st.session_state.propositions if tp.proposed_by.user_id == st.session_state.user.user_id]
+            st.session_state.propositions = StreamlitTablePropositions.from_list_of_objects(
+                [tp for tp in st.session_state.propositions if tp.proposed_by.user_id == st.session_state.user.user_id]
+            )
 
         # FILTER BY LOCATION
         if location_mode is not None:
-            st.session_state.propositions = [tp for tp in st.session_state.propositions if tp.location.location_is_default is filter_default_location[location_mode]]
+            st.session_state.propositions = StreamlitTablePropositions.from_list_of_objects(
+                [tp for tp in st.session_state.propositions if tp.location.location_is_default is filter_default_location[location_mode]]
+            )
 
         # FILTER BY PROPOSITION TYPE
         if proposition_type_id_mode is not None:
-            st.session_state.propositions = [tp for tp in st.session_state.propositions if
-                                             tp.proposition_type_id == proposition_type_id_mode]
+            st.session_state.propositions = StreamlitTablePropositions.from_list_of_objects(
+                [tp for tp in st.session_state.propositions if tp.proposition_type_id == proposition_type_id_mode]
+            )
 
         logging.info(f"[User: {st.session_state.user if st.session_state.get('user') else '(not instantiated)'}] "
                      f"Table propositions QUERY [{reason}] refreshed in {(time_module.time() - query_start_time):.4f}s "
@@ -360,6 +367,14 @@ class StreamlitTablePropositions(list[TableProposition]):
     @classmethod
     def from_list_of_tuples(cls, list_of_tuples: list[tuple]) -> "StreamlitTablePropositions":
         return cls([TableProposition.from_tuple(t) for t in list_of_tuples])
+
+    @classmethod
+    def from_list_of_objects(cls, list_of_objects: list[TableProposition]) -> "StreamlitTablePropositions":
+        return cls(list_of_objects)
+
+    # create a copy method
+    def copy(self) -> "StreamlitTablePropositions":
+        return StreamlitTablePropositions(self)
 
     def add_from_dict(self, dict_: dict) -> None:
         """Create a TableProposition from a dict and append it."""
