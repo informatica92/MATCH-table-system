@@ -4,6 +4,7 @@ import os
 import utils.streamlit_utils as stu
 from utils.table_system_user import StreamlitTableSystemUser, login_button, logout_button
 from utils.table_system_proposition import StreamlitTablePropositions
+from utils.table_system_location import get_default_location
 
 # # FEATURES
 # TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (requires no streamlit_extras => no cookies)
@@ -32,7 +33,7 @@ if st.session_state['user'].is_banned:
     ###################################################################################################################
 
 # ...alternatively, show the normal pages
-def_loc = stu.get_default_location()
+def_loc = get_default_location()
 def_loc_alias = def_loc['alias']
 pages_dict = {}
 

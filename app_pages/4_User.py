@@ -5,6 +5,7 @@ from utils.telegram_notifications import get_telegram_profile_page_url
 from utils.bgg_manager import get_bgg_profile_page_url
 from utils.table_system_user import login_button
 from utils.table_system_proposition import StreamlitTablePropositions
+from utils.table_system_location import manage_user_locations, display_system_locations, get_default_location
 
 
 stu.add_title_text(st, frmt="{title}")
@@ -75,7 +76,7 @@ if st.session_state.user.is_admin:
     stu.st_write(f"Use the following list to manage admin locations. <br>"
                  f"This lists differs from the \"User locations\", below, since <b>\"Admin locations\" are visible to "
                  f"all users</b> while \"User locations\" are only visible to the user who created them. <br>")
-    stu.manage_user_locations(user_id=None)
+    manage_user_locations(user_id=None)
 
 st.subheader("User locations")
 stu.st_write(f"Use the following list to manage your locations. Having one or more registered location will allow "
@@ -83,14 +84,17 @@ stu.st_write(f"Use the following list to manage your locations. Having one or mo
              f"The DEFAULT location is automatically generated. <br>"
              f"Also, removing a location will set the location of all tables at that location to <i>'Unknown'</i> and "
              f"the corresponding tables will be available into the '{stu.get_rest_of_the_world_page_name()}' page. <br>")
-stu.manage_user_locations(user_id=st.session_state.user.user_id)
+manage_user_locations(user_id=st.session_state.user.user_id)
 stu.st_write("Using <b>'Locations'</b> you automatically accept the "
              "<a href='https://github.com/informatica92/MATCH-table-system/tree/main/static/gdpr'>GDPR policy</a> "
              "of this application")
 
 st.write("The following locations are already in place and selectable in the **'➕ Create'** page by the user:")
 stu.st_write("ℹ️: the 'Pages' column shows the pages where once a table is created at that location will be displayed")
-stu.display_system_locations()
+display_system_locations(
+    default_location_page_name=get_default_location()['alias'],
+    non_default_location_page_name=stu.get_rest_of_the_world_page_name()
+)
 
 st.divider()
 st.write("This is a open source project and is free to use. "

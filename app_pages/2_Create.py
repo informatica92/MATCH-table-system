@@ -4,6 +4,7 @@ import os
 
 import utils.streamlit_utils as stu
 from utils.bgg_manager import search_bgg_games, get_bgg_game_info, get_bgg_url
+from utils.table_system_location import get_default_location
 
 # redirect to "User" page if username is not set
 stu.redirect_to_user_page_if_username_not_set()
@@ -76,11 +77,11 @@ with st.form(key="create_new_proposition_form", border=False):
     if can_users_set_location:
         locations = stu.get_available_locations(st.session_state.user.user_id, True, False)
     else:
-        locations = [list(stu.get_default_location().values())]
+        locations = [list(get_default_location().values())]
     # 'id', 'street_name', 'city', 'house_number', 'country', 'alias', 'user_id'
     locations = [(loc[0], loc[5]) for loc in locations]  # id, alias
     st.selectbox(":world_map: Location", options=locations, key="location", format_func=lambda x: x[1])
-    def_loc_alias = stu.get_default_location()['alias']
+    def_loc_alias = get_default_location()['alias']
     code_html_style = "style='color: black; background-color: #f0f0f0;font-weight: bold;'"
     stu.st_write(f"Selecting <b>{def_loc_alias}</b> as location, the table will be displayed into the "
                  f"<b>''📜{def_loc_alias}''</b> page, otherwise you'll find it into the "

@@ -7,6 +7,7 @@ from utils.bgg_manager import get_bgg_url
 from utils.altair_manager import timeline_chart
 from utils.table_system_proposition import TableProposition, TablePropositionExpansion, StreamlitTablePropositions
 from utils.table_system_overlaps import check_overlaps_in_joined_tables, render_overlaps_table_buttons
+from utils.table_system_location import get_default_location
 
 
 @st.dialog("🖋️ Edit Table")
@@ -276,7 +277,7 @@ def create_view_and_join_page():
                 on_change=StreamlitTablePropositions.refresh_table_propositions, kwargs={"reason": "Filtering proposed_by_me"},
                 disabled=not st.session_state['username']
             )
-            location_options = {'default': stu.get_default_location()['alias'], 'row': stu.get_rest_of_the_world_page_name()}
+            location_options = {'default': get_default_location()['alias'], 'row': stu.get_rest_of_the_world_page_name()}
             location_filter_disabled = st.session_state.location_mode is not None
             st.pills(
                 "Locations",
