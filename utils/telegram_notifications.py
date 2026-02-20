@@ -187,7 +187,11 @@ class TelegramNotifications(object):
 
     def send_message(self, text: str, chat_id: str, message_thread_id: int, image_url: str=None) -> TelegramNotificationsOutput:
         if image_url:
-            return self._send_photo_message(text=text, chat_id=chat_id, message_thread_id=message_thread_id, image_url=image_url)
+            try:
+                return self._send_photo_message(text=text, chat_id=chat_id, message_thread_id=message_thread_id, image_url=image_url)
+            except requests.exceptions.ConnectTimeout as e:
+                logging.error(f"Error downloading image for Telegram PHOTO message: '{e}', retrying without image")
+                return self._send_text_message(text=text, chat_id=chat_id, message_thread_id=message_thread_id)
         else:
             return self._send_text_message(text=text, chat_id=chat_id, message_thread_id=message_thread_id)
 
