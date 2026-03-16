@@ -338,5 +338,8 @@ def create_user_info(user: JoinedPlayerOrProposer, label=None, icon=None):
     if expander.open:
         with expander:
             with st.container(gap="xxsmall"):
-                st.write(f":orange[**BGG**]: {user.bgg_username}", unsafe_allow_html=True)
-                st.write(f":blue[**Telegram**]: {user.telegram_username}", unsafe_allow_html=True)
+                if st.session_state.user.is_logged_in():
+                    st.write(f":orange[**BGG**]: {user.bgg_username}", unsafe_allow_html=True)
+                    st.write(f":blue[**Telegram**]: {user.telegram_username}", unsafe_allow_html=True)
+                else:
+                    st.write("*Login to see user details*")
