@@ -1,7 +1,9 @@
 import datetime
 import time as time_module
 import pandas as pd
-from utils.bgg_manager import get_bgg_game_info, get_bgg_url
+from utils.bgg_manager import get_bgg_game_info, get_bgg_url, get_bgg_profile_page_url
+from utils.telegram_notifications import get_telegram_profile_page_url
+from utils.table_system_user import _get_or_create_user
 from utils.table_system_user import StreamlitTableSystemUser
 from utils.table_system_logging import logging
 from utils.sql_manager import SQLManager
@@ -75,6 +77,59 @@ class JoinedPlayerOrProposer(object):
         self.user_id = user_id
         self.username = username
         self.email = email
+
+    @staticmethod
+    def _get_user_details(email: str) -> dict:
+        result = _get_or_create_user(email)
+        result_dict = {
+            "user_id": result[0],
+            "username": result[1],
+            "name": result[2],
+            "surname": result[3],
+            "bgg_username": result[4],
+            "telegram_username": result[5],
+            "is_admin": result[6],
+            "is_banned": result[7]
+        }
+        return result_dict
+
+    @property
+    def complete_name(self) -> str:
+        if self.email:
+            user_details = self._get_user_details(self.email)
+            name = user_details.get("name")
+            surname = user_details.get("surname")
+            if name and surname:
+                return f"{name} {surname}"
+            if name and not surname:
+                return name
+            if not name and surname:
+                return surname
+            if not name and not surname:
+                return "Unknown"
+        return "Unknown"
+
+    @property
+    def bgg_username(self) -> str:
+        if self.email:
+            user_details = self._get_user_details(self.email)
+            bgg_username = user_details.get("bgg_username")
+            if bgg_username:
+                return get_bgg_profile_page_url(bgg_username, as_html_link=True, label=bgg_username)
+            else:
+                return "Unknown"
+        return "Unknown"
+
+    @property
+    def telegram_username(self) -> str:
+        if self.email:
+            user_details = self._get_user_details(self.email)
+            telegram_username = user_details.get("telegram_username")
+            if telegram_username:
+                return get_telegram_profile_page_url(telegram_username, as_html_link=True, label='@'+telegram_username)
+            else:
+                return "Unknown"
+        return "Unknown"
 
     @staticmethod
     def from_dict(dict_) -> 'JoinedPlayerOrProposer':

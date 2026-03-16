@@ -35,10 +35,12 @@ TEXTS = {
 }
 
 
-def get_telegram_profile_page_url(telegram_username, as_html_link=False):
+def get_telegram_profile_page_url(telegram_username, as_html_link=False, label=None):
     url = f"https://t.me/{telegram_username}"
+    if not label:
+        label = url
     if as_html_link:
-        return f"<a href='{url}'>{url}</a>"
+        return f"<a href='{url}'>{label}</a>"
     else:
         return url
 

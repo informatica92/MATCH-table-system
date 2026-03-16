@@ -334,5 +334,9 @@ def add_donation_button(label='Support me on Ko-fi', color='#29abe0'):
         components.v1.html(script)
 
 def create_user_info(user: JoinedPlayerOrProposer, label=None, icon=None):
-    with st.expander(f"{icon or ''}{label or ''}{user.username}"):
-        st.write(f"**BGG**: *coming soon* **Telegram**: *coming soon*")
+    expander = st.expander(f"{icon or ''}{label or ''}{user.username}", on_change="rerun")
+    if expander.open:
+        with expander:
+            with st.container(gap="xxsmall"):
+                st.write(f":orange[**BGG**]: {user.bgg_username}", unsafe_allow_html=True)
+                st.write(f":blue[**Telegram**]: {user.telegram_username}", unsafe_allow_html=True)

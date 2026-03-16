@@ -80,10 +80,12 @@ def get_bgg_game_info(game_id):
 def get_bgg_url(game_id):
     return f"https://boardgamegeek.com/boardgame/{game_id}"
 
-def get_bgg_profile_page_url(username, as_html_link=False):
+def get_bgg_profile_page_url(username, as_html_link=False, label=None):
     url = f"https://boardgamegeek.com/user/{username}"
+    if not label:
+        label = url
     if as_html_link:
-        return f"<a href='{url}' target='_blank'>{url}</a>"
+        return f"<a href='{url}' target='_blank'>{label}</a>"
     else:
         return url
 
