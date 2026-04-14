@@ -111,13 +111,13 @@ def str_to_bool(s: str) -> bool:
 def scroll_to(element_id):
     tmp = st.empty()
     with tmp:
-        components.v1.html(f'''
+        st.iframe(f'''
             <script>
                 var element = window.parent.document.getElementById("{element_id}");
                 element.scrollIntoView({{behavior: 'smooth'}});
             </script>
-        '''.encode())
-        sleep(0.5)
+        ''')
+        sleep(0.9)
     tmp.empty()
 
 
@@ -331,10 +331,10 @@ def add_donation_button(label='Support me on Ko-fi', color='#29abe0'):
         <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
         <script type='text/javascript'>kofiwidget2.init('{label}', '{color}', '{user}');kofiwidget2.draw();</script>
         """
-        components.v1.html(script)
+        st.iframe(script)
 
-def create_user_info(user: JoinedPlayerOrProposer, label=None, icon=None):
-    expander = st.expander(f"{icon or ''}{label or ''}{user.username}", on_change="rerun")
+def create_user_info(user: JoinedPlayerOrProposer, table_id, label=None, icon=None):
+    expander = st.expander(f"{icon or ''}{label or ''}{user.username}", on_change="rerun", key=f"{table_id}_{user.user_id}_{label or ''}_expander")
     if expander.open:
         with expander:
             with st.container(gap="xxsmall"):

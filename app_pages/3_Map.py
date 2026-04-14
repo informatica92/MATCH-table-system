@@ -1,5 +1,4 @@
 import streamlit as st
-from streamlit.components.v1 import iframe
 
 import os
 
@@ -11,7 +10,7 @@ st.header("🗺️ Map")
 
 gmap_url = os.environ.get('GMAP_MAP_URL')
 if gmap_url:
-    iframe(gmap_url, height=500)
+    st.iframe(gmap_url, height=500)
 else:
     st.warning("GMAP_MAP_URL environment variable not set")
 

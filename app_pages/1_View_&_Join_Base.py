@@ -113,7 +113,7 @@ def display_table_proposition(section_name, table_proposition: TableProposition)
                 st.badge(f"**{table_proposition.time.strftime('%H:%M')}**", icon="⌚", color="violet")
                 st.badge(f"{table_proposition.date}", icon="📅", color="blue")
                 st.badge(f"{'{:02d}:{:02d}'.format(*divmod(table_proposition.duration, 60))}h", icon="⏳", color="orange")
-            stu.create_user_info(user=table_proposition.proposed_by, icon="🧔🏻", label=" **Proposed by** ")
+            stu.create_user_info(user=table_proposition.proposed_by, table_id=table_proposition.table_id, icon="🧔🏻", label=" **Proposed by** ")
             with st.expander(f"🗺️ **Location**: {table_proposition.location.location_alias}"):
                 location_markdown = table_proposition.location.to_markdown(st.session_state.user, icon="🔗")
                 # location_markdown includes address + link to google maps IF default location or logged users
@@ -132,7 +132,7 @@ def display_table_proposition(section_name, table_proposition: TableProposition)
             for joined_player_obj in table_proposition.joined_players or []:
                 if joined_player_obj.username is not None:
                     with st.container(horizontal=True, vertical_alignment="center"):  # NEW in Streamlit 1.48.0
-                        stu.create_user_info(user=joined_player_obj)
+                        stu.create_user_info(user=joined_player_obj, table_id=table_proposition.table_id)
                         # LEAVE
                         st.button(
                             "Leave",
