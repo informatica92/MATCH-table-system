@@ -169,7 +169,9 @@ class TelegramNotifications(object):
                         photo=image_file,
                         caption=text,
                         parse_mode='HTML',
-                        message_thread_id=message_thread_id
+                        message_thread_id=message_thread_id,
+                        write_timeout=35,
+                        read_timeout=35
                     )
                 )
                 return TelegramNotificationsOutput(message=m)
