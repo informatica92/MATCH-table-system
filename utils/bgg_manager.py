@@ -4,6 +4,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 import html
 import xml.etree.ElementTree as et
+from time import sleep
 
 from streamlit import cache_data
 
@@ -105,6 +106,41 @@ def search_bgg_games(game_name):
             year = year.get('value') if year is not None else "Unknown Year"
             games.append((game_id, f"{name} ({year})"))
 
+        return games
+    except Exception as e:
+        raise AttributeError(e)
+
+def clear_user_collection_cache():
+    get_user_collection.clear()
+
+@cache_data(ttl=None, max_entries=1000, persist="disk")
+def get_user_collection(username):
+    url = f"https://boardgamegeek.com/xmlapi2/collection?username={username}&subtype=boardgame&own=1"
+    try:
+        response = requests.get(url, headers=HEADERS)
+        while response.status_code == 429:
+            sleep(30)
+            response = requests.get(url, headers=HEADERS)
+        response.raise_for_status()
+        root = et.fromstring(response.content)
+
+        # return response.content.decode('utf-8')
+
+        games = []
+        for item in root.findall('item'):
+            game_id = item.get('objectid')
+            name = item.find('name').text
+            year = item.find('yearpublished').text if item.find('yearpublished') is not None else "Unknown Year"
+            thumb = item.find('thumbnail').text if item.find('thumbnail') is not None else None
+            games.append(
+                {
+                    "username": username,
+                    "game_id": game_id,
+                    "name": name,
+                    "year": year,
+                    "thumb": thumb,
+                }
+            )
         return games
     except Exception as e:
         raise AttributeError(e)

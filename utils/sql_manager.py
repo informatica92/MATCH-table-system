@@ -406,6 +406,22 @@ class SQLManager(object):
         c.close()
         conn.close()
 
+    def get_all_bgg_usernames(self):
+        conn = self.get_db_connection()
+        c = conn.cursor()
+        query = f"""
+        SELECT 
+            bgg_username
+        FROM {self._schema}.users 
+        WHERE
+            bgg_username is not null
+        """
+        c.execute(query)
+        result = c.fetchall()
+        c.close()
+        conn.close()
+        return [r[0] for r in result]
+
     # TABLES
     def get_table_propositions(self):
 

@@ -62,7 +62,8 @@ if len(view_and_join_prop_pages)>0:
 other_pages = [
     st.Page(stu.CREATE_PAGE, icon="➕"),
     st.Page(stu.MAP_PAGE, icon="🗺️"),
-    st.Page(stu.USER_PAGE, icon="👦🏻")
+    st.Page(stu.USER_PAGE, icon="👦🏻"),
+    st.Page(stu.SEARCH_PAGE, icon="🔍")
 ]
 pages_dict["Other"] = other_pages
 

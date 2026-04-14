@@ -29,6 +29,7 @@ VIEW_JOIN_DEMOS_PAGE = "app_pages/1_View_&_Join_Prop_02_Demos.py"
 CREATE_PAGE = "app_pages/2_Create.py"
 MAP_PAGE = "app_pages/3_Map.py"
 USER_PAGE = "app_pages/4_User.py"
+SEARCH_PAGE = "app_pages/5_Search.py"
 
 HELP_TEXT = "Expanding the sidebar on the left ◀️ you can navigate among pages:\n\n"\
 "- **📜 Tables by ...**: view the table propositions, join, leave or edit them\n"\
@@ -343,3 +344,6 @@ def create_user_info(user: JoinedPlayerOrProposer, label=None, icon=None):
                     st.write(f":blue[**Telegram**]: {user.telegram_username}", unsafe_allow_html=True)
                 else:
                     st.write("*Login to see user details*")
+
+def get_all_bgg_usernames():
+    return sql_manager.get_all_bgg_usernames()
