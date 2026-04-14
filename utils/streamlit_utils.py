@@ -2,7 +2,6 @@ import os
 from typing import Literal
 
 import streamlit as st
-from streamlit import components
 
 from time import sleep
 import datetime

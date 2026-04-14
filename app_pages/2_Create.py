@@ -115,9 +115,9 @@ with st.form(key="create_new_proposition_form", border=False):
                 if st.session_state.bring_me_to_table:
                     last_created_table = st.session_state.last_created_table_id
                     if stu.is_default_location(st.session_state.location):
-                        st.switch_page(stu.VIEW_JOIN_LOC_DEFAULT_PAGE, query_params={"navigate_to": last_created_table})
+                        st.switch_page(stu.VIEW_JOIN_LOC_DEFAULT_PAGE)
                     else:
-                        st.switch_page(stu.VIEW_JOIN_LOC_ROW_PAGE, query_params={"navigate_to": last_created_table})
+                        st.switch_page(stu.VIEW_JOIN_LOC_ROW_PAGE)
         else:
             st.form_submit_button("Create Proposition", disabled=True)
             st.warning("Select a game from the list to create a proposition.")

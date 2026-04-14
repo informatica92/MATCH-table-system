@@ -339,6 +339,7 @@ def create_view_and_join_page():
     st.divider()
     stu.add_powered_by_bgg_image()
 
-    if st.query_params.get("navigate_to"):
-        navigate_to_table_id = st.query_params.get("navigate_to")
+    if st.session_state.get("last_created_table_id"):
+        navigate_to_table_id = st.session_state.last_created_table_id
         stu.scroll_to(f"table-{navigate_to_table_id}")
+        st.session_state.last_created_table_id = None
