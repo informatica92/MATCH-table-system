@@ -110,6 +110,7 @@ def str_to_bool(s: str) -> bool:
 def scroll_to(element_id):
     tmp = st.empty()
     with tmp:
+        sleep(0.9)
         st.iframe(f'''
             <script>
                 var element = window.parent.document.getElementById("{element_id}");
