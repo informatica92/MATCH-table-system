@@ -97,11 +97,12 @@ def display_table_proposition(section_name, table_proposition: TableProposition)
         st.subheader(f"Table {table_proposition.table_id}: {table_proposition.game_name}", anchor=f"table-{table_proposition.table_id}")
 
     # Create three columns
-    col1, col2, col3 = st.columns([1, 1, 1])
+    col1, col2, col3 = st.columns([2, 3, 3])
 
     with col1:  # image, description, categories, mechanics
         with st.container(horizontal=False, gap=stu.SPACE_BETWEEN_VERTICAL_COMPONENTS):
-            st.image(table_proposition.image_url or stu.DEFAULT_IMAGE_URL, caption=table_proposition.get_description_preview())
+            st.image(table_proposition.image_url or stu.DEFAULT_IMAGE_URL)
+            stu.st_write(table_proposition.get_description_preview(read_all_link="HTML"), color="lightgrey")
             stu.st_write(
                 f"<b>Categories:</b> {', '.join(table_proposition.categories)}<br>"
                 f"<b>Mechanics:</b> {', '.join(table_proposition.mechanics)}"

@@ -306,8 +306,31 @@ class TableProposition(object):
     def get_notes_preview(self, n_chars=20):
         return _str_preview(self.notes, n_chars)
 
-    def get_description_preview(self, n_chars=120):
-        return _str_preview(self.game_description, n_chars)
+    def get_description_preview(self, n_chars=120, read_all_link=None):
+        """
+        Return a preview of the game description, optionally appending a link to the full BGG page.
+
+        Args:
+            n_chars (int): Maximum number of characters to include in the preview.
+            read_all_link (str | None): Link output format.
+                - "MD": append a Markdown link
+                - "HTML": append an HTML link
+                - None/other: no link appended
+
+        Returns:
+            str: Description preview, with optional "read all" link when truncated.
+        """
+        game_description_preview = _str_preview(self.game_description, n_chars)
+
+        # Add link only if text was truncated.
+        if read_all_link:
+            bgg_url = get_bgg_url(self.bgg_game_id)
+            if read_all_link == "MD":
+                game_description_preview += f" [read all on BGG]({bgg_url})"
+            elif read_all_link == "HTML":
+                game_description_preview += f' <a href="{bgg_url}" target="_blank">read all on BGG</a>'
+
+        return game_description_preview
 
     # PROPERTIES
 
