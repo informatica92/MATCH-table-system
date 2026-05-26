@@ -95,6 +95,20 @@ def get_go_to_user_page_link_button(use_container_width: bool = True):
         width='content' if use_container_width is False else 'stretch',
     )
 
+def format_duration_in_h_min(duration: int, suffix: str | None = None) -> str:
+    """
+    Duration in minutes format in hours and minutes. EX: 90(min/int) => "01:30h" (h/str)
+    Args:
+        duration: the duration in minutes to format in HH:MIN
+        suffix: the suffix to add to the duration in hours once formatted. If None, no suffix will be added.
+
+    Returns:
+
+    """
+    if not suffix:
+        suffix = ""
+    return f"{'{:02d}:{:02d}'.format(*divmod(duration, 60))}{suffix}"
+
 def st_write(label: str, size: int = 12, color: str = "black") -> None:
     txt = CUSTOM_TEXT_WITH_LABEL_AND_SIZE.format(label=label, size=size, color=color)
     st.write(txt, unsafe_allow_html=True)

@@ -415,14 +415,10 @@ class StreamlitTablePropositions(list[TableProposition]):
         st.session_state.propositions = st.session_state.global_propositions.copy()
 
         if joined_by_me:
-            st.session_state.propositions = StreamlitTablePropositions.from_list_of_objects(
-                [tp for tp in st.session_state.propositions if tp.joined(st.session_state.user.user_id)]
-            )
+            st.session_state.propositions = StreamlitTablePropositions.from_list_of_objects(st.session_state.propositions.get_joined_tables())
 
         if proposed_by_me:
-            st.session_state.propositions = StreamlitTablePropositions.from_list_of_objects(
-                [tp for tp in st.session_state.propositions if tp.proposed_by.user_id == st.session_state.user.user_id]
-            )
+            st.session_state.propositions = StreamlitTablePropositions.from_list_of_objects(st.session_state.propositions.get_proposed_tables())
 
         # FILTER BY LOCATION
         if location_mode is not None:
@@ -517,3 +513,41 @@ class StreamlitTablePropositions(list[TableProposition]):
 
         return df.sort_values(["date", "time"])
 
+    def get_joined_tables(self, user_id: int | None = None) -> list[TableProposition]:
+        """
+        Returns the table propositions joined by the user with the given user_id. If user_id is None, returns the tables joined by the current user in st.session_state.
+        Args:
+            user_id: the user_id, if None the user_id of the current user in st.session_state will be used
+
+        Returns:
+
+        """
+        if not user_id:
+            user_id = st.session_state.user.user_id
+
+        return [p for p in self if p.joined(user_id)]
+
+    def get_booked_play_time(self, user_id: int | None = None) -> int:
+        """
+        Returns the total booked play time in minutes for the user with the given user_id.
+        If user_id is None, returns the booked play time in minutes for the current user in st.session_state.
+        Args:
+            user_id: the user_id, if None the user_id of the current user in st.session_state will be used
+        """
+        joined_tables = self.get_joined_tables(user_id)
+        booked_play_time = sum([t.duration for t in joined_tables])
+        return booked_play_time
+
+    def get_proposed_tables(self, user_id: int | None = None) -> list[TableProposition]:
+        """
+        Returns the table propositions proposed by the user with the given user_id. If user_id is None, returns the tables proposed by the current user in st.session_state.
+        Args:
+            user_id: the user_id, if None the user_id of the current user in st.session_state will be used
+
+        Returns:
+
+        """
+        if not user_id:
+            user_id = st.session_state.user.user_id
+
+        return [p for p in self if p.proposed_by.user_id == user_id]

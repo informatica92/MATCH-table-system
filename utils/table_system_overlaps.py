@@ -1,12 +1,9 @@
 import streamlit as st
 from utils.streamlit_utils import scroll_to, VIEW_JOIN_PROPOSITIONS_PAGE, VIEW_JOIN_TOURNAMENTS_PAGE, VIEW_JOIN_DEMOS_PAGE
-from utils.table_system_proposition import TableProposition
+from utils.table_system_proposition import TableProposition, StreamlitTablePropositions
 
-def check_overlaps_in_joined_tables(
-        table_propositions:  list[TableProposition],
-        current_user_id: int
-) -> tuple[list[tuple[TableProposition, TableProposition]], list[tuple[TableProposition, TableProposition]]]:
-    joined_tables = [tp for tp in table_propositions if tp.joined(current_user_id)]
+def check_overlaps_in_joined_tables(table_propositions:  StreamlitTablePropositions) -> tuple[list[tuple[TableProposition, TableProposition]], list[tuple[TableProposition, TableProposition]]]:
+    joined_tables = table_propositions.get_joined_tables()
     # check if the start time and duration of the tables joined by the user (in joined_tables) contain any kind of
     # overlaps. In particular mark the cases in which the start date is exactly the same as ERROR and all the other
     # types of overlaps as warning

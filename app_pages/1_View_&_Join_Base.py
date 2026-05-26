@@ -114,7 +114,7 @@ def display_table_proposition(section_name, table_proposition: TableProposition)
             with st.container(horizontal=True):
                 st.badge(f"**{table_proposition.time.strftime('%H:%M')}**", icon="⌚", color="violet")
                 st.badge(f"{table_proposition.date}", icon="📅", color="blue")
-                st.badge(f"{'{:02d}:{:02d}'.format(*divmod(table_proposition.duration, 60))}h", icon="⏳", color="orange")
+                st.badge(stu.format_duration_in_h_min(table_proposition.duration, suffix="h"), icon="⏳", color="orange")
             stu.create_user_info(user=table_proposition.proposed_by, table_id=table_proposition.table_id, icon="🧔🏻", label=" **Proposed by** ")
             with st.expander(f"🗺️ **Location**: {table_proposition.location.location_alias}"):
                 location_markdown = table_proposition.location.to_markdown(st.session_state.user, icon="🔗")
@@ -304,7 +304,7 @@ def create_view_and_join_page():
                 on_change=StreamlitTablePropositions.refresh_table_propositions, kwargs={"reason": "Filtering Proposition Type"}
             )
         # OVERLAPS
-        errors, warnings = check_overlaps_in_joined_tables(st.session_state.global_propositions, st.session_state.user.user_id)
+        errors, warnings = check_overlaps_in_joined_tables(st.session_state.global_propositions)
         num_overlaps = len(errors) + len(warnings)
         if num_overlaps == 0:
             with st.popover("✅ No overlaps", width='stretch'):
@@ -325,6 +325,13 @@ def create_view_and_join_page():
                         render_overlaps_table_buttons(warning_left, warning_right, "warn")
         # FAKE SPACE ON THE RIGHT
         st.space("stretch")
+
+    # statistics with st.metrics
+    with st.container(horizontal=True, gap="xxsmall"):
+        st.metric("Tables", f"{len(st.session_state.propositions)} :material/table_restaurant:", border=False, help="The total number of tables available.")
+        st.metric("Joined", f"{len(st.session_state.propositions.get_joined_tables())} :material/how_to_reg:", border=False, help="The number of tables joined by the current user.")
+        st.metric("Play Time", f"{stu.format_duration_in_h_min(st.session_state.propositions.get_booked_play_time())}h", border=False, help="The total expected play time booked by the joined tables of the current user.")
+        st.metric("Proposed", f"{len(st.session_state.propositions.get_proposed_tables())} :material/add_box:", border=False, help="The total number of tables proposed by the current user.")
 
     # show propositions
     if len(st.session_state.propositions) == 0:
