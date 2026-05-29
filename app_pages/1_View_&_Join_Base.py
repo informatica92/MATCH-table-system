@@ -8,6 +8,7 @@ from utils.altair_manager import timeline_chart
 from utils.table_system_proposition import TableProposition, TablePropositionExpansion, StreamlitTablePropositions
 from utils.table_system_overlaps import check_overlaps_in_joined_tables, render_overlaps_table_buttons
 from utils.table_system_location import get_default_location
+from utils.recommender import recommend_score
 
 
 @st.dialog("🖋️ Edit Table")
@@ -116,6 +117,17 @@ def display_table_proposition(section_name, table_proposition: TableProposition)
                 st.badge(f"{table_proposition.date}", icon="📅", color="blue")
                 st.badge(stu.format_duration_in_h_min(table_proposition.duration, suffix="h"), icon="⏳", color="orange")
             stu.create_user_info(user=table_proposition.proposed_by, table_id=table_proposition.table_id, icon="🧔🏻", label=" **Proposed by** ")
+            st.text(
+                recommend_score(
+                    user_categories=st.session_state.user.liked_categories,
+                    user_mechanics=st.session_state.user.liked_mechanics,
+                    game_categories=table_proposition.categories,
+                    game_mechanics=table_proposition.mechanics,
+                    cat_weight = 0.5,
+                    mech_weight = 0.5,
+                    beta = 1
+                )
+            )
             with st.expander(f"🗺️ **Location**: {table_proposition.location.location_alias}"):
                 location_markdown = table_proposition.location.to_markdown(st.session_state.user, icon="🔗")
                 # location_markdown includes address + link to google maps IF default location or logged users

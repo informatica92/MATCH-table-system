@@ -89,7 +89,9 @@ class JoinedPlayerOrProposer(object):
             "bgg_username": result[4],
             "telegram_username": result[5],
             "is_admin": result[6],
-            "is_banned": result[7]
+            "is_banned": result[7],
+            "liked_categories": result[8],
+            "liked_mechanics": result[9]
         }
         return result_dict
 

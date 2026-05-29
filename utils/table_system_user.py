@@ -16,8 +16,8 @@ def _get_or_create_user(email):
     if email:
         logging.info(f"Getting user info [no cache] for {st.user.email}")
         sql_manager = SQLManager()
-        user_id, username, name, surname, bgg_username, telegram_username, is_admin, is_banned = sql_manager.get_or_create_user(email)
-        return user_id, username, name, surname, bgg_username, telegram_username, is_admin, is_banned
+        user_id, username, name, surname, bgg_username, telegram_username, is_admin, is_banned, liked_categories, liked_mechanics = sql_manager.get_or_create_user(email)
+        return user_id, username, name, surname, bgg_username, telegram_username, is_admin, is_banned, liked_categories, liked_mechanics
     else:
         return None, None, None, None, None, None, None, None
 
@@ -54,7 +54,9 @@ class StreamlitTableSystemUser(object):
             self.bgg_username,
             self.telegram_username,
             self.is_admin,
-            self.is_banned
+            self.is_banned,
+            self.liked_categories,
+            self.liked_mechanics,
         ) = _get_or_create_user(self.email)
 
         if init_session_state_for_username:

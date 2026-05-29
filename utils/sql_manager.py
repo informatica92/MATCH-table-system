@@ -371,7 +371,10 @@ class SQLManager(object):
         c.close()
         conn.close()
 
-        return _id, username, name, surname, bgg_username, telegram_username, is_admin, is_banned
+        liked_categories = ["Fantasy", "Fighting", "Medieval", "Adventure", "Dice", "Horror"]
+        liked_mechanics = ["Deck, Bag, and Pool Building", "Modular Board", "Drafting", "Hand Management", "Cooperative Game", "Set Collection"]
+
+        return _id, username, name, surname, bgg_username, telegram_username, is_admin, is_banned, liked_categories, liked_mechanics
 
     def set_user(self, email, username, name, surname, bgg_username, telegram_username):
         conn = self.get_db_connection()
