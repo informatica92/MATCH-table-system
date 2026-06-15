@@ -102,11 +102,10 @@ def display_table_proposition(section_name, table_proposition: TableProposition)
     with col1:  # image, description, categories, mechanics
         with st.container(horizontal=False, gap=stu.SPACE_BETWEEN_VERTICAL_COMPONENTS):
             st.image(table_proposition.image_url or stu.DEFAULT_IMAGE_URL)
-            stu.st_write(table_proposition.get_description_preview(read_all_link="HTML"), color="lightgrey")
+            stu.st_write(table_proposition.get_description_preview(read_all_link="HTML"), color="gray")
             stu.st_write(
                 f"<b>Categories:</b> {', '.join(table_proposition.categories)}<br>"
-                f"<b>Mechanics:</b> {', '.join(table_proposition.mechanics)}",
-                color="black" if st.context.theme.get('type') == "light" else "grey"
+                f"<b>Mechanics:</b> {', '.join(table_proposition.mechanics)}"
             )
 
     with col2:  # time, date, duration, proposed by, location, expansions, notes

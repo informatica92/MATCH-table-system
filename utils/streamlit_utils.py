@@ -109,7 +109,20 @@ def format_duration_in_h_min(duration: int, suffix: str | None = None) -> str:
         suffix = ""
     return f"{'{:02d}:{:02d}'.format(*divmod(duration, 60))}{suffix}"
 
-def st_write(label: str, size: int = 12, color: str = "black") -> None:
+def st_write(label: str, size: int = 12, color: str = "auto") -> None:
+    """
+    Write something in Streamlit with a custom size and color using HTML capabilities.
+    If color is "auto", it will be black in light mode and gray in dark mode.
+    Args:
+        label: the text to write in Streamlit (in HTML)
+        size: the size in pixels to write in
+        color: the color to use (black, gray, lightgray, auto). If auto => black in light mode and gray in dark mode
+
+    Returns: None
+
+    """
+    if color == "auto":
+        color = "black" if st.context.theme.get('type') == "light" else "gray"
     txt = CUSTOM_TEXT_WITH_LABEL_AND_SIZE.format(label=label, size=size, color=color)
     st.write(txt, unsafe_allow_html=True)
 
