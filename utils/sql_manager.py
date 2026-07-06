@@ -2,6 +2,7 @@ import psycopg2
 import json
 import os
 import pandas as pd
+import streamlit as st
 
 from utils.table_system_logging import logging
 
@@ -33,14 +34,24 @@ class SQLManager(object):
 
     def get_db_connection(self):
         # Initialize the PostgreSQL connection
-        return psycopg2.connect(
-            host=self._db_host,
-            dbname=self._db_name,
-            user=self._db_user,
-            password=self._db_password,
-            port=self._db_port,
-            options=f'-c search_path={self._schema}'
-        )
+        try:
+            return psycopg2.connect(
+                host=self._db_host,
+                dbname=self._db_name,
+                user=self._db_user,
+                password=self._db_password,
+                port=self._db_port,
+                options=f'-c search_path={self._schema}'
+            )
+        except psycopg2.OperationalError as e:
+            logging.error(f"Error connecting to the database {self._db_host} ({self._db_name}):\n{e}")
+            st.error(f"Error connecting to the database.\n\n"
+                     f"Ask Database Administrator to check database connection.\n\n"
+                     f"Possible causes:\n\n"
+                     f" - Database server is down or unreachable\n"
+                     f" - Database connection error\n"
+                     f" - Database powered-off due to inactivity\n")
+            st.stop()
 
     # INIT
     def create_tables(self):
