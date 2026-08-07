@@ -206,12 +206,16 @@ def timeline_table_propositions():
             _id = selected_data["selection"]["param_1"][0]['table_id']
             selected_row = df[df['table_id'] == _id].iloc[0]
             display_table_proposition(section_name="timeline", table_proposition=TableProposition.from_dict(selected_row))
+        else:
+            st.info("Select an item above to see details here")
+    else:
+        st.info("Select an item above to see details here")
 
 def dataframe_table_propositions():
 
     df = st.session_state.propositions.to_df(
         username=st.session_state.user.username,
-        add_bgg_url=True, add_players_fraction=True, add_joined=True
+        add_bgg_url=True, add_players_fraction=True, add_joined=True, add_title_markdown=True
     )
 
     column_config = {
@@ -238,6 +242,10 @@ def dataframe_table_propositions():
             _id = selected_data["selection"]["rows"][0]
             selected_row = df.iloc[_id]
             display_table_proposition(section_name="timeline", table_proposition=TableProposition.from_dict(selected_row))
+        else:
+            st.info("Select an item above to see details here")
+    else:
+        st.info("Select an item above to see details here")
 
 def create_view_and_join_page():
 
