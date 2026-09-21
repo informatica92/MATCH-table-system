@@ -335,10 +335,33 @@ def create_view_and_join_page():
 
     # statistics with st.metrics
     with st.container(horizontal=True, gap="xxsmall"):
-        st.metric("Tables", f"{len(st.session_state.propositions)} :material/table_restaurant:", border=False, help="The total number of tables available.")
-        st.metric("Joined", f"{len(st.session_state.propositions.get_joined_tables())} :material/how_to_reg:", border=False, help="The number of tables joined by the current user.")
-        st.metric("Play Time", f"{stu.format_duration_in_h_min(st.session_state.propositions.get_booked_play_time())}h", border=False, help="The total expected play time booked by the joined tables of the current user.")
-        st.metric("Proposed", f"{len(st.session_state.propositions.get_proposed_tables())} :material/add_box:", border=False, help="The total number of tables proposed by the current user.")
+        st.metric(
+            "Tables",
+            f"{len(st.session_state.propositions)} :material/table_restaurant:",
+            border=False,
+            help="The total number of available tables."
+        )
+        st.metric(
+            "Proposed by me",
+            f"{len(st.session_state.propositions.get_proposed_tables())} :material/add_box:",
+            border=False,
+            help="The total number of tables proposed by me."
+        )
+        st.metric(
+            "Joined by me",
+            f"{len(st.session_state.propositions.get_joined_tables())} :material/how_to_reg:",
+            border=False,
+            help="The number of tables **joined by me**, together with the **resulting play time in hh:mm** (see below)",
+            delta=f"{stu.format_duration_in_h_min(st.session_state.propositions.get_booked_play_time())}h",
+            delta_arrow="off",
+            delta_color="gray"
+        )
+        # st.metric(
+        #     "Play Time",
+        #     f"{stu.format_duration_in_h_min(st.session_state.propositions.get_booked_play_time())}h",
+        #     border=False,
+        #     help="The total expected play time booked by the joined tables of the current user."
+        # )
 
     # show propositions
     if len(st.session_state.propositions) == 0:
