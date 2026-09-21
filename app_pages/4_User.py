@@ -24,77 +24,81 @@ if not st.session_state.user.is_logged_in():
             login_button()
     st.stop()
 
-st.subheader("User settings")
+setting_tab, admin_tab, location_tab = st.tabs(["⚙️ User settings", "🔏 Admin settings", "🌏 Locations"])
+with setting_tab:
+    st.subheader("User settings")
 
-col1, col2 = st.columns([1, 4])
-col1.text_input("User ID", value=st.session_state.user.user_id, disabled=True)
-col2.text_input("Email", value=st.session_state.user.email, disabled=True)
-with st.form("user_setting_form", border=False):
-    # if username is none, warn the user to set the username
-    if not st.session_state.username:
-        st.warning("You need to **set a Username** below to **join** and **create** tables. ⤵️")
-    username_markdown = "Username" if st.session_state.username else ":red[Username]"
-    st.text_input(username_markdown, value=st.session_state.username, key="username_user_setting", disabled=False, placeholder="[Mandatory] Set a username")
+    col1, col2 = st.columns([1, 4])
+    col1.text_input("User ID", value=st.session_state.user.user_id, disabled=True)
+    col2.text_input("Email", value=st.session_state.user.email, disabled=True)
+    with st.form("user_setting_form", border=False):
+        # if username is none, warn the user to set the username
+        if not st.session_state.username:
+            st.warning("You need to **set a Username** below to **join** and **create** tables. ⤵️")
+        username_markdown = "Username" if st.session_state.username else ":red[Username]"
+        st.text_input(username_markdown, value=st.session_state.username, key="username_user_setting", disabled=False, placeholder="[Mandatory] Set a username")
 
-    col_name, col_surname =  st.columns([1, 1])
-    col_name.text_input("Name", value=st.session_state.user.name, key="name_user_setting", disabled=False, placeholder="[Optional] Set your name")
-    col_surname.text_input("Surname",  value=st.session_state.user.surname, key="surname_user_setting", disabled=False, placeholder="[Optional] Set your surname")
+        col_name, col_surname =  st.columns([1, 1])
+        col_name.text_input("Name", value=st.session_state.user.name, key="name_user_setting", disabled=False, placeholder="[Optional] Set your name")
+        col_surname.text_input("Surname",  value=st.session_state.user.surname, key="surname_user_setting", disabled=False, placeholder="[Optional] Set your surname")
 
-    col_bgg_username, col_telegram_username =  st.columns([1, 1])
-    col_bgg_username.text_input("BGG username",  value=st.session_state.user.bgg_username, key="bgg_username_user_setting", disabled=False, placeholder="[Optional] Set your BGG username")
-    with col_bgg_username:
-        if st.session_state.user.bgg_username:
-            stu.st_write(get_bgg_profile_page_url(st.session_state.user.bgg_username, as_html_link=True))
-        else:
-            stu.st_write("No BGG username set, set it to test the link")
-    col_telegram_username.text_input("Telegram username (without the '@')", value=st.session_state.user.telegram_username, key="telegram_username_user_setting", disabled=False, placeholder="[Optional] Set your Telegram username")
-    with col_telegram_username:
-        if st.session_state.user.telegram_username:
-            stu.st_write(get_telegram_profile_page_url(st.session_state.user.telegram_username, as_html_link=True))
-        else:
-            stu.st_write("No Telegram username set, set it to test the link")
+        col_bgg_username, col_telegram_username =  st.columns([1, 1])
+        col_bgg_username.text_input("BGG username",  value=st.session_state.user.bgg_username, key="bgg_username_user_setting", disabled=False, placeholder="[Optional] Set your BGG username")
+        with col_bgg_username:
+            if st.session_state.user.bgg_username:
+                stu.st_write(get_bgg_profile_page_url(st.session_state.user.bgg_username, as_html_link=True))
+            else:
+                stu.st_write("No BGG username set, set it to test the link")
+        col_telegram_username.text_input("Telegram username (without the '@')", value=st.session_state.user.telegram_username, key="telegram_username_user_setting", disabled=False, placeholder="[Optional] Set your Telegram username")
+        with col_telegram_username:
+            if st.session_state.user.telegram_username:
+                stu.st_write(get_telegram_profile_page_url(st.session_state.user.telegram_username, as_html_link=True))
+            else:
+                stu.st_write("No Telegram username set, set it to test the link")
 
-    if st.form_submit_button("💾 Update ", on_click=st.session_state.user.update_user):
-        if not st.session_state.get("update_username_from_user_error"):
-            new_user_details =\
-                f"\t- Username: {st.session_state.username_user_setting},\n"\
-                f"\t- Name: {st.session_state.name_user_setting},\n"\
-                f"\t- Surname: {st.session_state.surname_user_setting},\n"\
-                f"\t- BGG username: {st.session_state.bgg_username_user_setting},\n"\
-                f"\t- Telegram username: {st.session_state.telegram_username_user_setting}\n"
+        if st.form_submit_button("💾 Update ", on_click=st.session_state.user.update_user):
+            if not st.session_state.get("update_username_from_user_error"):
+                new_user_details =\
+                    f"\t- Username: {st.session_state.username_user_setting},\n"\
+                    f"\t- Name: {st.session_state.name_user_setting},\n"\
+                    f"\t- Surname: {st.session_state.surname_user_setting},\n"\
+                    f"\t- BGG username: {st.session_state.bgg_username_user_setting},\n"\
+                    f"\t- Telegram username: {st.session_state.telegram_username_user_setting}\n"
 
-            st.success(f"User updated successfully:\n\n{new_user_details}")
-            StreamlitTablePropositions.refresh_table_propositions("User update")
-        else:
-            st.error(f"Error updating username: {st.session_state.update_username_from_user_error}")
-        st.session_state["update_username_from_user_error"] = None
+                st.success(f"User updated successfully:\n\n{new_user_details}")
+                StreamlitTablePropositions.refresh_table_propositions("User update")
+            else:
+                st.error(f"Error updating username: {st.session_state.update_username_from_user_error}")
+            st.session_state["update_username_from_user_error"] = None
 
-st.subheader("User Admin")
-st.toggle("Admin", value=st.session_state.user.is_admin, disabled=True, help="Ask the admin to change this setting for your user")
-if st.session_state.user.is_admin:
-    st.subheader("Admin locations (visible only to admins)")
-    stu.st_write(f"Use the following list to manage admin locations. <br>"
-                 f"This lists differs from the \"User locations\", below, since <b>\"Admin locations\" are visible to "
-                 f"all users</b> while \"User locations\" are only visible to the user who created them. <br>")
-    manage_user_locations(user_id=None)
+with admin_tab:
+    st.subheader("User Admin")
+    st.toggle("Admin", value=st.session_state.user.is_admin, disabled=True, help="Ask the admin to change this setting for your user")
+    if st.session_state.user.is_admin:
+        st.subheader("Admin locations (visible only to admins)")
+        stu.st_write(f"Use the following list to manage admin locations. <br>"
+                     f"This lists differs from the \"User locations\", below, since <b>\"Admin locations\" are visible to "
+                     f"all users</b> while \"User locations\" are only visible to the user who created them. <br>")
+        manage_user_locations(user_id=None)
 
-st.subheader("User locations")
-stu.st_write(f"Use the following list to manage your locations. Having one or more registered location will allow "
-             f"you to specify where a table proposition will take place, apart from the DEFAULT location <br>"
-             f"The DEFAULT location is automatically generated. <br>"
-             f"Also, removing a location will set the location of all tables at that location to <i>'Unknown'</i> and "
-             f"the corresponding tables will be available into the '{stu.get_rest_of_the_world_page_name()}' page. <br>")
-manage_user_locations(user_id=st.session_state.user.user_id)
-stu.st_write("Using <b>'Locations'</b> you automatically accept the "
-             "<a href='https://github.com/informatica92/MATCH-table-system/tree/main/static/gdpr'>GDPR policy</a> "
-             "of this application")
+with location_tab:
+    st.subheader("User locations")
+    stu.st_write(f"Use the following list to manage your locations. Having one or more registered location will allow "
+                 f"you to specify where a table proposition will take place, apart from the DEFAULT location <br>"
+                 f"The DEFAULT location is automatically generated. <br>"
+                 f"Also, removing a location will set the location of all tables at that location to <i>'Unknown'</i> and "
+                 f"the corresponding tables will be available into the '{stu.get_rest_of_the_world_page_name()}' page. <br>")
+    manage_user_locations(user_id=st.session_state.user.user_id)
+    stu.st_write("Using <b>'Locations'</b> you automatically accept the "
+                 "<a href='https://github.com/informatica92/MATCH-table-system/tree/main/static/gdpr'>GDPR policy</a> "
+                 "of this application")
 
-st.write("The following locations are already in place and selectable in the **'➕ Create'** page by the user:")
-stu.st_write("ℹ️: the 'Pages' column shows the pages where once a table is created at that location will be displayed")
-display_system_locations(
-    default_location_page_name=get_default_location()['alias'],
-    non_default_location_page_name=stu.get_rest_of_the_world_page_name()
-)
+    st.write("The following locations are already in place and selectable in the **'➕ Create'** page by the user:")
+    stu.st_write("ℹ️: the 'Pages' column shows the pages where once a table is created at that location will be displayed")
+    display_system_locations(
+        default_location_page_name=get_default_location()['alias'],
+        non_default_location_page_name=stu.get_rest_of_the_world_page_name()
+    )
 
 st.divider()
 st.write("This is a open source project and is free to use. "
