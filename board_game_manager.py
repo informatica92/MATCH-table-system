@@ -8,12 +8,9 @@ from utils.table_system_location import get_default_location
 
 # # FEATURES
 # TODO: replace text+bgg search with: https://pypi.org/project/streamlit-searchbox/ (requires no streamlit_extras => no cookies)
-# TODO: add board game image during creation (for check)
 # # IMPROVEMENTS
 # TODO: use @st.fragments
 # TODO: optimize return data in BGG info (from tuple to dataclass)
-# TODO: SQC: duration should be float4 (so it can be 0.5hours, 1.5hours, etc.) or minutes
-# TODO: SQC: redirect to created table once done
 # TODO: SQC: sidebar button more visible
 
 
