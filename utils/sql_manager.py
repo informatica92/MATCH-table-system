@@ -32,7 +32,7 @@ class SQLManager(object):
         self._db_port = os.getenv('DB_PORT', '5432')
         self._schema = os.getenv('DB_SCHEMA', 'public')
 
-    def get_db_connection(self):
+    def get_db_connection(self, use_streamlit_error=True):
         # Initialize the PostgreSQL connection
         try:
             return psycopg2.connect(
@@ -45,6 +45,10 @@ class SQLManager(object):
             )
         except psycopg2.OperationalError as e:
             logging.error(f"Error connecting to the database {self._db_host} ({self._db_name}):\n{e}")
+            # In background contexts (e.g. the BGG collection sync thread) there is no Streamlit
+            # ScriptRunContext, so re-raise instead of trying to render a UI error and stopping.
+            if not use_streamlit_error:
+                raise
             st.error(f"Error connecting to the database.\n\n"
                      f"Ask Database Administrator to check database connection.\n\n"
                      f"Possible causes:\n\n"
@@ -199,6 +203,25 @@ class SQLManager(object):
                         END IF;
                     END $$;
                     ''')
+
+        # Owned games collected from BGG for each user (see utils/bgg_collection_sync.py).
+        # One row per (user, owned game); the whole set for a user is replaced on every sync.
+        c.execute('''CREATE TABLE IF NOT EXISTS owned_games (
+                        id SERIAL PRIMARY KEY,
+                        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                        bgg_game_id INTEGER NOT NULL,
+                        name TEXT,
+                        year_published INTEGER,
+                        image_url TEXT,
+                        thumbnail_url TEXT,
+                        min_players INTEGER,
+                        max_players INTEGER,
+                        playing_time INTEGER,
+                        num_plays INTEGER,
+                        average_rating NUMERIC,
+                        last_updated timestamptz NOT NULL DEFAULT now(),
+                        UNIQUE(user_id, bgg_game_id)
+                    )''')
 
         conn.commit()
         c.close()
@@ -602,3 +625,113 @@ class SQLManager(object):
         conn.commit()
         c.close()
         conn.close()
+
+    # OWNED GAMES (BGG collection sync)
+    def get_users_with_bgg_username(self, use_streamlit_error=True):
+        """Return the list of users that have a BGG username set, as (user_id, username, bgg_username).
+
+        Used by the background BGG collection sync job to know which collections to fetch.
+        """
+        conn = self.get_db_connection(use_streamlit_error=use_streamlit_error)
+        c = conn.cursor()
+        c.execute(f'''
+                    SELECT id, username, bgg_username
+                    FROM {self._schema}.users
+                    WHERE bgg_username IS NOT NULL AND TRIM(bgg_username) <> ''
+                    ORDER BY id
+                ''')
+        result = c.fetchall()
+        c.close()
+        conn.close()
+        return result
+
+    def replace_owned_games(self, user_id, games: list, use_streamlit_error=True):
+        """Atomically replace the owned games of a user.
+
+        Deletes the current owned games for ``user_id`` and inserts ``games`` (a list of dicts with
+        keys: bgg_game_id, name, year_published, image_url, thumbnail_url, min_players, max_players,
+        playing_time, num_plays, average_rating). All new rows share the same ``last_updated`` value.
+        Both operations run in a single transaction so the collection is never left partially updated.
+        """
+        conn = self.get_db_connection(use_streamlit_error=use_streamlit_error)
+        c = conn.cursor()
+        try:
+            c.execute(f'''DELETE FROM {self._schema}.owned_games WHERE user_id = %s''', (user_id,))
+            for game in games:
+                c.execute(f'''
+                        INSERT INTO {self._schema}.owned_games (
+                            user_id, bgg_game_id, name, year_published, image_url, thumbnail_url,
+                            min_players, max_players, playing_time, num_plays, average_rating, last_updated
+                        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, now())
+                        ON CONFLICT (user_id, bgg_game_id) DO UPDATE SET
+                            name = EXCLUDED.name,
+                            year_published = EXCLUDED.year_published,
+                            image_url = EXCLUDED.image_url,
+                            thumbnail_url = EXCLUDED.thumbnail_url,
+                            min_players = EXCLUDED.min_players,
+                            max_players = EXCLUDED.max_players,
+                            playing_time = EXCLUDED.playing_time,
+                            num_plays = EXCLUDED.num_plays,
+                            average_rating = EXCLUDED.average_rating,
+                            last_updated = EXCLUDED.last_updated
+                    ''', (
+                        user_id,
+                        game.get('bgg_game_id'),
+                        game.get('name'),
+                        game.get('year_published'),
+                        game.get('image_url'),
+                        game.get('thumbnail_url'),
+                        game.get('min_players'),
+                        game.get('max_players'),
+                        game.get('playing_time'),
+                        game.get('num_plays'),
+                        game.get('average_rating'),
+                    )
+                )
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            c.close()
+            conn.close()
+
+    def get_all_owned_games(self, return_as_df=True):
+        """Return every owned game across all users, joined with the owner details.
+
+        Used by the "Owned Games" page to let anyone browse/filter the aggregated collection.
+        """
+        conn = self.get_db_connection()
+        c = conn.cursor()
+        columns = [
+            'owner_user_id', 'owner_username', 'owner_bgg_username', 'bgg_game_id', 'name',
+            'year_published', 'image_url', 'thumbnail_url', 'min_players', 'max_players',
+            'playing_time', 'num_plays', 'average_rating', 'last_updated'
+        ]
+        c.execute(f'''
+                    SELECT
+                        u.id AS owner_user_id,
+                        u.username AS owner_username,
+                        u.bgg_username AS owner_bgg_username,
+                        og.bgg_game_id,
+                        og.name,
+                        og.year_published,
+                        og.image_url,
+                        og.thumbnail_url,
+                        og.min_players,
+                        og.max_players,
+                        og.playing_time,
+                        og.num_plays,
+                        og.average_rating,
+                        og.last_updated
+                    FROM {self._schema}.owned_games og
+                    JOIN {self._schema}.users u ON u.id = og.user_id
+                    ORDER BY og.name, u.username
+                ''')
+        result = c.fetchall()
+        c.close()
+        conn.close()
+
+        if return_as_df:
+            result = pd.DataFrame(result, columns=columns)
+        return result

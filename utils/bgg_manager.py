@@ -1,4 +1,5 @@
 import os
+import time
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
@@ -11,6 +12,11 @@ from utils.table_system_logging import logging
 
 BGG_API_BEARER_TOKEN = os.getenv("BGG_API_BEARER_TOKEN")
 HEADERS = {"Authorization": f"Bearer {BGG_API_BEARER_TOKEN}"}
+
+
+class BGGCollectionQueuedError(Exception):
+    """Raised when BGG keeps returning HTTP 202 (collection request still being processed)."""
+    pass
 
 
 @cache_data(ttl=None, max_entries=1000, persist="disk")
@@ -108,3 +114,112 @@ def search_bgg_games(game_name):
         return games
     except Exception as e:
         raise AttributeError(e)
+
+
+def _to_int(value):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _to_float(value):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def get_bgg_owned_games(username, queue_retries=5, queue_wait_seconds=5):
+    """Fetch the games a BGG user marks as *owned* via the BGG XML API2 collection endpoint.
+
+    The collection endpoint is asynchronous: BGG may answer HTTP 202 ("your request has been queued")
+    and only return the data on a subsequent call. We poll up to ``queue_retries`` times, waiting
+    ``queue_wait_seconds`` between attempts. Note: this waiting is on top of the caller-side 1/min
+    rate limiting enforced by the background sync job (see utils/bgg_collection_sync.py).
+
+    Returns a list of dicts, one per owned game, with keys: bgg_game_id, name, year_published,
+    image_url, thumbnail_url, min_players, max_players, playing_time, num_plays, average_rating.
+
+    Raises BGGCollectionQueuedError if BGG never stops returning 202, or AttributeError on other errors.
+    """
+    url = f"https://boardgamegeek.com/xmlapi2/collection?username={username}&own=1&stats=1"
+
+    session = requests.Session()
+    retries = Retry(
+        total=5,
+        backoff_factor=1,
+        status_forcelist=[429, 500, 502, 503, 504],
+        allowed_methods=["GET"],
+        raise_on_status=False
+    )
+    adapter = HTTPAdapter(max_retries=retries)
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+
+    response = None
+    for attempt in range(queue_retries):
+        response = session.get(url, headers=HEADERS)
+        if response.status_code == 202:
+            # Request accepted but not ready yet: wait and retry.
+            logging.info(f"\tBGG collection for '{username}' queued (202), retry {attempt + 1}/{queue_retries}")
+            time.sleep(queue_wait_seconds)
+            continue
+        break
+
+    if response is None or response.status_code == 202:
+        raise BGGCollectionQueuedError(
+            f"BGG collection for '{username}' still queued after {queue_retries} retries"
+        )
+
+    try:
+        response.raise_for_status()
+        root = et.fromstring(response.content)
+    except Exception as e:
+        raise AttributeError(e)
+
+    games = []
+    for item in root.findall('item'):
+        bgg_game_id = _to_int(item.get('objectid'))
+        if bgg_game_id is None:
+            continue
+
+        name_el = item.find('name')
+        name = name_el.text if name_el is not None else None
+
+        year_el = item.find('yearpublished')
+        year_published = _to_int(year_el.text) if year_el is not None else None
+
+        image_el = item.find('image')
+        image_url = image_el.text if image_el is not None else None
+
+        thumbnail_el = item.find('thumbnail')
+        thumbnail_url = thumbnail_el.text if thumbnail_el is not None else None
+
+        numplays_el = item.find('numplays')
+        num_plays = _to_int(numplays_el.text) if numplays_el is not None else None
+
+        min_players = max_players = playing_time = average_rating = None
+        stats_el = item.find('stats')
+        if stats_el is not None:
+            min_players = _to_int(stats_el.get('minplayers'))
+            max_players = _to_int(stats_el.get('maxplayers'))
+            playing_time = _to_int(stats_el.get('playingtime'))
+            average_el = stats_el.find('rating/average')
+            if average_el is not None:
+                average_rating = _to_float(average_el.get('value'))
+
+        games.append({
+            'bgg_game_id': bgg_game_id,
+            'name': name,
+            'year_published': year_published,
+            'image_url': image_url,
+            'thumbnail_url': thumbnail_url,
+            'min_players': min_players,
+            'max_players': max_players,
+            'playing_time': playing_time,
+            'num_plays': num_plays,
+            'average_rating': average_rating,
+        })
+
+    return games

@@ -10,6 +10,7 @@ from utils.telegram_notifications import TelegramNotifications
 from utils.table_system_location import get_available_locations, is_default_location
 from utils.sql_manager import SQLManager
 from utils.table_system_proposition import TableProposition, JoinedPlayerOrProposer, StreamlitTablePropositions
+from utils.bgg_collection_sync import start_bgg_collection_sync
 
 
 DEFAULT_IMAGE_URL = "static/images/no_image.jpg"
@@ -28,6 +29,7 @@ VIEW_JOIN_DEMOS_PAGE = "app_pages/1_View_&_Join_Prop_02_Demos.py"
 CREATE_PAGE = "app_pages/2_Create.py"
 MAP_PAGE = "app_pages/3_Map.py"
 USER_PAGE = "app_pages/4_User.py"
+OWNED_GAMES_PAGE = "app_pages/5_Owned_Games.py"
 
 HELP_TEXT = "Expanding the sidebar on the left ◀️ you can navigate among pages:\n\n"\
 "- **📜 Tables by ...**: view the table propositions, join, leave or edit them\n"\
@@ -70,6 +72,26 @@ sql_manager = SQLManager()
 sql_manager.create_tables()
 
 telegram_bot = TelegramNotifications()
+
+
+@st.cache_resource
+def _start_bgg_collection_sync_once():
+    """Start the BGG owned-collection sync job exactly once per Streamlit server process.
+
+    ``st.cache_resource`` guarantees the wrapped body runs a single time and is shared across all
+    sessions/reruns, which is exactly what we need for a single background thread. The job itself is
+    non-blocking (daemon thread), so this returns immediately.
+    """
+    return start_bgg_collection_sync()
+
+
+# Kick off the daily / at-startup BGG owned-games sync (non-blocking).
+_start_bgg_collection_sync_once()
+
+
+def get_all_owned_games(return_as_df=True):
+    """Return every owned game across all users (joined with owner details) for the Owned Games page."""
+    return sql_manager.get_all_owned_games(return_as_df=return_as_df)
 
 def get_duration_step():
     return int(os.getenv("DURATION_MINUTES_STEP", 30))
