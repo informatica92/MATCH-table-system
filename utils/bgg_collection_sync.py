@@ -79,7 +79,13 @@ class BGGCollectionSyncJob:
 
         logging.info(f"BGG collection sync: starting cycle for {len(users)} user(s) with a BGG username")
 
-        for index, (user_id, username, bgg_username) in enumerate(users):
+        for index, (user_id, username, bgg_username, last_updated) in enumerate(users):
+            if last_updated is not None and (time.time() - last_updated.timestamp()) < self.period_hours * 3600:
+                logging.info(
+                    f"BGG collection sync: skipping user '{username}' ({bgg_username}) "
+                    f"because last update was less than {self.period_hours}h ago"
+                )
+                continue
             self._sync_single_user(user_id, username, bgg_username)
             # Rate limit: wait before querying the next user (skip the wait after the last one).
             if index < len(users) - 1:

@@ -634,10 +634,11 @@ class SQLManager(object):
         conn = self.get_db_connection(use_streamlit_error=use_streamlit_error)
         c = conn.cursor()
         c.execute(f'''
-                    SELECT id, username, bgg_username
-                    FROM {self._schema}.users
+                    SELECT u.id, u.username, u.bgg_username, max(og.last_updated) last_updated 
+                    FROM {self._schema}.users u left join {self._schema}.owned_games og on u.id = og.user_id
                     WHERE bgg_username IS NOT NULL AND TRIM(bgg_username) <> ''
-                    ORDER BY id
+                    GROUP BY u.id, u.username, u.bgg_username
+                    ORDER BY 4 desc
                 ''')
         result = c.fetchall()
         c.close()
