@@ -87,10 +87,12 @@ if min_rating and min_rating > 0:
     filtered_df = filtered_df[filtered_df['average_rating'].fillna(0) >= min_rating]
 
 # --- SUMMARY METRICS ---
-with st.container(border=True, horizontal=True, gap="xxsmall"):
+with st.container(horizontal=True, gap="xxsmall"):
     st.metric("Games shown", len(filtered_df))
     st.metric("Distinct titles", filtered_df['bgg_game_id'].nunique())
     st.metric("Owners shown", filtered_df['owner_username'].nunique())
+    st.bar_chart(filtered_df['name'].value_counts().head(5), sort=False, horizontal=True, y_label="Number of owners", color="blue")
+    st.bar_chart(filtered_df.groupby(['name'])["num_plays"].sum().sort_values(ascending=False).head(5), sort=False, horizontal=True, y_label="Number of plays", color="green")
 
 # --- DISPLAY ---
 display_df = filtered_df.copy()
