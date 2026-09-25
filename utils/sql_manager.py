@@ -212,7 +212,6 @@ class SQLManager(object):
                         bgg_game_id INTEGER NOT NULL,
                         name TEXT,
                         year_published INTEGER,
-                        image_url TEXT,
                         thumbnail_url TEXT,
                         min_players INTEGER,
                         max_players INTEGER,
@@ -704,9 +703,19 @@ class SQLManager(object):
         conn = self.get_db_connection()
         c = conn.cursor()
         columns = [
-            'owner_user_id', 'owner_username', 'owner_bgg_username', 'bgg_game_id', 'name',
-            'year_published', 'image_url', 'thumbnail_url', 'min_players', 'max_players',
-            'playing_time', 'num_plays', 'average_rating', 'last_updated'
+            'owner_user_id',
+            'owner_username',
+            'owner_bgg_username',
+            'bgg_game_id',
+            'name',
+            'year_published',
+            'thumbnail_url',
+            'min_players',
+            'max_players',
+            'playing_time',
+            'num_plays',
+            'average_rating',
+            'last_updated'
         ]
         c.execute(f'''
                     SELECT
@@ -716,7 +725,6 @@ class SQLManager(object):
                         og.bgg_game_id,
                         og.name,
                         og.year_published,
-                        og.image_url,
                         og.thumbnail_url,
                         og.min_players,
                         og.max_players,

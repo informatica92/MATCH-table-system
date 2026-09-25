@@ -9,7 +9,7 @@ st.header("🎲 Owned Games")
 st.write(
     "Browse and filter the board games **owned** by all the users of the system.\n\n"
     "The list is collected automatically from [BoardGameGeek](https://boardgamegeek.com/) for every "
-    "user that has set a **BGG username** (see the **👦🏻 User** page). It is refreshed once a day and "
+    "user that has set a **BGG username** (see the **👦🏻 User** page). It is refreshed periodically and "
     "at every app startup."
 )
 
@@ -27,45 +27,44 @@ if owned_games_df.empty:
         stu.add_donation_button()
     st.stop()
 
+st.write(f":material/info: *Collection Last Update: {owned_games_df['last_updated'].max().strftime('%Y-%m-%d %H:%M:%S')}*")
+
 # --- FILTERS ---
-with st.container(border=True):
-    st.subheader("🔎 Filters")
+with st.container(border=True, gap="xxsmall"):
+    st.subheader(":material/filter_alt: Filters")
+    with st.container(border=False, horizontal=True, gap="medium"):
+        owners = sorted([o for o in owned_games_df['owner_username'].dropna().unique().tolist()])
+        selected_owners = st.multiselect(
+            "Owners",
+            options=owners,
+            default=[],
+            placeholder="All owners",
+            help="Filter by the users who own the games"
+        )
 
-    col_owner, col_name = st.columns([1, 1])
+        name_query = st.text_input(
+            "Game name contains",
+            value="",
+            placeholder="e.g. Wingspan",
+            help="Case-insensitive search on the game name"
+        )
 
-    owners = sorted([o for o in owned_games_df['owner_username'].dropna().unique().tolist()])
-    selected_owners = col_owner.multiselect(
-        "Owners",
-        options=owners,
-        default=[],
-        placeholder="All owners",
-        help="Filter by the users who own the games"
-    )
-
-    name_query = col_name.text_input(
-        "Game name contains",
-        value="",
-        placeholder="e.g. Wingspan",
-        help="Case-insensitive search on the game name"
-    )
-
-    col_players, col_rating = st.columns([1, 1])
-    n_players = col_players.number_input(
-        "Playable with N players",
-        min_value=0,
-        max_value=20,
-        value=0,
-        step=1,
-        help="Keep only games whose min/max players range includes this number of players (0 = no filter)"
-    )
-    min_rating = col_rating.slider(
-        "Minimum average rating",
-        min_value=0.0,
-        max_value=10.0,
-        value=0.0,
-        step=0.5,
-        help="Keep only games with a BGG average rating greater than or equal to this value"
-    )
+        n_players = st.number_input(
+            "Playable with N players",
+            min_value=0,
+            max_value=20,
+            value=0,
+            step=1,
+            help="Keep only games whose min/max players range includes this number of players (0 = no filter)"
+        )
+        min_rating = st.slider(
+            "Minimum average rating",
+            min_value=0.0,
+            max_value=10.0,
+            value=0.0,
+            step=0.5,
+            help="Keep only games with a BGG average rating greater than or equal to this value"
+        )
 
 # --- APPLY FILTERS ---
 filtered_df = owned_games_df.copy()
@@ -88,10 +87,10 @@ if min_rating and min_rating > 0:
     filtered_df = filtered_df[filtered_df['average_rating'].fillna(0) >= min_rating]
 
 # --- SUMMARY METRICS ---
-col_m1, col_m2, col_m3 = st.columns(3)
-col_m1.metric("Games shown", len(filtered_df))
-col_m2.metric("Distinct titles", filtered_df['bgg_game_id'].nunique())
-col_m3.metric("Owners shown", filtered_df['owner_username'].nunique())
+with st.container(border=True, horizontal=True, gap="xxsmall"):
+    st.metric("Games shown", len(filtered_df))
+    st.metric("Distinct titles", filtered_df['bgg_game_id'].nunique())
+    st.metric("Owners shown", filtered_df['owner_username'].nunique())
 
 # --- DISPLAY ---
 display_df = filtered_df.copy()
@@ -108,7 +107,6 @@ display_columns = [
     'average_rating',
     'num_plays',
     'bgg_url',
-    'last_updated',
 ]
 
 st.dataframe(
@@ -125,8 +123,7 @@ st.dataframe(
         'playing_time': st.column_config.NumberColumn("Time (min)", format="%d"),
         'average_rating': st.column_config.NumberColumn("Avg rating", format="%.1f"),
         'num_plays': st.column_config.NumberColumn("Plays", format="%d"),
-        'bgg_url': st.column_config.LinkColumn("BGG", display_text="Open"),
-        'last_updated': st.column_config.DatetimeColumn("Last updated", format="YYYY-MM-DD HH:mm"),
+        'bgg_url': st.column_config.LinkColumn("Link", display_text="Link")
     }
 )
 
