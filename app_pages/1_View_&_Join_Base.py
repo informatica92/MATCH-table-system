@@ -356,6 +356,12 @@ def create_view_and_join_page():
             delta_arrow="off",
             delta_color="gray"
         )
+        st.metric(
+            "Players",
+            f"{st.session_state.propositions.get_distinct_num_players()} :material/groups:",
+            border=False,
+            help="The total number of distinct players that have joined the available tables."
+        )
         # st.metric(
         #     "Play Time",
         #     f"{stu.format_duration_in_h_min(st.session_state.propositions.get_booked_play_time())}h",

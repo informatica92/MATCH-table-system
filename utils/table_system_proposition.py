@@ -551,3 +551,9 @@ class StreamlitTablePropositions(list[TableProposition]):
             user_id = st.session_state.user.user_id
 
         return [p for p in self if p.proposed_by.user_id == user_id]
+
+    def get_distinct_num_players(self) -> int:
+        """
+        Returns the number of distinct players who have joined the current list of tables.
+        """
+        return len(set(player.user_id for table in self for player in table.joined_players))
