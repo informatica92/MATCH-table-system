@@ -71,6 +71,9 @@ In caso si voglia invece eseguire l'applicazione in locale è necessario seguire
 |                       | BGG_API_BEARER_TOKEN                 | Il Bearer Token per le API di BGG (https://boardgamegeek.com/using_the_xml_api)                                                                        |                       |              |
 |                       | BGG_URL                              | L'URL di BGG                                                                                                                                           |                       |              |
 |                       | BGG_POWERED_BY_IMAGE                 | L'URL del logo per il "Powered by BGG" obbligatorio                                                                                                    |                       |              |
+|                       | BGG_COLLECTION_SYNC_ENABLED          | Se abilitare il job in background che sincronizza i giochi posseduti ("own") degli utenti da BGG ("true"/"false")                                      | true                  | No           |
+|                       | BGG_COLLECTION_SYNC_PER_USER_DELAY_SECONDS | Intervallo (in secondi) tra la sincronizzazione di un utente e il successivo, per rispettare il basso rate limit di BGG (1 utente/min di default) | 60                    | No           |
+|                       | BGG_COLLECTION_SYNC_PERIOD_HOURS     | Ogni quante ore rieseguire l'intero ciclo di sincronizzazione (il ciclo parte comunque anche all'avvio dell'app)                                       | 24                    | No           |
 | [auth]                | ---                                  | ---                                                                                                                                                    | ---                   | ---          |
 |                       | redirect_uri                         | URI di reindirizzamento per l'autenticazione, può essere: <br/> - http://localhost:8501/oauth2callback <br/> - https://`dominio deploy`/oauth2callback |                       | Sì           |
 |                       | cookie_secret                        | Nome del cookie in cui inserire il token di autenticazione                                                                                             |                       | Sì           |
@@ -88,6 +91,18 @@ Le "Section" che invece hanno forma `[nome]` sono obbligatorie e devono essere r
  streamlit run board_game_manager.py
  ```
 ## Funzionalità
+
+### 🎉 Novità: Giochi Posseduti (BGG "Owned") e pagina dedicata
+E' stata introdotta una nuova pagina **"🎲 Owned Games"** che permette di visualizzare e filtrare tutti i giochi **posseduti** ("own" su BoardGameGeek) da tutti gli utenti del sistema.
+
+La lista viene raccolta automaticamente da BGG tramite le sue API per ogni utente che ha impostato un **BGG username** (nella pagina "👦🏻 User"). Il funzionamento è il seguente:
+ - un job in background parte **una volta al giorno** e **all'avvio dell'app**, in modalità **non bloccante** (thread demone)
+ - per rispettare il **basso rate limit** imposto da BGG, gli utenti vengono interrogati **uno al minuto** (configurabile)
+ - per ciascun utente il sistema legge la collezione posseduta, **cancella** la lista precedentemente salvata a DB e **inserisce** quella nuova (con id, nome, anno, immagine, numero giocatori, durata, rating medio, numero di partite...) insieme alla **data di ultimo aggiornamento**
+
+La pagina permette di filtrare per proprietario, nome del gioco, numero di giocatori e rating minimo.
+
+Le variabili d'ambiente `BGG_COLLECTION_SYNC_ENABLED`, `BGG_COLLECTION_SYNC_PER_USER_DELAY_SECONDS` e `BGG_COLLECTION_SYNC_PERIOD_HOURS` permettono di configurare (o disabilitare) il job.
 
 ### 🎉 Novità: Durata dei tavoli in minuti 
 <p><img src="https://github.com/user-attachments/assets/edfbc7b4-aa47-4373-a7d7-d58bd9f671ad" alt="duration_edit" height="40%", width="40%"/></p>

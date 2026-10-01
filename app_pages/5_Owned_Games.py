@@ -3,15 +3,9 @@ import streamlit as st
 import utils.streamlit_utils as stu
 from utils.bgg_manager import get_bgg_url
 
-stu.add_title_text(st, frmt="{title}")
+METRICS_STATS_TOP_N = 3
 
-st.header("🎲 Owned Games")
-st.write(
-    "Browse and filter the board games **owned** by all the users of the system.\n\n"
-    "The list is collected automatically from [BoardGameGeek](https://boardgamegeek.com/) for every "
-    "user that has set a **BGG username** (see the **👦🏻 User** page). It is refreshed periodically and "
-    "at every app startup."
-)
+stu.add_title_text(st, frmt="{title}")
 
 owned_games_df = stu.get_all_owned_games(return_as_df=True)
 
@@ -27,7 +21,15 @@ if owned_games_df.empty:
         stu.add_donation_button()
     st.stop()
 
-st.write(f":material/info: *Collection Last Update: {owned_games_df['last_updated'].max().strftime('%Y-%m-%d %H:%M:%S')}*")
+st.header(
+    "🎲 Owned Games",
+    help="Browse and filter the board games **owned** by all the users of the system.\n\n"
+        "The list is collected automatically from [BoardGameGeek](https://boardgamegeek.com/) for every "
+        "user that has set a **BGG username** (see the **👦🏻 User** page). \n\n"
+        "It is refreshed periodically and "
+        "at every app startup.\n\n"
+        f":material/info: *Collection Last Update: {owned_games_df['last_updated'].min().strftime('%Y-%m-%d %H:%M:%S')}*"
+)
 
 # --- FILTERS ---
 with st.container(border=True, gap="xxsmall"):
@@ -91,8 +93,9 @@ with st.container(horizontal=True, gap="xxsmall"):
     st.metric("Games shown", len(filtered_df))
     st.metric("Distinct titles", filtered_df['bgg_game_id'].nunique())
     st.metric("Owners shown", filtered_df['owner_username'].nunique())
-    st.bar_chart(filtered_df['name'].value_counts().head(5), sort=False, horizontal=True, y_label="Number of owners", color="blue")
-    st.bar_chart(filtered_df.groupby(['name'])["num_plays"].sum().sort_values(ascending=False).head(5), sort=False, horizontal=True, y_label="Number of plays", color="green")
+    st.bar_chart(filtered_df['name'].value_counts().head(METRICS_STATS_TOP_N), sort=False, horizontal=True, y_label="Number of owners", color="blue")
+    st.bar_chart(filtered_df.groupby(['name'])["num_plays"].sum().sort_values(ascending=False).head(METRICS_STATS_TOP_N), sort=False, horizontal=True, y_label="Number of plays", color="green")
+    st.bar_chart(filtered_df['owner_username'].value_counts().head(METRICS_STATS_TOP_N), sort=False, horizontal=True, y_label="Number of games", color="orange")
 
 # --- DISPLAY ---
 display_df = filtered_df.copy()

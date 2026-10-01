@@ -83,7 +83,7 @@ class BGGCollectionSyncJob:
             if last_updated is not None and (time.time() - last_updated.timestamp()) < self.period_hours * 3600:
                 logging.info(
                     f"BGG collection sync: skipping user '{username}' ({bgg_username}) "
-                    f"because last update was less than {self.period_hours}h ago"
+                    f"because last update was less than {self.period_hours}h ({self.period_hours/24}days) ago"
                 )
                 continue
             self._sync_single_user(user_id, username, bgg_username)
