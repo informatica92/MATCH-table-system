@@ -59,7 +59,7 @@ with st.expander(":material/filter_list: Filters"):
             help="Keep only games whose min/max players range includes this number of players (0 = no filter)"
         )
         min_rating = st.slider(
-            "Minimum average rating",
+            "Min rating",
             min_value=0.0,
             max_value=10.0,
             value=0.0,
