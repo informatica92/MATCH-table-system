@@ -88,7 +88,7 @@ def _start_bgg_collection_sync_once():
 # Kick off the daily / at-startup BGG owned-games sync (non-blocking).
 _start_bgg_collection_sync_once()
 
-
+@st.cache_data(ttl=60 * 60)  # cache for 1 hour
 def get_all_owned_games(return_as_df=True):
     """Return every owned game across all users (joined with owner details) for the Owned Games page."""
     return sql_manager.get_all_owned_games(return_as_df=return_as_df)

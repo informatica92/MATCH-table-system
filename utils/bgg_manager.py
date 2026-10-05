@@ -130,20 +130,22 @@ def _to_float(value):
         return None
 
 
-def get_bgg_owned_games(username, queue_retries=5, queue_wait_seconds=5):
-    """Fetch the games a BGG user marks as *owned* via the BGG XML API2 collection endpoint.
+def _fetch_bgg_collection(username, extra_params="", forced_subtype=None, queue_retries=10, queue_wait_seconds=10):
+    """Fetch one *owned* collection query from the BGG XML API2 collection endpoint and parse it.
+
+    ``extra_params`` is appended to the query string (e.g. "excludesubtype=boardgameexpansion").
+    If ``forced_subtype`` is given, every returned game gets that subtype regardless of what BGG
+    reports (see get_bgg_owned_games for why this matters).
 
     The collection endpoint is asynchronous: BGG may answer HTTP 202 ("your request has been queued")
     and only return the data on a subsequent call. We poll up to ``queue_retries`` times, waiting
-    ``queue_wait_seconds`` between attempts. Note: this waiting is on top of the caller-side 1/min
-    rate limiting enforced by the background sync job (see utils/bgg_collection_sync.py).
-
-    Returns a list of dicts, one per owned game, with keys: bgg_game_id, name, year_published,
-    image_url, thumbnail_url, min_players, max_players, playing_time, num_plays, average_rating.
+    ``queue_wait_seconds`` between attempts.
 
     Raises BGGCollectionQueuedError if BGG never stops returning 202, or AttributeError on other errors.
     """
     url = f"https://boardgamegeek.com/xmlapi2/collection?username={username}&own=1&stats=1"
+    if extra_params:
+        url += f"&{extra_params}"
 
     session = requests.Session()
     retries = Retry(
@@ -162,7 +164,7 @@ def get_bgg_owned_games(username, queue_retries=5, queue_wait_seconds=5):
         response = session.get(url, headers=HEADERS)
         if response.status_code == 202:
             # Request accepted but not ready yet: wait and retry.
-            logging.info(f"\tBGG collection for '{username}' queued (202), retry {attempt + 1}/{queue_retries}")
+            logging.debug(f"\tBGG collection for '{username}' queued (202), retry {attempt + 1}/{queue_retries}")
             time.sleep(queue_wait_seconds)
             continue
         break
@@ -183,6 +185,10 @@ def get_bgg_owned_games(username, queue_retries=5, queue_wait_seconds=5):
         bgg_game_id = _to_int(item.get('objectid'))
         if bgg_game_id is None:
             continue
+
+        # 'boardgame' for base games, 'boardgameexpansion' for expansions. BGG mislabels expansions
+        # as 'boardgame' when no subtype filter is used, so the caller forces the correct value.
+        subtype = forced_subtype if forced_subtype is not None else item.get('subtype')
 
         name_el = item.find('name')
         name = name_el.text if name_el is not None else None
@@ -215,6 +221,7 @@ def get_bgg_owned_games(username, queue_retries=5, queue_wait_seconds=5):
             'year_published': year_published,
             'image_url': image_url,
             'thumbnail_url': thumbnail_url,
+            'subtype': subtype,
             'min_players': min_players,
             'max_players': max_players,
             'playing_time': playing_time,
@@ -223,3 +230,44 @@ def get_bgg_owned_games(username, queue_retries=5, queue_wait_seconds=5):
         })
 
     return games
+
+
+def get_bgg_owned_games(username, queue_retries=10, queue_wait_seconds=10, inter_call_delay_seconds=0):
+    """Fetch the games a BGG user marks as *owned*, correctly distinguishing expansions.
+
+    BGG has a known bug: a collection query without a subtype filter (or with subtype=boardgame)
+    returns both base games and expansions but reports subtype=boardgame for ALL of them, so
+    expansions cannot be told apart. The documented workaround is to issue two separate queries:
+      1. excludesubtype=boardgameexpansion -> only base games
+      2. subtype=boardgameexpansion        -> only expansions
+    We tag each result with the correct subtype ourselves and merge the two lists.
+
+    ``inter_call_delay_seconds`` is slept between the two HTTP calls so the background sync job can
+    keep every BGG request within its rate limit (see utils/bgg_collection_sync.py).
+
+    Returns a list of dicts, one per owned game, with keys: bgg_game_id, name, year_published,
+    image_url, thumbnail_url, subtype ('boardgame' or 'boardgameexpansion'), min_players,
+    max_players, playing_time, num_plays, average_rating.
+
+    Raises BGGCollectionQueuedError if BGG never stops returning 202, or AttributeError on other errors.
+    """
+    base_games = _fetch_bgg_collection(
+        username,
+        extra_params="excludesubtype=boardgameexpansion",
+        forced_subtype="boardgame",
+        queue_retries=queue_retries,
+        queue_wait_seconds=queue_wait_seconds,
+    )
+
+    if inter_call_delay_seconds:
+        time.sleep(inter_call_delay_seconds)
+
+    expansions = _fetch_bgg_collection(
+        username,
+        extra_params="subtype=boardgameexpansion",
+        forced_subtype="boardgameexpansion",
+        queue_retries=queue_retries,
+        queue_wait_seconds=queue_wait_seconds,
+    )
+
+    return base_games + expansions

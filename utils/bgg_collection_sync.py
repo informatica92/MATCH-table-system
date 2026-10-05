@@ -86,31 +86,30 @@ class BGGCollectionSyncJob:
                     f"because last update was less than {self.period_hours}h ({self.period_hours/24}days) ago"
                 )
                 continue
-            self._sync_single_user(user_id, username, bgg_username)
+            self._sync_single_user(user_id, username, bgg_username, index=index, total=len(users))
             # Rate limit: wait before querying the next user (skip the wait after the last one).
             if index < len(users) - 1:
                 time.sleep(self.per_user_delay_seconds)
 
         logging.info("BGG collection sync: cycle completed")
 
-    def _sync_single_user(self, user_id, username, bgg_username):
+    def _sync_single_user(self, user_id, username, bgg_username, index=0, total=1):
         try:
-            games = get_bgg_owned_games(bgg_username)
+            # get_bgg_owned_games issues two BGG calls (base games + expansions); space them out by the
+            # same per-user delay so every request stays within the configured rate limit.
+            games = get_bgg_owned_games(bgg_username, inter_call_delay_seconds=self.per_user_delay_seconds)
         except BGGCollectionQueuedError as e:
-            logging.warning(f"BGG collection sync: skipping user '{username}' ({bgg_username}) this cycle: {e}")
+            logging.warning(f"BGG collection sync: [{index + 1}/{total}] skipping user '{username}' ({bgg_username}) this cycle: {e}")
             return
         except Exception as e:
-            logging.error(f"BGG collection sync: error fetching collection for '{bgg_username}': {e}")
+            logging.error(f"BGG collection sync: [{index + 1}/{total}] error fetching collection for '{bgg_username}': {e}")
             return
 
         try:
             self.sql_manager.replace_owned_games(user_id, games, use_streamlit_error=False)
-            logging.info(
-                f"BGG collection sync: stored {len(games)} owned game(s) for "
-                f"user '{username}' (BGG: {bgg_username})"
-            )
+            logging.info(f"BGG collection sync: [{index + 1}/{total}] stored {len(games)} owned game(s) for user '{username}' (BGG: {bgg_username})")
         except Exception as e:
-            logging.error(f"BGG collection sync: error saving collection for '{bgg_username}': {e}")
+            logging.error(f"BGG collection sync: [{index + 1}/{total}] error saving collection for '{bgg_username}': {e}")
 
 
 def start_bgg_collection_sync():

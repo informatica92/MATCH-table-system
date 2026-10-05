@@ -213,6 +213,7 @@ class SQLManager(object):
                         name TEXT,
                         year_published INTEGER,
                         thumbnail_url TEXT,
+                        subtype TEXT,
                         min_players INTEGER,
                         max_players INTEGER,
                         playing_time INTEGER,
@@ -649,7 +650,7 @@ class SQLManager(object):
         """Atomically replace the owned games of a user.
 
         Deletes the current owned games for ``user_id`` and inserts ``games`` (a list of dicts with
-        keys: bgg_game_id, name, year_published, image_url, thumbnail_url, min_players, max_players,
+        keys: bgg_game_id, name, year_published, thumbnail_url, subtype, min_players, max_players,
         playing_time, num_plays, average_rating). All new rows share the same ``last_updated`` value.
         Both operations run in a single transaction so the collection is never left partially updated.
         """
@@ -660,14 +661,14 @@ class SQLManager(object):
             for game in games:
                 c.execute(f'''
                         INSERT INTO {self._schema}.owned_games (
-                            user_id, bgg_game_id, name, year_published, image_url, thumbnail_url,
+                            user_id, bgg_game_id, name, year_published, thumbnail_url, subtype,
                             min_players, max_players, playing_time, num_plays, average_rating, last_updated
                         ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, now())
                         ON CONFLICT (user_id, bgg_game_id) DO UPDATE SET
                             name = EXCLUDED.name,
                             year_published = EXCLUDED.year_published,
-                            image_url = EXCLUDED.image_url,
                             thumbnail_url = EXCLUDED.thumbnail_url,
+                            subtype = EXCLUDED.subtype,
                             min_players = EXCLUDED.min_players,
                             max_players = EXCLUDED.max_players,
                             playing_time = EXCLUDED.playing_time,
@@ -679,8 +680,8 @@ class SQLManager(object):
                         game.get('bgg_game_id'),
                         game.get('name'),
                         game.get('year_published'),
-                        game.get('image_url'),
                         game.get('thumbnail_url'),
+                        game.get('subtype'),
                         game.get('min_players'),
                         game.get('max_players'),
                         game.get('playing_time'),
@@ -711,6 +712,7 @@ class SQLManager(object):
             'name',
             'year_published',
             'thumbnail_url',
+            'subtype',
             'min_players',
             'max_players',
             'playing_time',
@@ -727,6 +729,7 @@ class SQLManager(object):
                         og.name,
                         og.year_published,
                         og.thumbnail_url,
+                        og.subtype,
                         og.min_players,
                         og.max_players,
                         og.playing_time,

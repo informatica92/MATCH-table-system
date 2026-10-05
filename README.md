@@ -98,9 +98,9 @@ E' stata introdotta una nuova pagina **"🎲 Owned Games"** che permette di visu
 La lista viene raccolta automaticamente da BGG tramite le sue API per ogni utente che ha impostato un **BGG username** (nella pagina "👦🏻 User"). Il funzionamento è il seguente:
  - un job in background parte **una volta al giorno** e **all'avvio dell'app**, in modalità **non bloccante** (thread demone)
  - per rispettare il **basso rate limit** imposto da BGG, gli utenti vengono interrogati **uno al minuto** (configurabile)
- - per ciascun utente il sistema legge la collezione posseduta, **cancella** la lista precedentemente salvata a DB e **inserisce** quella nuova (con id, nome, anno, immagine, numero giocatori, durata, rating medio, numero di partite...) insieme alla **data di ultimo aggiornamento**
+ - per ciascun utente il sistema legge la collezione posseduta, **cancella** la lista precedentemente salvata a DB e **inserisce** quella nuova (con id, nome, anno, thumbnail, numero giocatori, durata, rating medio, numero di partite e **se si tratta di un'espansione** - `subtype` BGG) insieme alla **data di ultimo aggiornamento**
 
-La pagina permette di filtrare per proprietario, nome del gioco, numero di giocatori e rating minimo.
+La pagina permette di filtrare per proprietario, nome del gioco, numero di giocatori, rating minimo e **tipo** (giochi base / espansioni).
 
 Le variabili d'ambiente `BGG_COLLECTION_SYNC_ENABLED`, `BGG_COLLECTION_SYNC_PER_USER_DELAY_SECONDS` e `BGG_COLLECTION_SYNC_PERIOD_HOURS` permettono di configurare (o disabilitare) il job.
 

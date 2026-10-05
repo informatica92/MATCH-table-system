@@ -28,12 +28,11 @@ st.header(
         "user that has set a **BGG username** (see the **👦🏻 User** page). \n\n"
         "It is refreshed periodically and "
         "at every app startup.\n\n"
-        f":material/info: *Collection Last Update: {owned_games_df['last_updated'].min().strftime('%Y-%m-%d %H:%M:%S')}*"
 )
+st.info(f":material/info: *Collection Last Update: {owned_games_df['last_updated'].min().strftime('%Y-%m-%d %H:%M:%S')}*")
 
 # --- FILTERS ---
-with st.container(border=True, gap="xxsmall"):
-    st.subheader(":material/filter_alt: Filters")
+with st.expander(":material/filter_list: Filters"):
     with st.container(border=False, horizontal=True, gap="medium"):
         owners = sorted([o for o in owned_games_df['owner_username'].dropna().unique().tolist()])
         selected_owners = st.multiselect(
@@ -68,6 +67,15 @@ with st.container(border=True, gap="xxsmall"):
             help="Keep only games with a BGG average rating greater than or equal to this value"
         )
 
+        game_type = st.radio(
+            "Type",
+            options=["ALL", "Base games", "Expansions"],
+            captions=["Base + Expansions", "", ""],
+            index=0,
+            help="Filter by BGG type: base games vs expansions",
+            horizontal=True
+        )
+
 # --- APPLY FILTERS ---
 filtered_df = owned_games_df.copy()
 
@@ -88,6 +96,11 @@ if n_players and n_players > 0:
 if min_rating and min_rating > 0:
     filtered_df = filtered_df[filtered_df['average_rating'].fillna(0) >= min_rating]
 
+if game_type == "Base games":
+    filtered_df = filtered_df[filtered_df['subtype'] != 'boardgameexpansion']
+elif game_type == "Expansions":
+    filtered_df = filtered_df[filtered_df['subtype'] == 'boardgameexpansion']
+
 # --- SUMMARY METRICS ---
 with st.container(horizontal=True, gap="xxsmall"):
     st.metric("Games shown", len(filtered_df))
@@ -100,10 +113,12 @@ with st.container(horizontal=True, gap="xxsmall"):
 # --- DISPLAY ---
 display_df = filtered_df.copy()
 display_df['bgg_url'] = display_df['bgg_game_id'].apply(lambda gid: get_bgg_url(gid) if gid is not None else None)
+display_df['is_expansion'] = display_df['subtype'] == 'boardgameexpansion'
 
 display_columns = [
     'thumbnail_url',
     'name',
+    'is_expansion',
     'year_published',
     'owner_username',
     'min_players',
@@ -121,6 +136,7 @@ st.dataframe(
     column_config={
         'thumbnail_url': st.column_config.ImageColumn("🖼️", help="Game thumbnail"),
         'name': st.column_config.TextColumn("Game"),
+        'is_expansion': st.column_config.CheckboxColumn("Exp.", help="Whether the game is an expansion (BGG subtype)"),
         'year_published': st.column_config.NumberColumn("Year", format="%d"),
         'owner_username': st.column_config.TextColumn("Owner"),
         'min_players': st.column_config.NumberColumn("Min P.", format="%d"),
