@@ -11,7 +11,7 @@ stu.redirect_to_user_page_if_username_not_set()
 
 stu.add_title_text(st, frmt="{title}")
 
-st.header("➕ Create Proposition", wrap=False)
+st.header("➕ New Proposition", wrap=False)
 
 game_name = st.text_input("✍🏻 Search for Game Name")
 stu.st_write("Write a game name in the above text box and press ENTER. The matching games from BGG will appear here:")
