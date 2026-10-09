@@ -109,7 +109,8 @@ def get_bar_chart_from_grouped_df(grouped_df, x_col=None, y_col=None, color="lig
         dx=5,           # piccolo margine dal bordo sinistro della barra
         fontSize=10,
         # limit=100,
-        clip=True
+        clip=True,
+        color='#636363',
     ).encode(
         x=alt.value(0),  # posizione fissa in pixel: inizio della barra
         text=f'{y_col}:N'
