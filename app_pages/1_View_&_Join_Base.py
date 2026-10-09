@@ -264,14 +264,14 @@ def create_view_and_join_page():
         stu.add_donation_button()
 
     # refresh and filter buttons
-    with st.container(horizontal=True):
+    with st.container(horizontal=True, gap="xsmall", wrap=False):
         # REFRESH
         refresh_button = st.button("🔄️ Refresh", key="refresh", width='stretch')
         if refresh_button:
             StreamlitTablePropositions.refresh_table_propositions("Refresh")
         # FILTERS
         filter_label_num_active_filters = stu.get_num_active_filters(as_str=True)
-        with st.popover(f"🔍 {filter_label_num_active_filters}Filters:", width='stretch'):
+        with st.popover(f"🔍 {filter_label_num_active_filters}Filters", width='stretch'):
             st.toggle(
                 "Joined by me",
                 key="joined_by_me",

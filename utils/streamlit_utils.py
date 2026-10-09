@@ -100,7 +100,7 @@ def get_title():
     return os.environ.get("TITLE") or "Board Game Proposals"
 
 def add_title_text(col, frmt="{title}"):
-    col.title(frmt.format(title=get_title()), text_alignment="center", help=HELP_TEXT)
+    col.title(frmt.format(title=get_title()), text_alignment="center", help=HELP_TEXT, wrap=False)
 
 def get_logo():
     return os.environ.get("LOGO") or "images/logo.jpg"
