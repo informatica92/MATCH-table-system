@@ -114,7 +114,7 @@ elif game_type == "Expansions":
 
 # --- SUMMARY METRICS ---
 with st.container(horizontal=True, gap="xsmall", wrap=False):
-    st.metric("Games", len(filtered_df), delta=f":material/compress:: {filtered_df['bgg_game_id'].nunique()}", delta_color="off", delta_arrow="off", help="Number of games shown (above) and number of unique games (below)", width="content")
+    st.metric("Games", len(filtered_df), delta=f":material/compress: {filtered_df['bgg_game_id'].nunique()}", delta_color="off", delta_arrow="off", help="Number of games shown (above) and number of unique games (below)", width="content")
     st.metric("Owners", filtered_df['owner_username'].nunique(), width="content")
     st.altair_chart(get_bar_chart_from_grouped_df(filtered_df['name'].value_counts(), color="lightblue", x_label="Number of owners"))
     st.altair_chart(get_bar_chart_from_grouped_df(filtered_df.groupby(['name'])["num_plays"].sum().sort_values(ascending=False), color="lightgreen", x_label="Number of plays"))
