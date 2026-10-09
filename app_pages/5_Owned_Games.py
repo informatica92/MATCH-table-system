@@ -152,7 +152,7 @@ st.dataframe(
         'min_players': st.column_config.NumberColumn("Min P.", format="%d"),
         'max_players': st.column_config.NumberColumn("Max P.", format="%d"),
         'playing_time': st.column_config.NumberColumn("Time (min)", format="%d"),
-        'average_rating': st.column_config.NumberColumn("Avg rating", format="%.1f"),
+        'average_rating': st.column_config.NumberColumn("Rating", format="%.1f"),
         'num_plays': st.column_config.NumberColumn("Plays", format="%d"),
         'bgg_url': st.column_config.LinkColumn("Link", display_text="Link")
     }
