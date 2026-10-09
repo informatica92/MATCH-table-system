@@ -63,3 +63,56 @@ def timeline_chart(df: pd.DataFrame):
     )
 
     return chart
+
+def get_bar_chart_from_grouped_df(grouped_df, x_col=None, y_col=None, color="lightblue", x_label=None, y_label=None, top_n=3):
+    grouped_df = grouped_df.head(top_n) if top_n else grouped_df
+
+    if isinstance(grouped_df, pd.Series):
+        grouped_df = grouped_df.reset_index()
+
+    if not x_col:
+        x_col = grouped_df.columns[1]
+
+    if not y_col:
+        y_col = grouped_df.columns[0]
+
+    base = alt.Chart(grouped_df).encode(
+        y=alt.Y(
+            f'{y_col}:O',
+            sort=None,
+            axis=alt.Axis(
+                title=y_label,
+                labels=False,   # nasconde le label sull'asse
+                ticks=False,
+                domain=False
+            )
+        ),
+        tooltip=[y_col, x_col]
+    )
+
+    bars = base.mark_bar(color=color).encode(
+        x=alt.X(
+            f'{x_col}:Q',
+            axis=alt.Axis(
+                title=x_label,
+                labelFontSize=10,
+                labelPadding=5,
+                titleFontSize=10,
+                titlePadding=5
+            )
+        )
+    )
+
+    labels = base.mark_text(
+        align='left',
+        baseline='middle',
+        dx=5,           # piccolo margine dal bordo sinistro della barra
+        fontSize=10,
+        # limit=100,
+        clip=True
+    ).encode(
+        x=alt.value(0),  # posizione fissa in pixel: inizio della barra
+        text=f'{y_col}:N'
+    )
+
+    return alt.layer(bars, labels)

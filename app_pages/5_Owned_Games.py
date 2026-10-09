@@ -2,6 +2,7 @@ import streamlit as st
 
 import utils.streamlit_utils as stu
 from utils.bgg_manager import get_bgg_url
+from utils.altair_manager import get_bar_chart_from_grouped_df
 
 METRICS_STATS_TOP_N = 3
 
@@ -55,7 +56,7 @@ with st.expander(":material/filter_list: Filters"):
         )
 
         n_players = st.number_input(
-            "Playable with N players",
+            "N players",
             min_value=0,
             max_value=20,
             value=0,
@@ -112,13 +113,12 @@ elif game_type == "Expansions":
     filtered_df = filtered_df[filtered_df['subtype'] == 'boardgameexpansion']
 
 # --- SUMMARY METRICS ---
-with st.container(horizontal=True, gap="xxsmall"):
-    st.metric("Games shown", len(filtered_df))
-    st.metric("Distinct titles", filtered_df['bgg_game_id'].nunique())
-    st.metric("Owners shown", filtered_df['owner_username'].nunique())
-    st.bar_chart(filtered_df['name'].value_counts().head(METRICS_STATS_TOP_N), sort=False, horizontal=True, y_label="Number of owners", color="blue")
-    st.bar_chart(filtered_df.groupby(['name'])["num_plays"].sum().sort_values(ascending=False).head(METRICS_STATS_TOP_N), sort=False, horizontal=True, y_label="Number of plays", color="green")
-    st.bar_chart(filtered_df['owner_username'].value_counts().head(METRICS_STATS_TOP_N), sort=False, horizontal=True, y_label="Number of games", color="orange")
+with st.container(horizontal=True, gap="small", wrap=False):
+    st.metric("Games", len(filtered_df), delta=filtered_df['bgg_game_id'].nunique(), delta_color="off", delta_arrow="off", help="Number of games shown (above) and number of unique games (below)", width="content")
+    st.metric("Owners", filtered_df['owner_username'].nunique(), width="content")
+    st.altair_chart(get_bar_chart_from_grouped_df(filtered_df['name'].value_counts(), color="lightblue", x_label="Number of owners"))
+    st.altair_chart(get_bar_chart_from_grouped_df(filtered_df.groupby(['name'])["num_plays"].sum().sort_values(ascending=False), color="lightgreen", x_label="Number of plays"))
+    st.altair_chart(get_bar_chart_from_grouped_df(filtered_df['owner_username'].value_counts(), color="orange", x_label="Number of games"))
 
 # --- DISPLAY ---
 display_df = filtered_df.copy()
