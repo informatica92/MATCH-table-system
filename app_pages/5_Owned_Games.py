@@ -40,14 +40,18 @@ with st.expander(":material/filter_list: Filters"):
             options=owners,
             default=[],
             placeholder="All owners",
-            help="Filter by the users who own the games"
+            help="Filter by the users who own the games",
+            key="owners",
+            bind="query-params"
         )
 
         name_query = st.text_input(
             "Game name contains",
             value="",
             placeholder="e.g. Wingspan",
-            help="Case-insensitive search on the game name"
+            help="Case-insensitive search on the game name",
+            key="name",
+            bind="query-params"
         )
 
         n_players = st.number_input(
@@ -56,7 +60,9 @@ with st.expander(":material/filter_list: Filters"):
             max_value=20,
             value=0,
             step=1,
-            help="Keep only games whose min/max players range includes this number of players (0 = no filter)"
+            help="Keep only games whose min/max players range includes this number of players (0 = no filter)",
+            key="n_players",
+            bind="query-params"
         )
         min_rating = st.slider(
             "Min rating",
@@ -64,7 +70,9 @@ with st.expander(":material/filter_list: Filters"):
             max_value=10.0,
             value=0.0,
             step=0.5,
-            help="Keep only games with a BGG average rating greater than or equal to this value"
+            help="Keep only games with a BGG average rating greater than or equal to this value",
+            key="min_rating",
+            bind="query-params"
         )
 
         game_type = st.radio(
@@ -73,7 +81,9 @@ with st.expander(":material/filter_list: Filters"):
             captions=["Base + Expansions", "", ""],
             index=0,
             help="Filter by BGG type: base games vs expansions",
-            horizontal=True
+            horizontal=True,
+            key="game_type",
+            bind="query-params"
         )
 
 # --- APPLY FILTERS ---
