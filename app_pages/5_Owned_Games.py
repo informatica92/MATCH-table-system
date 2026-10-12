@@ -69,7 +69,7 @@ with st.expander(":material/filter_list: Filters"):
             key="n_players",
             bind="query-params"
         )
-        min_rating = st.slider(
+        min_rating = st.number_input(
             "Min rating",
             min_value=0.0,
             max_value=10.0,
@@ -80,13 +80,11 @@ with st.expander(":material/filter_list: Filters"):
             bind="query-params"
         )
 
-        game_type = st.radio(
+        game_type = st.selectbox(
             "Type",
-            options=["ALL", "Base games", "Expansions"],
-            captions=["Base + Expansions", "", ""],
+            options=["Base + Expansions", "Base games", "Expansions"],
             index=0,
             help="Filter by BGG type: base games vs expansions",
-            horizontal=True,
             key="game_type",
             bind="query-params"
         )
