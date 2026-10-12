@@ -1,4 +1,5 @@
 import streamlit as st
+from zoneinfo import ZoneInfo
 
 import utils.streamlit_utils as stu
 from utils.bgg_manager import get_bgg_url
@@ -30,7 +31,10 @@ st.header(
         "It is refreshed periodically and "
         "at every app startup.\n\n"
 )
-st.info(f":material/info: *Collection Last Update: {owned_games_df['last_updated'].min().strftime('%Y-%m-%d %H:%M:%S')}*")
+## Collection Last Update
+tz = st.context.timezone
+collection_last_update = owned_games_df['last_updated'].min().astimezone(ZoneInfo(tz)).strftime(f'%Y-%m-%d %H:%M:%S ({tz})') if not owned_games_df.empty else "N/A"
+st.info(f":material/info: *Collection Last Update: {collection_last_update}*")
 
 # --- FILTERS ---
 with st.expander(":material/filter_list: Filters"):
