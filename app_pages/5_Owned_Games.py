@@ -33,7 +33,7 @@ st.header(
 )
 ## Collection Last Update
 tz = st.context.timezone
-collection_last_update = owned_games_df['last_updated'].min().astimezone(ZoneInfo(tz)).strftime(f'%Y-%m-%d %H:%M:%S ({tz})') if not owned_games_df.empty else "N/A"
+collection_last_update = owned_games_df['last_updated'].min().astimezone(ZoneInfo(tz)).strftime(f'%Y-%m-%d %H:%M ({tz})') if not owned_games_df.empty else "N/A"
 st.info(f":material/info: *Collection Last Update: {collection_last_update}*")
 
 # --- FILTERS ---
