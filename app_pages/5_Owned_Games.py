@@ -6,6 +6,7 @@ from utils.bgg_manager import get_bgg_url
 from utils.altair_manager import get_bar_chart_from_grouped_df
 
 METRICS_STATS_TOP_N = 3
+GAME_TYPE_OPTIONS = {"boardgame": "Base", "boardgameexpansion": "Expansion"}
 
 stu.add_title_text(st, frmt="{title}")
 
@@ -37,7 +38,10 @@ collection_last_update = owned_games_df['last_updated'].min().astimezone(ZoneInf
 st.info(f":material/info: *Collection Last Update: {collection_last_update}*")
 
 # --- FILTERS ---
-with st.expander(":material/filter_list: Filters"):
+filters_keys = ["owners", "name", "n_players", "min_rating", "game_type"]
+num_active_filters = sum([1 for k in filters_keys if st.session_state.get(k)])
+
+with st.expander(f":material/filter_list: Filters ({num_active_filters})"):
     with st.container(border=False, horizontal=True, gap="medium"):
         owners = sorted([o for o in owned_games_df['owner_username'].dropna().unique().tolist()])
         selected_owners = st.multiselect(
@@ -80,10 +84,12 @@ with st.expander(":material/filter_list: Filters"):
             bind="query-params"
         )
 
-        game_type = st.selectbox(
+        game_types = st.multiselect(
             "Type",
-            options=["Base + Expansions", "Base games", "Expansions"],
-            index=0,
+            placeholder="All types",
+            options=GAME_TYPE_OPTIONS,
+            default=[],
+            format_func=lambda x: GAME_TYPE_OPTIONS[x],
             help="Filter by BGG type: base games vs expansions",
             key="game_type",
             bind="query-params"
@@ -109,10 +115,8 @@ if n_players and n_players > 0:
 if min_rating and min_rating > 0:
     filtered_df = filtered_df[filtered_df['average_rating'].fillna(0) >= min_rating]
 
-if game_type == "Base games":
-    filtered_df = filtered_df[filtered_df['subtype'] != 'boardgameexpansion']
-elif game_type == "Expansions":
-    filtered_df = filtered_df[filtered_df['subtype'] == 'boardgameexpansion']
+if game_types:
+    filtered_df = filtered_df[filtered_df['subtype'].isin(game_types)]
 
 # --- SUMMARY METRICS ---
 with st.container(horizontal=True, gap="xsmall", wrap=False):
