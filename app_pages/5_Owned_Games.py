@@ -39,7 +39,11 @@ st.info(f":material/info: *Collection Last Update: {collection_last_update}*")
 
 # --- FILTERS ---
 filters_keys = ["owners", "name", "n_players", "min_rating", "game_type"]
-num_active_filters = sum([1 for k in filters_keys if st.session_state.get(k)])
+num_active_filters = sum(
+    [
+        1 for k in filters_keys if st.session_state.get(k) or st.query_params.get(k)
+    ]
+)
 
 with st.expander(f":material/filter_list: Filters ({num_active_filters})", key="filters_state"):
     with st.container(border=False, horizontal=True, gap="medium"):
