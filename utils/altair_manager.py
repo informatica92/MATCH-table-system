@@ -65,6 +65,15 @@ def timeline_chart(df: pd.DataFrame):
     return chart
 
 def get_bar_chart_from_grouped_df(grouped_df, x_col=None, y_col=None, color="lightblue", x_label=None, y_label=None, top_n=3):
+
+    if len(grouped_df) == 0:
+        return alt.Chart(pd.DataFrame()).mark_bar().encode(
+            x=alt.X(f'{x_col}:N', axis=alt.Axis(title=x_label, labelFontSize=10, labelPadding=5, titleFontSize=10, titlePadding=5)),
+            y=alt.Y(f'{y_col}:N', axis=alt.Axis(title=y_label))
+        ).properties(
+            height=100
+        )
+
     grouped_df = grouped_df.head(top_n) if top_n else grouped_df
 
     if isinstance(grouped_df, pd.Series):
@@ -114,6 +123,8 @@ def get_bar_chart_from_grouped_df(grouped_df, x_col=None, y_col=None, color="lig
     ).encode(
         x=alt.value(0),  # posizione fissa in pixel: inizio della barra
         text=f'{y_col}:N'
+    ).properties(
+        height=35*top_n if top_n else 115
     )
 
     return alt.layer(bars, labels)
