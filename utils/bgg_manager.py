@@ -95,6 +95,15 @@ def get_bgg_profile_page_url(username, as_html_link=False, label=None):
     else:
         return url
 
+def get_bgg_profile_collection_url(username, as_html_link=False, label=None):
+    url = f"https://boardgamegeek.com/collection/user/{username}"
+    if not label:
+        label = url
+    if as_html_link:
+        return f"<a href='{url}' target='_blank'>{label}</a>"
+    else:
+        return url
+
 
 def search_bgg_games(game_name):
     url = f"https://boardgamegeek.com/xmlapi2/search?query={game_name}&type=boardgame"
