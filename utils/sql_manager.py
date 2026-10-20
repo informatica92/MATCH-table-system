@@ -1,4 +1,5 @@
 import psycopg2
+from psycopg2.extras import execute_values
 import json
 import os
 import pandas as pd
@@ -205,10 +206,13 @@ class SQLManager(object):
                     ''')
 
         # Owned games collected from BGG for each user (see utils/bgg_collection_sync.py).
-        # One row per (user, owned game); the whole set for a user is replaced on every sync.
+        # One row per (user, owned game). The natural key (user_id, bgg_game_id) is the PRIMARY KEY:
+        # there is no surrogate id because nothing references a single owned-game row.
+        # NB: this DDL is for fresh installs only (CREATE IF NOT EXISTS). Existing databases created
+        # with the previous surrogate-id shape must be migrated with the one-shot DDL provided out of
+        # band (drop id, promote the composite primary key). See also the TODO about proper migrations.
         c.execute('''CREATE TABLE IF NOT EXISTS owned_games (
-                        id SERIAL PRIMARY KEY,
-                        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
                         bgg_game_id INTEGER NOT NULL,
                         name TEXT,
                         year_published INTEGER,
@@ -220,7 +224,19 @@ class SQLManager(object):
                         num_plays INTEGER,
                         average_rating NUMERIC,
                         last_updated timestamptz NOT NULL DEFAULT now(),
-                        UNIQUE(user_id, bgg_game_id)
+                        PRIMARY KEY (user_id, bgg_game_id)
+                    )''')
+
+        # Log of every BGG collection sync job run: when it started/finished and the outcome.
+        c.execute('''CREATE TABLE IF NOT EXISTS bgg_collections_sync_log (
+                        id SERIAL PRIMARY KEY,
+                        started_at timestamptz NOT NULL DEFAULT now(),
+                        finished_at timestamptz,
+                        status TEXT NOT NULL DEFAULT 'running',
+                        users_total INTEGER,
+                        users_synced INTEGER,
+                        users_failed INTEGER,
+                        error TEXT
                     )''')
 
         conn.commit()
@@ -647,48 +663,85 @@ class SQLManager(object):
         return result
 
     def replace_owned_games(self, user_id, games: list, use_streamlit_error=True):
-        """Atomically replace the owned games of a user.
+        """Differentially sync the owned games of a user.
 
-        Deletes the current owned games for ``user_id`` and inserts ``games`` (a list of dicts with
-        keys: bgg_game_id, name, year_published, thumbnail_url, subtype, min_players, max_players,
-        playing_time, num_plays, average_rating). All new rows share the same ``last_updated`` value.
-        Both operations run in a single transaction so the collection is never left partially updated.
+        ``games`` is a list of dicts with keys: bgg_game_id, name, year_published, thumbnail_url,
+        subtype, min_players, max_players, playing_time, num_plays, average_rating.
+
+        Instead of deleting and re-inserting the whole collection on every run (which produces a lot
+        of dead tuples / bloat), this:
+          1. bulk-upserts the current games but updates a row ONLY when a value actually changed
+             (``IS DISTINCT FROM`` guard), so unchanged rows create no new version;
+          2. deletes only the games the user no longer owns.
+        ``last_updated`` is therefore the timestamp of the last *change* of that specific game; the
+        "when did the sync run" information lives in ``bgg_collections_sync_log`` instead.
+
+        Everything runs in a single transaction so the collection is never left partially updated.
         """
         conn = self.get_db_connection(use_streamlit_error=use_streamlit_error)
         c = conn.cursor()
         try:
-            c.execute(f'''DELETE FROM {self._schema}.owned_games WHERE user_id = %s''', (user_id,))
-            for game in games:
-                c.execute(f'''
-                        INSERT INTO {self._schema}.owned_games (
-                            user_id, bgg_game_id, name, year_published, thumbnail_url, subtype,
-                            min_players, max_players, playing_time, num_plays, average_rating, last_updated
-                        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, now())
-                        ON CONFLICT (user_id, bgg_game_id) DO UPDATE SET
-                            name = EXCLUDED.name,
-                            year_published = EXCLUDED.year_published,
-                            thumbnail_url = EXCLUDED.thumbnail_url,
-                            subtype = EXCLUDED.subtype,
-                            min_players = EXCLUDED.min_players,
-                            max_players = EXCLUDED.max_players,
-                            playing_time = EXCLUDED.playing_time,
-                            num_plays = EXCLUDED.num_plays,
-                            average_rating = EXCLUDED.average_rating,
-                            last_updated = EXCLUDED.last_updated
-                    ''', (
-                        user_id,
-                        game.get('bgg_game_id'),
-                        game.get('name'),
-                        game.get('year_published'),
-                        game.get('thumbnail_url'),
-                        game.get('subtype'),
-                        game.get('min_players'),
-                        game.get('max_players'),
-                        game.get('playing_time'),
-                        game.get('num_plays'),
-                        game.get('average_rating'),
-                    )
+            rows = [
+                (
+                    user_id,
+                    game.get('bgg_game_id'),
+                    game.get('name'),
+                    game.get('year_published'),
+                    game.get('thumbnail_url'),
+                    game.get('subtype'),
+                    game.get('min_players'),
+                    game.get('max_players'),
+                    game.get('playing_time'),
+                    game.get('num_plays'),
+                    game.get('average_rating'),
                 )
+                for game in games
+                if game.get('bgg_game_id') is not None
+            ]
+
+            if rows:
+                execute_values(
+                    c,
+                    f'''
+                    INSERT INTO {self._schema}.owned_games (
+                        user_id, bgg_game_id, name, year_published, thumbnail_url, subtype,
+                        min_players, max_players, playing_time, num_plays, average_rating
+                    ) VALUES %s
+                    ON CONFLICT (user_id, bgg_game_id) DO UPDATE SET
+                        name = EXCLUDED.name,
+                        year_published = EXCLUDED.year_published,
+                        thumbnail_url = EXCLUDED.thumbnail_url,
+                        subtype = EXCLUDED.subtype,
+                        min_players = EXCLUDED.min_players,
+                        max_players = EXCLUDED.max_players,
+                        playing_time = EXCLUDED.playing_time,
+                        num_plays = EXCLUDED.num_plays,
+                        average_rating = EXCLUDED.average_rating,
+                        last_updated = now()
+                    WHERE (
+                        owned_games.name, owned_games.year_published, owned_games.thumbnail_url,
+                        owned_games.subtype, owned_games.min_players, owned_games.max_players,
+                        owned_games.playing_time, owned_games.num_plays, owned_games.average_rating
+                    ) IS DISTINCT FROM (
+                        EXCLUDED.name, EXCLUDED.year_published, EXCLUDED.thumbnail_url,
+                        EXCLUDED.subtype, EXCLUDED.min_players, EXCLUDED.max_players,
+                        EXCLUDED.playing_time, EXCLUDED.num_plays, EXCLUDED.average_rating
+                    )
+                    ''',
+                    rows
+                )
+
+            # Remove games the user no longer owns (or every row if the collection is now empty).
+            current_ids = [r[1] for r in rows]
+            if current_ids:
+                c.execute(
+                    f'''DELETE FROM {self._schema}.owned_games
+                        WHERE user_id = %s AND bgg_game_id <> ALL(%s)''',
+                    (user_id, current_ids)
+                )
+            else:
+                c.execute(f'''DELETE FROM {self._schema}.owned_games WHERE user_id = %s''', (user_id,))
+
             conn.commit()
         except Exception:
             conn.rollback()
@@ -696,6 +749,54 @@ class SQLManager(object):
         finally:
             c.close()
             conn.close()
+
+    # BGG COLLECTION SYNC LOG
+    def start_sync_log(self, users_total, use_streamlit_error=True):
+        """Insert a 'running' row for a starting sync job and return its id."""
+        conn = self.get_db_connection(use_streamlit_error=use_streamlit_error)
+        c = conn.cursor()
+        c.execute(
+            f'''INSERT INTO {self._schema}.bgg_collections_sync_log (users_total, status)
+                VALUES (%s, 'running') RETURNING id''',
+            (users_total,)
+        )
+        log_id = c.fetchone()[0]
+        conn.commit()
+        c.close()
+        conn.close()
+        return log_id
+
+    def finish_sync_log(self, log_id, status, users_synced=None, users_failed=None, error=None,
+                        use_streamlit_error=True):
+        """Mark a sync job row as finished with its outcome."""
+        conn = self.get_db_connection(use_streamlit_error=use_streamlit_error)
+        c = conn.cursor()
+        c.execute(
+            f'''UPDATE {self._schema}.bgg_collections_sync_log
+                SET finished_at = now(), status = %s, users_synced = %s, users_failed = %s, error = %s
+                WHERE id = %s''',
+            (status, users_synced, users_failed, error, log_id)
+        )
+        conn.commit()
+        c.close()
+        conn.close()
+
+    def get_last_completed_sync(self):
+        """Return the most recent completed sync job as a dict, or None if there is none yet."""
+        conn = self.get_db_connection()
+        c = conn.cursor()
+        fields = ['id', 'started_at', 'finished_at', 'users_total', 'users_synced', 'users_failed']
+        c.execute(
+            f'''SELECT {', '.join(fields)}
+                FROM {self._schema}.bgg_collections_sync_log
+                WHERE status = 'completed' AND finished_at IS NOT NULL
+                ORDER BY finished_at DESC
+                LIMIT 1'''
+        )
+        row = c.fetchone()
+        c.close()
+        conn.close()
+        return dict(zip(fields, row)) if row else None
 
     def get_all_owned_games(self, return_as_df=True):
         """Return every owned game across all users, joined with the owner details.

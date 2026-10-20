@@ -32,9 +32,13 @@ st.header(
         "It is refreshed periodically and "
         "at every app startup.\n\n"
 )
-## Collection Last Update
+## Collection Last Update (from the sync log: when the job last finished, not per-game last change)
 tz = st.context.timezone
-collection_last_update = owned_games_df['last_updated'].min().astimezone(ZoneInfo(tz)).strftime(f'%Y-%m-%d %H:%M ({tz})') if not owned_games_df.empty else "N/A"
+last_sync = stu.get_last_owned_games_sync()
+if last_sync and last_sync.get('finished_at'):
+    collection_last_update = last_sync['finished_at'].astimezone(ZoneInfo(tz)).strftime(f'%Y-%m-%d %H:%M ({tz})')
+else:
+    collection_last_update = "N/A"
 st.info(f":material/info: *Collection Last Update: {collection_last_update}*")
 
 # --- FILTERS ---

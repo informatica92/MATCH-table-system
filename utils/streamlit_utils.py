@@ -93,6 +93,15 @@ def get_all_owned_games(return_as_df=True):
     """Return every owned game across all users (joined with owner details) for the Owned Games page."""
     return sql_manager.get_all_owned_games(return_as_df=return_as_df)
 
+def get_last_owned_games_sync():
+    """Return the most recent completed BGG collection sync (dict) or None.
+
+    Preferred over the per-row ``last_updated`` for showing "when did the collection last refresh":
+    with the differential sync, unchanged games keep their old ``last_updated``, so only the sync log
+    reliably tells when the job actually ran.
+    """
+    return sql_manager.get_last_completed_sync()
+
 def get_duration_step():
     return int(os.getenv("DURATION_MINUTES_STEP", 30))
 
