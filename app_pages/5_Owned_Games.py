@@ -39,7 +39,7 @@ if last_sync and last_sync.get('finished_at'):
     collection_last_update = last_sync['finished_at'].astimezone(ZoneInfo(tz)).strftime(f'%Y-%m-%d %H:%M ({tz})')
 else:
     collection_last_update = "N/A"
-st.info(f":material/info: *Collection Last Update: {collection_last_update}*")
+st.badge(label=f"*Collection Last Update: {collection_last_update}*", color="blue", icon=":material/info:")
 
 # --- FILTERS ---
 filters_keys = ["owners", "name", "n_players", "min_rating", "game_type"]
@@ -53,7 +53,7 @@ with st.expander(f":material/filter_list: Filters ({num_active_filters})", key="
     with st.container(border=False, horizontal=True, gap="medium"):
         owners = sorted([o for o in owned_games_df['owner_username'].dropna().unique().tolist()])
         selected_owners = st.multiselect(
-            "Owners",
+            ":material/people: Owners",
             options=owners,
             default=[],
             placeholder="All owners",
@@ -63,7 +63,7 @@ with st.expander(f":material/filter_list: Filters ({num_active_filters})", key="
         )
 
         name_query = st.text_input(
-            "Game name contains",
+            ":material/search: Game name",
             value="",
             placeholder="e.g. Wingspan",
             help="Case-insensitive search on the game name",
@@ -72,7 +72,7 @@ with st.expander(f":material/filter_list: Filters ({num_active_filters})", key="
         )
 
         n_players = st.number_input(
-            "N players",
+            ":material/diversity_3: N players",
             min_value=0,
             max_value=20,
             value=0,
@@ -82,7 +82,7 @@ with st.expander(f":material/filter_list: Filters ({num_active_filters})", key="
             bind="query-params"
         )
         min_rating = st.number_input(
-            "Min rating",
+            ":material/star: Min rating",
             min_value=0.0,
             max_value=10.0,
             value=0.0,
@@ -93,7 +93,7 @@ with st.expander(f":material/filter_list: Filters ({num_active_filters})", key="
         )
 
         game_types = st.multiselect(
-            "Type",
+            ":material/category: Type",
             placeholder="All types",
             options=GAME_TYPE_OPTIONS,
             default=[],
