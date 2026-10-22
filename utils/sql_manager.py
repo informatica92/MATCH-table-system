@@ -681,6 +681,9 @@ class SQLManager(object):
         conn = self.get_db_connection(use_streamlit_error=use_streamlit_error)
         c = conn.cursor()
         try:
+            # NB: ``games`` is expected to be already deduplicated by bgg_game_id (see
+            # get_bgg_owned_games), otherwise a single INSERT ... ON CONFLICT would fail trying to
+            # touch the same (user_id, bgg_game_id) twice.
             rows = [
                 (
                     user_id,

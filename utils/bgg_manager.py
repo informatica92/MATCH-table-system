@@ -279,4 +279,13 @@ def get_bgg_owned_games(username, queue_retries=10, queue_wait_seconds=10, inter
         queue_wait_seconds=queue_wait_seconds,
     )
 
-    return base_games + expansions
+    # Deduplicate by bgg_game_id: BGG can return the same game more than once
+    #  (multiple copies, duplicate collection entries, or overlap between the two calls).
+    # Keep the last occurrence so that a game returned by both calls ends up classified as an expansion
+    #  (expansions are appended after the base games below).
+    deduped = {}
+    for game in base_games + expansions:
+        deduped[game['bgg_game_id']] = game
+    all_unique_games = list(deduped.values())
+
+    return all_unique_games
