@@ -126,6 +126,15 @@ if min_rating and min_rating > 0:
 if game_types:
     filtered_df = filtered_df[filtered_df['subtype'].isin(game_types)]
 
+st.markdown(
+    """
+<style>
+[data-testid="stMetricValue"] { font-size: 20px; }
+[data-testid="stMetricLabel"] { font-size: 12px; }
+[data-testid="stMetricDelta"] { font-size: 11px; }
+""",
+    unsafe_allow_html=True,
+)
 # --- SUMMARY METRICS ---
 with st.container(horizontal=True, gap="xsmall", wrap=False):
     st.metric("Games", len(filtered_df), delta=f":material/compress: {filtered_df['bgg_game_id'].nunique()}", delta_color="off", delta_arrow="off", help="Number of games shown (above) and number of unique games (below)", width="content")
