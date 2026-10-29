@@ -721,14 +721,16 @@ class SQLManager(object):
                         num_plays = EXCLUDED.num_plays,
                         average_rating = EXCLUDED.average_rating,
                         last_updated = now()
+                    -- average_rating is compared rounded to 1 decimal, so sub-decimal BGG wobble
+                    -- (e.g. 8.1 -> 8.1001) does NOT trigger an update, while 8.1 -> 7.9 does.
                     WHERE (
                         owned_games.name, owned_games.year_published, owned_games.thumbnail_url,
                         owned_games.subtype, owned_games.min_players, owned_games.max_players,
-                        owned_games.playing_time, owned_games.num_plays, owned_games.average_rating
+                        owned_games.playing_time, owned_games.num_plays, round(owned_games.average_rating, 1)
                     ) IS DISTINCT FROM (
                         EXCLUDED.name, EXCLUDED.year_published, EXCLUDED.thumbnail_url,
                         EXCLUDED.subtype, EXCLUDED.min_players, EXCLUDED.max_players,
-                        EXCLUDED.playing_time, EXCLUDED.num_plays, EXCLUDED.average_rating
+                        EXCLUDED.playing_time, EXCLUDED.num_plays, round(EXCLUDED.average_rating::numeric, 1)
                     )
                     ''',
                     rows
