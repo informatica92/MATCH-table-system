@@ -89,39 +89,43 @@ class BGGCollectionSyncJob:
         total = len(users)
         users_synced = 0
         users_failed = 0
+        last_completed_cycle_timestamp = self.sql_manager.get_last_completed_sync().get('finished_at')
         try:
-            for index, (user_id, username, bgg_username, last_updated) in enumerate(users):
-                if last_updated is not None and (time.time() - last_updated.timestamp()) < self.period_hours * 3600:
-                    logging.info(
-                        f"BGG collection sync: [{index+1}/{total}] skipping user '{username}' ({bgg_username}) because last update was less than {self.period_hours}h ({self.period_hours/24}days) ago"
-                    )
-                    continue
-                if self._sync_single_user(user_id, username, bgg_username, index=index, total=total):
-                    users_synced += 1
-                else:
-                    users_failed += 1
-                # Rate limit: wait before querying the next user (skip the wait after the last one).
-                if index < total - 1:
-                    time.sleep(self.per_user_delay_seconds)
+            if last_completed_cycle_timestamp is not None and (time.time() - last_completed_cycle_timestamp.timestamp()) < self.period_hours * 3600:
+                logging.info(
+                    f"BGG collection sync: skipping cycle because last completed cycle was less than "
+                    f"{self.period_hours}h ({self.period_hours/24}days) ago"
+                )
+            else:
+                for index, (user_id, username, bgg_username, last_updated) in enumerate(users):
+                    if last_updated is not None and (time.time() - last_updated.timestamp()) < self.period_hours * 3600:
+                        logging.info(
+                            f"BGG collection sync: [{index+1}/{total}] skipping user '{username}' ({bgg_username}) "
+                            f"because last update was less than {self.period_hours}h ({self.period_hours/24}days) ago"
+                        )
+                        continue
+                    if self._sync_single_user(user_id, username, bgg_username, index=index, total=total):
+                        users_synced += 1
+                    else:
+                        users_failed += 1
+                    # Rate limit: wait before querying the next user (skip the wait after the last one).
+                    if index < total - 1:
+                        time.sleep(self.per_user_delay_seconds)
         except Exception as e:
             if log_id is not None:
                 try:
-                    self.sql_manager.finish_sync_log(log_id, 'failed', users_synced, users_failed,
-                                                     error=str(e), use_streamlit_error=False)
+                    self.sql_manager.finish_sync_log(log_id, 'failed', users_synced, users_failed, error=str(e), use_streamlit_error=False)
                 except Exception as log_e:
                     logging.error(f"BGG collection sync: could not close sync log: {log_e}")
             raise
 
         if log_id is not None:
             try:
-                self.sql_manager.finish_sync_log(log_id, 'completed', users_synced, users_failed,
-                                                 use_streamlit_error=False)
+                self.sql_manager.finish_sync_log(log_id, 'completed', users_synced, users_failed, use_streamlit_error=False)
             except Exception as e:
                 logging.error(f"BGG collection sync: could not close sync log: {e}")
 
-        logging.info(
-            f"BGG collection sync: cycle completed ({users_synced} synced, {users_failed} failed)"
-        )
+        logging.info(f"BGG collection sync: cycle completed ({users_synced} synced, {users_failed} failed)")
 
     def _sync_single_user(self, user_id, username, bgg_username, index=0, total=1):
         """Sync one user's owned collection. Returns True on success, False on failure/skip."""
