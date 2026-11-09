@@ -162,8 +162,12 @@ display_columns = [
     'bgg_url',
 ]
 
+hidden_columns = [
+    'last_updated'
+]
+
 st.dataframe(
-    display_df[display_columns],
+    display_df[display_columns + hidden_columns],
     hide_index=True,
     width='stretch',
     column_config={
@@ -177,8 +181,10 @@ st.dataframe(
         'playing_time': st.column_config.NumberColumn("Time (min)", format="%d"),
         'average_rating': st.column_config.NumberColumn("Rating", format="%.1f"),
         'num_plays': st.column_config.NumberColumn("Plays", format="%d"),
-        'bgg_url': st.column_config.LinkColumn("Link", display_text="Link")
-    }
+        'bgg_url': st.column_config.LinkColumn("Link", display_text="Link"),
+        'last_updated': st.column_config.DatetimeColumn("Last Updated", format="YYYY-MM-DD HH:mm")
+    },
+    column_order=display_columns
 )
 
 with st.sidebar:
