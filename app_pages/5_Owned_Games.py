@@ -50,7 +50,7 @@ num_active_filters = sum(
 )
 
 with st.expander(f":material/filter_list: Filters ({num_active_filters})", key="filters_state"):
-    with st.container(border=False, horizontal=True, gap="medium"):
+    with st.container(border=False, horizontal=True, gap="small"):
         owners = sorted([o for o in owned_games_df['owner_username'].dropna().unique().tolist()])
         selected_owners = st.multiselect(
             ":material/people: Owners",
@@ -166,6 +166,35 @@ hidden_columns = [
     'last_updated'
 ]
 
+# --- APPLY GROUPING ---
+group_by_game = st.toggle(
+    ":material/compress: Group by game",
+    key="group_by_game",
+    bind="query-params",
+    help="Group games by owner (one row per user) [default] or by game (one row per game, with a list of owners and total plays)"
+)
+if group_by_game:
+    display_df = display_df.groupby(
+        [
+            'bgg_game_id',
+            'name',
+            'is_expansion',
+            'min_players',
+            'max_players',
+            'playing_time',
+            'bgg_url',
+        ],
+        as_index=False,
+        sort=False
+    ).agg({
+        'owner_username': list,
+        'num_plays': 'sum',
+        'last_updated': 'max',
+        'average_rating': 'mean',
+        'thumbnail_url': 'first',
+        'year_published': 'min'
+    })
+
 st.dataframe(
     display_df[display_columns + hidden_columns],
     hide_index=True,
@@ -175,7 +204,7 @@ st.dataframe(
         'name': st.column_config.TextColumn("Game"),
         'is_expansion': st.column_config.CheckboxColumn("Exp.", help="Whether the game is an expansion (BGG subtype)"),
         'year_published': st.column_config.NumberColumn("Year", format="%d"),
-        'owner_username': st.column_config.TextColumn("Owner"),
+        'owner_username': st.column_config.TextColumn("Owner") if not group_by_game else st.column_config.ListColumn("Owners", help="List of owners (usernames)"),
         'min_players': st.column_config.NumberColumn("Min P.", format="%d"),
         'max_players': st.column_config.NumberColumn("Max P.", format="%d"),
         'playing_time': st.column_config.NumberColumn("Time (min)", format="%d"),
